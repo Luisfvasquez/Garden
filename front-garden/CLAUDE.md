@@ -46,6 +46,7 @@ src/
 
 | Archivo | Contenido |
 | --- | --- |
+| `docs/setup.md` | Inicialización del proyecto, proxy de Vite, entorno |
 | `docs/sistema-diseno.md` | Tokens, tipografía, paleta, componentes de carta |
 | `docs/rutas-y-estado.md` | Mapa de rutas, guards, stores de Pinia |
 | `docs/pwa-offline.md` | Workbox, IndexedDB, cola offline, push |
