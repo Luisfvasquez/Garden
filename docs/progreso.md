@@ -3,7 +3,7 @@
 **Actualizar al cerrar cada tarea.** Este archivo es lo que le dice al agente qué existe ya.
 Formato: `[ ]` pendiente · `[~]` en curso · `[x]` terminado.
 
-Última actualización: _(pendiente)_
+Última actualización: 2026-08-28 — arranque de cimientos backend (Fase 0).
 
 ---
 
@@ -11,16 +11,21 @@ Formato: `[ ]` pendiente · `[~]` en curso · `[x]` terminado.
 
 ### Backend
 - [ ] Repo, docker-compose (php, nginx, pgsql, redis, horizon, scheduler, reverb, mailpit, minio)
-- [ ] Laravel 11 skeleton API + `install:api`
-- [ ] Sanctum configurado (cookie SPA + tokens móviles) y CORS
-- [ ] Estructura `/api/v1` con `_convenciones.md` aplicada (Resources, FormRequests, error handler)
-- [ ] Pint + Larastan 6 + Pest en CI
-- [ ] Migración `users` + `user_settings` + generación de `postal_handle`
+      _(diferido: el entorno Laragon local —pgsql 17, redis— ya funciona; la contenerización es tarea aparte)_
+- [x] Laravel 11 skeleton API + `install:api` _(Laravel 13 en el entorno; `routes/api.php` → manifiesto de versiones → `routes/api/v1.php`)_
+- [~] Sanctum configurado (cookie SPA + tokens móviles) y CORS
+      _(hecho: `statefulApi`, `config/cors.php` con orígenes explícitos + credenciales, expiración de token móvil 30d, modelo `PersonalAccessToken` con UUID. Falta: endpoints `auth/login` y `auth/token`)_
+- [~] Estructura `/api/v1` con `_convenciones.md` aplicada (Resources, FormRequests, error handler)
+      _(hecho: envelope de error único con `error_code` + `meta.request_id`, `X-Request-Id`, versionado, patrón API Resource. FormRequests se añaden por endpoint en la fase de auth)_
+- [x] Pint + Larastan 6 + Pest en CI
+      _(en verde local + `.github/workflows/backend-ci.yml`: Pint `--test`, PHPStan nivel 6, Pest sobre servicio Postgres 17)_
+- [x] Migración `users` + `user_settings` + generación de `postal_handle`
+      _(+ `feature_flags`, `personal_access_tokens` UUID; `postal_handle` `nombre-XXXX` hex en `User::creating`)_
 - [ ] Auth: registro (con verificación de edad), login, logout, verificación email, reset
 - [ ] `GET /me`, `PATCH /me`, ajustes, avatar
 - [ ] `GET /users/{handle}` (perfil público mínimo)
 - [ ] Policies base + tests de aislamiento entre usuarios
-- [ ] `GET /health`, `GET /features` (feature flags)
+- [x] `GET /health`, `GET /features` (feature flags)
 
 ### Front
 - [ ] Vite + Vue 3 + TS + Tailwind + Pinia + Router con guards

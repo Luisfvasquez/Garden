@@ -326,6 +326,8 @@ Enum `UserRole`: `client`, `doll`, `moderator`, `admin`.
 | `id` | uuid (PK) | UUID, no autoincremental: evita enumeración y facilita sincronización móvil |
 | `name` | string | |
 | `pen_name` | string, nullable, unique | Seudónimo público para el blog |
+| `postal_handle` | string, unique | Identificador postal `nombre-XXXX` (4 hex). Generado en el registro (§8.1) |
+| `postal_handle_rotated_at` | timestamp, nullable | Última rotación. Límite: 1 cada 30 días (`POST /me/postal-handle/rotate`) |
 | `email` | string, unique | |
 | `email_verified_at` | timestamp, nullable | |
 | `password` | string | |
@@ -340,9 +342,10 @@ Enum `UserRole`: `client`, `doll`, `moderator`, `admin`.
 | `random_letters_daily_cap` | tinyint | Default 3 |
 | `last_active_at` | timestamp | |
 | `deactivated_at` | timestamp, nullable | |
+| `deletes_at` | timestamp, nullable | Momento en que se consuma el borrado con gracia de 30 días (`DELETE /me`) |
 | `created_at` / `updated_at` / `deleted_at` | | SoftDeletes |
 
-Índices: `email`, `(status, accepts_random_letters, last_active_at)`, `pen_name`.
+Índices: `email`, `(status, accepts_random_letters, last_active_at)`, `pen_name`, `postal_handle`.
 
 #### `user_settings`
 
@@ -357,6 +360,7 @@ Separado de `users` para no ensuciar la tabla principal y permitir crecer.
 | `notify_on_dispatch_confirm` | boolean | Confirmación de despacho propio |
 | `notify_on_doll_message` | boolean | |
 | `notify_on_blog_comment` | boolean | |
+| `share_read_receipts` | boolean | default `false`. Permite que el remitente vea `read_at` de sus cartas |
 | `quiet_hours_start` / `quiet_hours_end` | time, nullable | No notificar de madrugada (hora local) |
 | `theme` | enum | `light`, `dark`, `system` |
 | `preferred_paper_style` | string, nullable | |
