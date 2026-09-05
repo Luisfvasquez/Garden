@@ -1,0 +1,44 @@
+name: front-ci
+
+on:
+  push:
+    paths:
+      - 'front-garden/**'
+      - '.github/workflows/front-ci.yml'
+  pull_request:
+    paths:
+      - 'front-garden/**'
+      - '.github/workflows/front-ci.yml'
+
+defaults:
+  run:
+    working-directory: front-garden
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: front-garden/package-lock.json
+
+      - run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Format check
+        run: npx prettier --check "src/**/*.{ts,vue,json}"
+
+      - name: Unit tests
+        run: npm run test
+
+      - name: Build
+        run: npm run build-only

@@ -75,7 +75,14 @@ solo en catálogos estáticos.
 
 | Código | Significado |
 | --- | --- |
+| `INVALID_CREDENTIALS` | Email o contraseña incorrectos |
+| `UNDER_MINIMUM_AGE` | No cumple la edad mínima (16) en el registro |
 | `EMAIL_NOT_VERIFIED` | Requiere verificar el correo |
+| `EMAIL_ALREADY_VERIFIED` | El correo ya estaba verificado |
+| `INVALID_VERIFICATION_LINK` | Enlace de verificación caducado o manipulado |
+| `INVALID_RESET_TOKEN` | Token de recuperación inválido o caducado |
+| `HANDLE_ROTATION_TOO_SOON` | El `postal_handle` se rotó hace menos de 30 días |
+| `ACCOUNT_INACTIVE` | Cuenta desactivada o pendiente de borrado |
 | `RECIPIENT_NOT_FOUND` | El handle postal no existe |
 | `RECIPIENT_NOT_ACCEPTING` | No acepta este tipo de carta |
 | `LETTER_LOCKED` | La carta ya fue enviada, no se puede editar |

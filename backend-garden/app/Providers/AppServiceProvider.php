@@ -5,9 +5,14 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Models\PersonalAccessToken;
+use App\Models\User;
+use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Sanctum\Sanctum;
 
@@ -20,9 +25,13 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // Contract: ISO-8601 UTC with a `Z` suffix, no fractional seconds.
+        Date::serializeUsing(static fn (\DateTimeInterface $date): string => Carbon::instance($date)->toIso8601ZuluString());
+
         Sanctum::usePersonalAccessTokenModel(PersonalAccessToken::class);
 
         $this->configureRateLimiters();
+        $this->configureEmailVerification();
     }
 
     /**
@@ -35,5 +44,24 @@ class AppServiceProvider extends ServiceProvider
             : Limit::perMinute(30)->by($request->ip()));
 
         RateLimiter::for('auth', fn (Request $request) => Limit::perMinute(5)->by($request->ip()));
+    }
+
+    /**
+     * Point the verification link at the versioned API route with a relative
+     * signature (host-independent, so it survives proxies and tests).
+     */
+    private function configureEmailVerification(): void
+    {
+        VerifyEmail::createUrlUsing(static function (User $notifiable): string {
+            return URL::temporarySignedRoute(
+                'api.v1.auth.email.verify',
+                Carbon::now()->addMinutes((int) config('auth.verification.expire', 60)),
+                [
+                    'id' => $notifiable->getKey(),
+                    'hash' => sha1($notifiable->getEmailForVerification()),
+                ],
+                absolute: false,
+            );
+        });
     }
 }

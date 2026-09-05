@@ -1,0 +1,109 @@
+{
+  "app": {
+    "name": "Evergarden",
+    "tagline": "Correspondencia que tarda en llegar."
+  },
+  "common": {
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "passwordConfirm": "Repite la contraseña",
+    "name": "Nombre",
+    "birthDate": "Fecha de nacimiento",
+    "language": "Idioma",
+    "loading": "Cargando…",
+    "retry": "Reintentar",
+    "back": "Volver",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "continue": "Continuar",
+    "close": "Cerrar",
+    "theme": {
+      "toggle": "Cambiar tema",
+      "light": "Claro",
+      "dark": "Oscuro"
+    }
+  },
+  "nav": {
+    "desk": "Escritorio",
+    "settings": "Ajustes",
+    "signOut": "Cerrar sesión",
+    "account": "Cuenta"
+  },
+  "landing": {
+    "title": "Escribe cartas que llegan cuando deben llegar.",
+    "body": "Sin mensajería instantánea. Solo papel, tinta y el tiempo que tarda un sobre en cruzar la distancia.",
+    "signIn": "Iniciar sesión",
+    "createAccount": "Crear cuenta"
+  },
+  "auth": {
+    "login": {
+      "title": "Iniciar sesión",
+      "submit": "Entrar",
+      "remember": "Mantener la sesión iniciada",
+      "forgot": "¿Olvidaste tu contraseña?",
+      "noAccount": "¿Aún no tienes cuenta?",
+      "createAccount": "Crear una"
+    },
+    "register": {
+      "title": "Crear cuenta",
+      "submit": "Crear cuenta",
+      "acceptTerms": "Acepto los términos y la política de privacidad",
+      "haveAccount": "¿Ya tienes cuenta?",
+      "signIn": "Inicia sesión",
+      "minAgeNote": "Necesitas al menos 16 años para registrarte.",
+      "done": {
+        "title": "Revisa tu correo",
+        "body": "Te hemos enviado un enlace de verificación a {email}. Ábrelo para activar la cuenta."
+      }
+    },
+    "verify": {
+      "title": "Verificar el correo",
+      "pending": "Tu correo aún no está verificado. Revisa tu bandeja o pide un enlace nuevo.",
+      "resend": "Reenviar el enlace",
+      "resent": "Enlace enviado. Revisa tu correo.",
+      "checking": "Verificando…",
+      "success": "Correo verificado. Ya puedes usar Evergarden.",
+      "goToDesk": "Ir al escritorio",
+      "invalidLink": "El enlace no es válido o ha caducado. Pide uno nuevo.",
+      "alreadyVerified": "Este correo ya estaba verificado."
+    },
+    "forgot": {
+      "title": "Recuperar contraseña",
+      "body": "Escribe tu correo y te enviaremos un enlace para elegir una nueva contraseña.",
+      "submit": "Enviar enlace",
+      "done": "Si ese correo tiene una cuenta, recibirás un enlace en unos minutos.",
+      "backToLogin": "Volver a iniciar sesión"
+    },
+    "reset": {
+      "title": "Nueva contraseña",
+      "submit": "Guardar contraseña",
+      "done": "Contraseña cambiada. Ya puedes iniciar sesión.",
+      "invalidToken": "El enlace de recuperación es inválido o ha caducado."
+    }
+  },
+  "errors": {
+    "generic": "Algo ha salido mal. Inténtalo de nuevo.",
+    "network": "Sin conexión con el servidor. Revisa tu red.",
+    "validation": "Revisa los campos marcados.",
+    "INVALID_CREDENTIALS": "Correo o contraseña incorrectos.",
+    "UNDER_MINIMUM_AGE": "Necesitas al menos 16 años para registrarte.",
+    "EMAIL_NOT_VERIFIED": "Verifica tu correo para continuar.",
+    "EMAIL_ALREADY_VERIFIED": "Este correo ya estaba verificado.",
+    "INVALID_VERIFICATION_LINK": "El enlace de verificación no es válido o ha caducado.",
+    "INVALID_RESET_TOKEN": "El enlace de recuperación es inválido o ha caducado.",
+    "ACCOUNT_SUSPENDED": "Esta cuenta está suspendida.",
+    "ACCOUNT_INACTIVE": "Esta cuenta ya no está disponible.",
+    "HANDLE_ROTATION_TOO_SOON": "Solo puedes cambiar tu identificador una vez cada 30 días.",
+    "RATE_LIMITED": "Demasiados intentos. Espera un momento.",
+    "UPGRADE_REQUIRED": "Necesitas actualizar la aplicación."
+  },
+  "upgrade": {
+    "title": "Actualiza Evergarden",
+    "body": "Esta versión ya no es compatible. Recarga la página para obtener la última."
+  },
+  "notFound": {
+    "title": "Aquí no hay nada",
+    "body": "La página que buscas no existe o se ha movido.",
+    "home": "Volver al inicio"
+  }
+}

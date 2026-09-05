@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
 
@@ -68,6 +69,19 @@ class User extends Authenticatable implements MustVerifyEmail
     ];
 
     /**
+     * Mirrors the DB column defaults so a freshly created, not-yet-reloaded
+     * instance already reports the right values.
+     *
+     * @var array<string, mixed>
+     */
+    protected $attributes = [
+        'role' => 'client',
+        'status' => 'active',
+        'accepts_random_letters' => false,
+        'random_letters_daily_cap' => 3,
+    ];
+
+    /**
      * @return array<string, string>
      */
     protected function casts(): array
@@ -90,8 +104,6 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         static::creating(function (User $user): void {
             $user->postal_handle ??= self::generatePostalHandle($user->name);
-            $user->role ??= UserRole::Client;
-            $user->status ??= UserStatus::Active;
         });
     }
 
@@ -121,5 +133,19 @@ class User extends Authenticatable implements MustVerifyEmail
     public function isStaff(): bool
     {
         return $this->role->isStaff();
+    }
+
+    public function displayName(): string
+    {
+        return $this->pen_name ?? $this->name;
+    }
+
+    public function avatarUrl(): ?string
+    {
+        if ($this->avatar_path === null) {
+            return null;
+        }
+
+        return Storage::disk('public')->url($this->avatar_path);
     }
 }

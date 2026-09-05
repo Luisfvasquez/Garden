@@ -1,0 +1,106 @@
+@import 'tailwindcss';
+
+/* Dark mode is driven by a `.dark` class on <html> (see stores/ui.ts). */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * Design tokens — see docs/sistema-diseno.md.
+ * "Escritorio a la luz de una lámpara": paper, ink and wax. Nothing bounces.
+ */
+@theme {
+  --font-sans:
+    'Inter', 'Source Sans 3', ui-sans-serif, system-ui, sans-serif;
+  --font-serif:
+    'Cormorant Garamond', 'EB Garamond', 'Lora', ui-serif, Georgia, serif;
+
+  --color-parchment-50: #fdfbf5;
+  --color-parchment-100: #f7f1e3;
+  --color-parchment-200: #ebe0c8;
+
+  --color-ink-700: #3b3228;
+  --color-ink-800: #2a231b;
+  --color-ink-900: #1a1512;
+
+  --color-sepia-400: #a1815c;
+  --color-sepia-500: #6b4423;
+
+  --color-wax-500: #8b2635;
+  --color-wax-600: #6d1e2a;
+
+  --color-violet-400: #7c6ba8;
+  --color-violet-500: #5d4e8c;
+
+  --color-sage-400: #8a9a7b;
+  --color-sage-500: #6b7a5c;
+
+  --ease-calm: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/*
+ * Semantic surface tokens. Light = lamp-lit paper; dark = wood and lamplight,
+ * never a generic blue-grey.
+ */
+:root {
+  --surface: var(--color-parchment-50);
+  --surface-raised: #ffffff;
+  --surface-sunken: var(--color-parchment-100);
+  --border-soft: var(--color-parchment-200);
+  --text: var(--color-ink-800);
+  --text-muted: #6a5f52;
+  --accent: var(--color-violet-500);
+  --accent-contrast: #ffffff;
+}
+
+.dark {
+  --surface: var(--color-ink-900);
+  --surface-raised: #241d16;
+  --surface-sunken: #15110d;
+  --border-soft: #3a3025;
+  --text: var(--color-parchment-100);
+  --text-muted: #a89a86;
+  --accent: var(--color-violet-400);
+  --accent-contrast: #1a1512;
+}
+
+@layer base {
+  html {
+    color-scheme: light dark;
+  }
+
+  body {
+    background-color: var(--surface);
+    color: var(--text);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-serif);
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  ::selection {
+    background: color-mix(in srgb, var(--accent) 30%, transparent);
+  }
+}
+
+/* The envelope-opening animation is central but optional. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

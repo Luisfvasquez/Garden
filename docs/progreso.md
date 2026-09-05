@@ -3,7 +3,7 @@
 **Actualizar al cerrar cada tarea.** Este archivo es lo que le dice al agente qué existe ya.
 Formato: `[ ]` pendiente · `[~]` en curso · `[x]` terminado.
 
-Última actualización: 2026-08-28 — arranque de cimientos backend (Fase 0).
+Última actualización: 2026-09-05 — Fase 0 completa: backend (auth + cuenta) y front (cimientos + vistas de auth).
 
 ---
 
@@ -13,27 +13,40 @@ Formato: `[ ]` pendiente · `[~]` en curso · `[x]` terminado.
 - [ ] Repo, docker-compose (php, nginx, pgsql, redis, horizon, scheduler, reverb, mailpit, minio)
       _(diferido: el entorno Laragon local —pgsql 17, redis— ya funciona; la contenerización es tarea aparte)_
 - [x] Laravel 11 skeleton API + `install:api` _(Laravel 13 en el entorno; `routes/api.php` → manifiesto de versiones → `routes/api/v1.php`)_
-- [~] Sanctum configurado (cookie SPA + tokens móviles) y CORS
-      _(hecho: `statefulApi`, `config/cors.php` con orígenes explícitos + credenciales, expiración de token móvil 30d, modelo `PersonalAccessToken` con UUID. Falta: endpoints `auth/login` y `auth/token`)_
-- [~] Estructura `/api/v1` con `_convenciones.md` aplicada (Resources, FormRequests, error handler)
-      _(hecho: envelope de error único con `error_code` + `meta.request_id`, `X-Request-Id`, versionado, patrón API Resource. FormRequests se añaden por endpoint en la fase de auth)_
+- [x] Sanctum configurado (cookie SPA + tokens móviles) y CORS
+      _(`statefulApi`, `config/cors.php` orígenes explícitos + credenciales, token móvil 30d, `PersonalAccessToken` UUID; `login` cookie + `token` móvil implementados)_
+- [x] Estructura `/api/v1` con `_convenciones.md` aplicada (Resources, FormRequests, error handler)
+      _(envelope único `error_code` + `meta.request_id`, `X-Request-Id`, versionado, un FormRequest y un API Resource por acción; fechas ISO-8601 `Z` globales vía `Date::serializeUsing`)_
 - [x] Pint + Larastan 6 + Pest en CI
       _(en verde local + `.github/workflows/backend-ci.yml`: Pint `--test`, PHPStan nivel 6, Pest sobre servicio Postgres 17)_
 - [x] Migración `users` + `user_settings` + generación de `postal_handle`
       _(+ `feature_flags`, `personal_access_tokens` UUID; `postal_handle` `nombre-XXXX` hex en `User::creating`)_
-- [ ] Auth: registro (con verificación de edad), login, logout, verificación email, reset
-- [ ] `GET /me`, `PATCH /me`, ajustes, avatar
-- [ ] `GET /users/{handle}` (perfil público mínimo)
-- [ ] Policies base + tests de aislamiento entre usuarios
+- [x] Auth: registro (con verificación de edad → `UNDER_MINIMUM_AGE`), login, logout, verificación email (URL firmada relativa), reset (revoca tokens), reenvío, dispositivos
+- [x] `GET /me`, `PATCH /me`, ajustes (`GET/PATCH /me/settings`), avatar; + `deactivate`, `DELETE /me` (gracia 30d), `postal-handle/rotate` (cooldown 30d)
+- [x] `GET /users/{handle}` (perfil público mínimo, solo `active`, sin email)
+- [~] Policies base + tests de aislamiento entre usuarios
+      _(aislamiento probado: dispositivos/ajustes/perfil sólo accesibles con el token propio, revocar dispositivo ajeno → 404. Las Policies de dominio (`LetterPolicy`…) nacen con su módulo, spec §5.3)_
 - [x] `GET /health`, `GET /features` (feature flags)
 
 ### Front
-- [ ] Vite + Vue 3 + TS + Tailwind + Pinia + Router con guards
-- [ ] `api/client.ts` con interceptores (auth, 401, 419, 429, error_code)
-- [ ] Sistema de diseño base: tokens, tipografía, paleta, componentes primitivos
-- [ ] Vistas de auth: registro, login, verificar email, recuperar contraseña
-- [ ] Layout autenticado + navegación
-- [ ] i18n es/en con las claves de auth
+- [x] Vite + Vue 3 + TS + Tailwind + Pinia + Router con guards
+      _(scaffold create-vue ya existía; Tailwind v4 por `@theme` en `assets/main.css`, router con `beforeEach` → `guards.ts` (guest/auth/verified/role))_
+- [x] `api/client.ts` con interceptores (auth, 401, 419, 429, error_code)
+      _(Axios `withCredentials` + XSRF, pre-flight CSRF en mutaciones, reintento único en 419, `ApiError` normalizado por `error_code`, hooks 401/429/426 conectados en `main.ts`)_
+- [x] Sistema de diseño base: tokens, tipografía, paleta, componentes primitivos
+      _(tokens de `sistema-diseno.md` como CSS vars + `@theme`; modo oscuro «madera y lámpara» por clase `.dark`; `prefers-reduced-motion`; primitivos `BaseButton/BaseInput/BaseCheckbox/AlertBox/SpinnerDots/ToastHost/ThemeToggle/LocaleSwitch`)_
+- [x] Vistas de auth: registro, login, verificar email, recuperar contraseña
+      _(+ reset con token; los tres estados carga/error/vacío; errores por `error_code`; edad → `UNDER_MINIMUM_AGE` bajo el campo)_
+- [x] Layout autenticado + navegación
+      _(`AppLayout` con nav + menú de usuario + logout; `AuthLayout` centrado; `DeskView`/`SettingsView` placeholder)_
+- [x] i18n es/en con las claves de auth
+      _(`vue-i18n` legacy:false, `locales/es.json` + `en.json`, persistencia de idioma y tema en `localStorage` (solo prefs de UI))_
+- [~] PWA instalable
+      _(plugin configurado, `npm run build` genera SW; faltan iconos en `public/icons/` — se completa en Fase 1)_
+
+> Desviación consciente: `src/types/api.ts` es un stand-in **escrito a mano y mínimo** (solo sesión)
+> hasta que el backend exponga `openapi.json` con Scramble (Fase 4). `npm run api:types` sigue siendo
+> el recordatorio. Front CI en `.github/workflows/front-ci.yml`.
 
 ---
 

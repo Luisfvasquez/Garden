@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Exceptions\InvalidSignatureException;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -62,6 +63,9 @@ final class ApiExceptionRenderer
             ],
             $e instanceof AuthenticationException => [
                 401, 'UNAUTHENTICATED', 'No autenticado.', [], [], [],
+            ],
+            $e instanceof InvalidSignatureException => [
+                403, 'INVALID_VERIFICATION_LINK', 'El enlace no es válido o ha caducado.', [], [], [],
             ],
             $e instanceof AuthorizationException || $e instanceof AccessDeniedHttpException => [
                 403, 'FORBIDDEN', 'No tienes permiso para esta acción.', [], [], [],

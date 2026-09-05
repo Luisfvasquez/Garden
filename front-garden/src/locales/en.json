@@ -1,0 +1,109 @@
+{
+  "app": {
+    "name": "Evergarden",
+    "tagline": "Correspondence that takes its time."
+  },
+  "common": {
+    "email": "Email",
+    "password": "Password",
+    "passwordConfirm": "Repeat your password",
+    "name": "Name",
+    "birthDate": "Date of birth",
+    "language": "Language",
+    "loading": "Loading…",
+    "retry": "Try again",
+    "back": "Back",
+    "cancel": "Cancel",
+    "save": "Save",
+    "continue": "Continue",
+    "close": "Close",
+    "theme": {
+      "toggle": "Switch theme",
+      "light": "Light",
+      "dark": "Dark"
+    }
+  },
+  "nav": {
+    "desk": "Desk",
+    "settings": "Settings",
+    "signOut": "Sign out",
+    "account": "Account"
+  },
+  "landing": {
+    "title": "Write letters that arrive when they should.",
+    "body": "No instant messaging. Just paper, ink, and the time an envelope takes to cross the distance.",
+    "signIn": "Sign in",
+    "createAccount": "Create account"
+  },
+  "auth": {
+    "login": {
+      "title": "Sign in",
+      "submit": "Sign in",
+      "remember": "Keep me signed in",
+      "forgot": "Forgot your password?",
+      "noAccount": "No account yet?",
+      "createAccount": "Create one"
+    },
+    "register": {
+      "title": "Create account",
+      "submit": "Create account",
+      "acceptTerms": "I accept the terms and privacy policy",
+      "haveAccount": "Already have an account?",
+      "signIn": "Sign in",
+      "minAgeNote": "You must be at least 16 to sign up.",
+      "done": {
+        "title": "Check your email",
+        "body": "We sent a verification link to {email}. Open it to activate your account."
+      }
+    },
+    "verify": {
+      "title": "Verify your email",
+      "pending": "Your email isn't verified yet. Check your inbox or request a new link.",
+      "resend": "Resend the link",
+      "resent": "Link sent. Check your email.",
+      "checking": "Verifying…",
+      "success": "Email verified. You're all set.",
+      "goToDesk": "Go to your desk",
+      "invalidLink": "This link is invalid or has expired. Request a new one.",
+      "alreadyVerified": "This email was already verified."
+    },
+    "forgot": {
+      "title": "Reset password",
+      "body": "Enter your email and we'll send a link to choose a new password.",
+      "submit": "Send link",
+      "done": "If that email has an account, a link is on its way.",
+      "backToLogin": "Back to sign in"
+    },
+    "reset": {
+      "title": "New password",
+      "submit": "Save password",
+      "done": "Password changed. You can sign in now.",
+      "invalidToken": "This reset link is invalid or has expired."
+    }
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "network": "Can't reach the server. Check your connection.",
+    "validation": "Check the highlighted fields.",
+    "INVALID_CREDENTIALS": "Wrong email or password.",
+    "UNDER_MINIMUM_AGE": "You must be at least 16 to sign up.",
+    "EMAIL_NOT_VERIFIED": "Verify your email to continue.",
+    "EMAIL_ALREADY_VERIFIED": "This email was already verified.",
+    "INVALID_VERIFICATION_LINK": "The verification link is invalid or has expired.",
+    "INVALID_RESET_TOKEN": "This reset link is invalid or has expired.",
+    "ACCOUNT_SUSPENDED": "This account is suspended.",
+    "ACCOUNT_INACTIVE": "This account is no longer available.",
+    "HANDLE_ROTATION_TOO_SOON": "You can only change your handle once every 30 days.",
+    "RATE_LIMITED": "Too many attempts. Wait a moment.",
+    "UPGRADE_REQUIRED": "You need to update the app."
+  },
+  "upgrade": {
+    "title": "Update Evergarden",
+    "body": "This version is no longer supported. Reload the page to get the latest one."
+  },
+  "notFound": {
+    "title": "Nothing here",
+    "body": "The page you're looking for doesn't exist or has moved.",
+    "home": "Back to start"
+  }
+}
