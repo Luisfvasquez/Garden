@@ -1,8 +1,25 @@
 # API — Programaciones y envíos recurrentes
 
-Estado: `[ ] contrato definido` · `[ ] backend` · `[ ] front`
+Estado: `[x] contrato definido` · `[x] backend` · `[~] front`
 
 Caso principal: *"una carta para cada cumpleaños de mi hija durante los próximos 10 años"*.
+
+> **Backend (Fase 2B):** `letter_schedules` + `letter_schedule_occurrences`, `OccurrenceGenerator`
+> (puro, ADR-0009), `OccurrenceMaterializer`, `GenerateUpcomingDeliveriesJob` (diario 03:00, cola
+> `maintenance`, materializa 90 días — ADR-0002), y los 9 endpoints. Todo tras el flag `schedules`
+> (middleware `feature:schedules` → 404 si está apagado). `SchedulePolicy` → 404 sin fuga.
+>
+> **Desviaciones conscientes respecto a este documento (actualizadas aquí):**
+> - `POST /schedules` acepta además `tier` (`express|standard|slow`, def. `standard`) y `is_anonymous`
+>   (bool, def. `false`); se copian a cada entrega materializada.
+> - `trigger_type` solo admite `date` en Fase 2. `inactivity`/`posthumous` (con aviso legal) → Fase 4;
+>   la columna ya existe.
+> - Mensual con ancla en día 29–31: se **recorta** al último día de los meses cortos
+>   (`addMonthsNoOverflow`). Ver ADR-0009.
+> - La respuesta de cada ocurrencia incluye `runs_at` (instante UTC ISO-8601) además de `date` +
+>   `local_time`.
+> - `PUT .../occurrences/{date}/letter` sobre una ocurrencia ya materializada → `409
+>   INVALID_STATE_TRANSITION`. Fecha que no es ocurrencia → `404`.
 
 ## Endpoints
 

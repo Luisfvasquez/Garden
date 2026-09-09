@@ -7,6 +7,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useUiStore } from '@/stores/ui'
 import { useApiError } from '@/composables/useApiError'
 import { useUnreadCount } from '@/composables/useMailbox'
+import { useFeature } from '@/composables/useFeatures'
 import LocaleSwitch from '@/components/ui/LocaleSwitch.vue'
 import ThemeToggle from '@/components/ui/ThemeToggle.vue'
 
@@ -17,6 +18,7 @@ const queryClient = useQueryClient()
 const { t } = useI18n()
 const { messageFor } = useApiError()
 const unread = useUnreadCount()
+const schedulesEnabled = useFeature('schedules')
 
 const signingOut = ref(false)
 
@@ -63,6 +65,14 @@ async function signOut() {
           >
             {{ unread.data.value }}
           </span>
+        </RouterLink>
+        <RouterLink
+          v-if="schedulesEnabled"
+          :to="{ name: 'schedules' }"
+          class="text-sm text-[var(--text-muted)] hover:text-[var(--text)]"
+          active-class="text-[var(--text)]"
+        >
+          {{ t('nav.schedules') }}
         </RouterLink>
         <RouterLink
           :to="{ name: 'settings' }"

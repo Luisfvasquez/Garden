@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Jobs\Maintenance\GenerateUpcomingDeliveriesJob;
 use App\Jobs\Postal\DeliverArrivedLettersJob;
 use App\Jobs\Postal\DispatchDueLettersJob;
 use Illuminate\Foundation\Inspiring;
@@ -19,3 +20,6 @@ Artisan::command('inspire', function () {
  */
 Schedule::job(new DispatchDueLettersJob)->everyMinute()->withoutOverlapping();
 Schedule::job(new DeliverArrivedLettersJob)->everyMinute()->withoutOverlapping();
+
+// Recurring letters: materialise the next 90 days of occurrences (ADR-0002).
+Schedule::job(new GenerateUpcomingDeliveriesJob)->dailyAt('03:00')->withoutOverlapping();

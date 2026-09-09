@@ -24,6 +24,7 @@ use App\Http\Controllers\Api\V1\NotificationController;
 use App\Http\Controllers\Api\V1\PostalHandleController;
 use App\Http\Controllers\Api\V1\PublicUserController;
 use App\Http\Controllers\Api\V1\ReportController;
+use App\Http\Controllers\Api\V1\ScheduleController;
 use App\Http\Controllers\Api\V1\SendLetterController;
 use App\Http\Controllers\Api\V1\SupportResourceController;
 use Illuminate\Support\Facades\Route;
@@ -83,6 +84,21 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
         ->scopeBindings()
         ->name('letters.attachments.destroy');
     Route::apiResource('letters', LetterController::class);
+
+    // --- Programaciones y envíos recurrentes — contrato: docs/api/programaciones.md ---
+    Route::middleware('feature:schedules')->group(function (): void {
+        Route::get('schedules', [ScheduleController::class, 'index'])->name('schedules.index');
+        Route::post('schedules', [ScheduleController::class, 'store'])->middleware('verified')->name('schedules.store');
+        Route::get('schedules/{schedule}', [ScheduleController::class, 'show'])->name('schedules.show');
+        Route::patch('schedules/{schedule}', [ScheduleController::class, 'update'])->name('schedules.update');
+        Route::delete('schedules/{schedule}', [ScheduleController::class, 'destroy'])->name('schedules.destroy');
+        Route::get('schedules/{schedule}/occurrences', [ScheduleController::class, 'occurrences'])->name('schedules.occurrences');
+        Route::put('schedules/{schedule}/occurrences/{date}/letter', [ScheduleController::class, 'assignLetter'])
+            ->where('date', '\d{4}-\d{2}-\d{2}')
+            ->name('schedules.occurrences.letter');
+        Route::post('schedules/{schedule}/pause', [ScheduleController::class, 'pause'])->name('schedules.pause');
+        Route::post('schedules/{schedule}/resume', [ScheduleController::class, 'resume'])->name('schedules.resume');
+    });
 
     // --- Envíos: bandeja de salida, seguimiento y cancelación ---
     Route::get('deliveries', [DeliveryController::class, 'index'])->name('deliveries.index');

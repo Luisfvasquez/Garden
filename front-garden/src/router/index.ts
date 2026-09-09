@@ -85,6 +85,18 @@ const routes: RouteRecordRaw[] = [
     meta: { auth: true },
   },
   {
+    path: '/programaciones',
+    name: 'schedules',
+    component: () => import('@/views/schedules/SchedulesView.vue'),
+    meta: { auth: true },
+  },
+  {
+    path: '/programaciones/:id',
+    name: 'schedule-timeline',
+    component: () => import('@/views/schedules/ScheduleTimelineView.vue'),
+    meta: { auth: true },
+  },
+  {
     path: '/envios/:id',
     name: 'delivery-tracking',
     component: () => import('@/views/deliveries/DeliveryTrackingView.vue'),

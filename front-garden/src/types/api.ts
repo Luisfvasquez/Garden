@@ -226,6 +226,68 @@ export interface Block {
   }
 }
 
+// --- Schedules (recurring letters) --------------------------------------
+
+export type RecurrenceType = 'once' | 'yearly' | 'monthly' | 'weekly' | 'custom_dates'
+export type LeapDayPolicy = 'feb_28' | 'mar_01'
+export type ScheduleStatus = 'active' | 'paused' | 'completed'
+export type OccurrenceStatus =
+  | 'empty'
+  | 'pending'
+  | 'queued'
+  | 'in_transit'
+  | 'delivered'
+  | 'cancelled'
+
+export interface Schedule {
+  id: string
+  name: string
+  recipient: { postal_handle: string; display_name: string } | null
+  recurrence_type: RecurrenceType
+  anchor_date: string
+  local_time: string
+  timezone: string
+  occurrences_total: number | null
+  custom_dates: string[]
+  leap_day_policy: LeapDayPolicy
+  trigger_type: 'date'
+  letter_id: string | null
+  tier: TransitTier
+  is_anonymous: boolean
+  status: ScheduleStatus
+  created_at: string
+  updated_at: string
+}
+
+export interface Occurrence {
+  date: string
+  local_time: string
+  runs_at: string
+  letter: { id: string; title: string | null } | null
+  delivery_id: string | null
+  status: OccurrenceStatus
+}
+
+export interface OccurrenceTimeline {
+  data: Occurrence[]
+  meta: { total: number; filled: number; delivered: number }
+}
+
+export interface CreateScheduleInput {
+  name: string
+  recipient: { postal_handle: string }
+  recurrence_type: RecurrenceType
+  anchor_date: string
+  local_time: string
+  timezone: string
+  occurrences_total?: number | null
+  custom_dates?: string[]
+  letter_id?: string | null
+  leap_day_policy?: LeapDayPolicy
+  tier?: TransitTier
+  is_anonymous?: boolean
+}
+
 // --- Envelopes -------------------------------------------------------------
 
 export interface Resource<T> {

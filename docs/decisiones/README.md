@@ -16,3 +16,4 @@ de cambiar el código en silencio.
 | 0006 | PostgreSQL sobre MySQL | Aceptado |
 | 0007 | Bloqueo silencioso | Aceptado |
 | 0008 | Moderación desacoplada del proveedor | Aceptado |
+| 0009 | Aritmética de recurrencias y zonas horarias | Aceptado |

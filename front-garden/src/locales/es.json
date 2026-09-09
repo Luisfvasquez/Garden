@@ -15,6 +15,7 @@
     "back": "Volver",
     "cancel": "Cancelar",
     "save": "Guardar",
+    "delete": "Eliminar",
     "continue": "Continuar",
     "close": "Cerrar",
     "theme": {
@@ -27,6 +28,7 @@
     "desk": "Escritorio",
     "settings": "Ajustes",
     "mailbox": "Buzón",
+    "schedules": "Programaciones",
     "signOut": "Cerrar sesión",
     "account": "Cuenta"
   },
@@ -307,5 +309,65 @@
     "title": "Aquí no hay nada",
     "body": "La página que buscas no existe o se ha movido.",
     "home": "Volver al inicio"
+  },
+  "schedules": {
+    "title": "Programaciones",
+    "intro": "Cartas que se envían solas en fechas futuras. Una para cada cumpleaños, cada aniversario.",
+    "new": "Nueva programación",
+    "empty": "Todavía no tienes ninguna programación.",
+    "pause": "Pausar",
+    "resume": "Reanudar",
+    "deleteConfirm": "¿Eliminar la programación? Las cartas ya en camino no se detienen.",
+    "backToList": "Todas las programaciones",
+    "timelineMeta": "{filled} de {total} ocurrencias con carta · {delivered} entregadas",
+    "pickLetter": "Asignar una carta…",
+    "viewTracking": "Ver seguimiento",
+    "status": {
+      "active": "activa",
+      "paused": "en pausa",
+      "completed": "completada"
+    },
+    "recurrence": {
+      "once": "Una vez",
+      "yearly": "Cada año",
+      "monthly": "Cada mes",
+      "weekly": "Cada semana",
+      "custom_dates": "Fechas concretas"
+    },
+    "occurrence": {
+      "empty": "sin carta",
+      "pending": "pendiente",
+      "queued": "en cola",
+      "in_transit": "en tránsito",
+      "delivered": "entregada",
+      "cancelled": "cancelada"
+    },
+    "leap": {
+      "feb_28": "Adelantar al 28 de febrero",
+      "mar_01": "Pasar al 1 de marzo"
+    },
+    "tier": {
+      "express": "Exprés",
+      "standard": "Normal",
+      "slow": "Lento"
+    },
+    "form": {
+      "name": "Nombre de la programación",
+      "recipient": "Identificador postal del destinatario",
+      "recurrence": "Repetición",
+      "anchorDate": "Fecha de la primera",
+      "localTime": "Hora local",
+      "timezone": "Zona horaria",
+      "total": "Número de ocurrencias",
+      "customDates": "Fechas (una por línea o separadas por espacios)",
+      "leapDay": "Si cae en 29 de febrero",
+      "letter": "Carta",
+      "letterPerOccurrence": "Una carta distinta por fecha",
+      "untitled": "(sin título)",
+      "tier": "Velocidad de entrega",
+      "anonymous": "Enviar de forma anónima",
+      "submit": "Crear programación",
+      "created": "Programación creada."
+    }
   }
 }

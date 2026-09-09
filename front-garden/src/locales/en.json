@@ -15,6 +15,7 @@
     "back": "Back",
     "cancel": "Cancel",
     "save": "Save",
+    "delete": "Delete",
     "continue": "Continue",
     "close": "Close",
     "theme": {
@@ -27,6 +28,7 @@
     "desk": "Desk",
     "settings": "Settings",
     "mailbox": "Mailbox",
+    "schedules": "Schedules",
     "signOut": "Sign out",
     "account": "Account"
   },
@@ -307,5 +309,65 @@
     "title": "Nothing here",
     "body": "The page you're looking for doesn't exist or has moved.",
     "home": "Back to start"
+  },
+  "schedules": {
+    "title": "Schedules",
+    "intro": "Letters that send themselves on future dates. One for every birthday, every anniversary.",
+    "new": "New schedule",
+    "empty": "You have no schedules yet.",
+    "pause": "Pause",
+    "resume": "Resume",
+    "deleteConfirm": "Delete this schedule? Letters already on their way won't stop.",
+    "backToList": "All schedules",
+    "timelineMeta": "{filled} of {total} occurrences have a letter · {delivered} delivered",
+    "pickLetter": "Assign a letter…",
+    "viewTracking": "View tracking",
+    "status": {
+      "active": "active",
+      "paused": "paused",
+      "completed": "completed"
+    },
+    "recurrence": {
+      "once": "Once",
+      "yearly": "Every year",
+      "monthly": "Every month",
+      "weekly": "Every week",
+      "custom_dates": "Specific dates"
+    },
+    "occurrence": {
+      "empty": "no letter",
+      "pending": "pending",
+      "queued": "queued",
+      "in_transit": "in transit",
+      "delivered": "delivered",
+      "cancelled": "cancelled"
+    },
+    "leap": {
+      "feb_28": "Move to February 28",
+      "mar_01": "Move to March 1"
+    },
+    "tier": {
+      "express": "Express",
+      "standard": "Standard",
+      "slow": "Slow"
+    },
+    "form": {
+      "name": "Schedule name",
+      "recipient": "Recipient's postal handle",
+      "recurrence": "Repeat",
+      "anchorDate": "Date of the first one",
+      "localTime": "Local time",
+      "timezone": "Timezone",
+      "total": "Number of occurrences",
+      "customDates": "Dates (one per line or space-separated)",
+      "leapDay": "If it falls on February 29",
+      "letter": "Letter",
+      "letterPerOccurrence": "A different letter per date",
+      "untitled": "(untitled)",
+      "tier": "Delivery speed",
+      "anonymous": "Send anonymously",
+      "submit": "Create schedule",
+      "created": "Schedule created."
+    }
   }
 }

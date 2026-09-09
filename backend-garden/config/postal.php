@@ -44,4 +44,12 @@ return [
         'image_max_kb' => 5 * 1024,
         'audio_max_seconds' => 60,
     ],
+
+    // Recurring letters (docs/api/programaciones.md).
+    'schedules' => [
+        // Upper bound on `occurrences_total` / the length of `custom_dates`.
+        'max_occurrences' => 60,
+        // Only occurrences within this window are materialised into deliveries.
+        'materialize_horizon_days' => 90,
+    ],
 ];

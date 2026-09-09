@@ -27,4 +27,11 @@ export const qk = {
     resources: (country?: string | null, topic?: string) =>
       ['support', 'resources', country ?? 'global', topic ?? 'all'] as const,
   },
+  schedules: {
+    all: ['schedules'] as const,
+    list: ['schedules', 'list'] as const,
+    one: (id: string) => ['schedules', 'one', id] as const,
+    occurrences: (id: string) => ['schedules', 'occurrences', id] as const,
+  },
+  features: ['features'] as const,
 } as const
