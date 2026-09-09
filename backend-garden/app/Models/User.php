@@ -7,6 +7,8 @@ namespace App\Models;
 use App\Enums\UserRole;
 use App\Enums\UserStatus;
 use Database\Factories\UserFactory;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -42,7 +44,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property Carbon|null $deletes_at
  * @property-read UserSettings|null $settings
  */
-class User extends Authenticatable implements MustVerifyEmail
+class User extends Authenticatable implements FilamentUser, MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, HasUuids, Notifiable, SoftDeletes;
@@ -142,6 +144,12 @@ class User extends Authenticatable implements MustVerifyEmail
     public function isStaff(): bool
     {
         return $this->role->isStaff();
+    }
+
+    /** Only moderators and admins reach the Filament panel. */
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return $this->isStaff() && $this->status === UserStatus::Active;
     }
 
     public function displayName(): string

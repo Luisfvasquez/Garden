@@ -18,3 +18,4 @@ de cambiar el código en silencio.
 | 0008 | Moderación desacoplada del proveedor | Aceptado |
 | 0009 | Aritmética de recurrencias y zonas horarias | Aceptado |
 | 0010 | Cliente Redis `predis` y pool aleatorio | Aceptado |
+| 0011 | Panel de moderación server-side (Filament) | Aceptado |

@@ -12,8 +12,14 @@ públicos, con seeder de líneas reales (ES, MX, AR, US + fallback internacional
 `RandomAbuseGuard` (2 reportes `actioned` sobre cartas aleatorias → `restrict_random` automático con
 caducidad). Moderación **síncrona** en el envío de botella al mar (`RandomLetterSender`): `rejected` →
 bloquea; `flagged` (autolesión) → `held` para revisión humana, nunca bloqueo silencioso.
-**Pendiente:** `ModerateContentJob` asíncrono + escalado real email/Slack — con el blog en 2D y el
-panel Filament en 2F.
+**Estado (Fase 2F):** panel **Filament** en `/admin` (server-side, sesión `web`, ADR-0011). Acceso solo
+`isStaff()` + `active`. Recursos: usuarios (suspender / restringir aleatorias / levantar), **cola de
+reportes** ordenada por `severity` con «Confirmar» (`Report::markActioned()` → dispara
+`RandomAbuseGuard`) / «Descartar», moderación del blog (posts `flagged` → aprobar/rechazar), catálogos
+(`feature_flags`, `support_resources`, `tags`), y `PlatformStatsWidget` (usuarios, tránsito, salud del
+reloj postal, moderación pendiente).
+**Pendiente:** `ModerateContentJob` asíncrono + escalado real email/Slack; cola dedicada de comentarios
+retenidos; recursos de `transit_routes`/`postal_holidays`.
 
 ## Capas
 
