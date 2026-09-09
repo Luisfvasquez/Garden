@@ -26,8 +26,185 @@
   "nav": {
     "desk": "Desk",
     "settings": "Settings",
+    "mailbox": "Mailbox",
     "signOut": "Sign out",
     "account": "Account"
+  },
+  "desk": {
+    "writeLetter": "Write a letter",
+    "drafts": "Drafts",
+    "noDrafts": "No drafts yet.",
+    "sent": "Sent",
+    "noSent": "You haven't sent any letters yet.",
+    "recipients": "no recipients | 1 recipient | {count} recipients",
+    "viewOutbox": "View my letters",
+    "mailbox": "Mailbox",
+    "unreadLetters": "unread letters"
+  },
+  "editor": {
+    "title": "Write",
+    "aria": "Letter body",
+    "toolbar": "Text formatting",
+    "bold": "Bold",
+    "italic": "Italic",
+    "underline": "Underline",
+    "quote": "Quote",
+    "divider": "Divider",
+    "letterTitle": "Title",
+    "letterTitleHint": "Optional. Only you and the recipient will see it.",
+    "untitled": "Untitled",
+    "preview": "Preview",
+    "backToEditing": "Keep writing",
+    "send": "Send",
+    "saving": "Saving…",
+    "saved": "Saved",
+    "saveError": "Couldn't save. Retrying…",
+    "saveNow": "Save now",
+    "discard": "Discard draft"
+  },
+  "style": {
+    "show": "Choose look",
+    "hide": "Hide look",
+    "none": "None",
+    "paper": "Paper",
+    "font": "Typeface",
+    "ink": "Ink",
+    "stamp": "Stamp",
+    "border": "Border",
+    "seal": "Wax seal",
+    "sigil": "Sigil"
+  },
+  "send": {
+    "title": "Send the letter",
+    "recipient": "Recipient's postal handle",
+    "recipientHint": "For example, violet-e4f2.",
+    "recipientFound": "Will be sent to {name}.",
+    "recipientNotFound": "No one has that handle.",
+    "tier": "Transit speed",
+    "tiers": {
+      "express": { "name": "Express", "hint": "30 min to 2 h. Max 3 per month." },
+      "standard": { "name": "Standard", "hint": "2 to 12 hours." },
+      "slow": { "name": "Slow", "hint": "1 to 3 days." }
+    },
+    "scheduleArrival": "Schedule the arrival date",
+    "arriveAt": "Should arrive on…",
+    "anonymous": "Send anonymously",
+    "revealAt": "Reveal my identity on…",
+    "revealHint": "Optional. Until then the recipient won't know who you are.",
+    "readReceipt": "Tell me when it's read",
+    "submit": "Send letter",
+    "done": "Letter sent. | Letter sent. | {count} letters sent."
+  },
+  "outbox": {
+    "title": "My letters",
+    "empty": "You haven't sent any letters yet.",
+    "anonymous": "Anonymous",
+    "filters": {
+      "all": "All",
+      "queued": "Queued",
+      "in_transit": "In transit",
+      "delivered": "Delivered"
+    }
+  },
+  "tracking": {
+    "title": "Postal tracking",
+    "eta": "Estimated arrival {when}.",
+    "cancel": "Pull the letter back",
+    "cancelled": "Letter pulled back."
+  },
+  "delivery": {
+    "status": {
+      "queued": "Queued",
+      "in_transit": "In transit",
+      "delivered": "Delivered",
+      "read": "Read",
+      "cancelled": "Withdrawn",
+      "failed": "Not delivered"
+    }
+  },
+  "mailbox": {
+    "empty": "Your mailbox is empty.",
+    "noSubject": "No subject",
+    "from": "From {name}",
+    "unopened": "Unopened",
+    "tapToOpen": "Tap to open the envelope",
+    "favorite": "Mark as favourite",
+    "unfavorite": "Remove favourite",
+    "archive": "Archive",
+    "unarchive": "Unarchive",
+    "reply": "Reply",
+    "filters": {
+      "all": "All",
+      "unread": "Unread",
+      "favorite": "Favourites",
+      "archived": "Archived"
+    }
+  },
+  "settings": {
+    "save": "Save changes",
+    "saved": "Changes saved.",
+    "avatarUpdated": "Avatar updated.",
+    "profile": {
+      "title": "Profile",
+      "changeAvatar": "Change avatar",
+      "penName": "Pen name",
+      "penNameHint": "Optional. Used on the anonymous blog.",
+      "bio": "Bio",
+      "country": "Country",
+      "countryHint": "Two-letter code, e.g. GB.",
+      "timezone": "Time zone"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "notify_email": "Email me updates",
+      "notify_push": "Push notifications",
+      "notify_on_arrival": "When a letter reaches my mailbox",
+      "notify_on_dispatch_confirm": "When one of my letters is dispatched or delivered",
+      "notify_on_doll_message": "Messages from an Auto Memory Doll",
+      "notify_on_blog_comment": "Comments on my posts",
+      "quietStart": "Quiet from",
+      "quietEnd": "Quiet until",
+      "theme": "Theme",
+      "themeSystem": "Match system"
+    },
+    "privacy": {
+      "title": "Privacy",
+      "description": "You decide who writes to you and what is shared.",
+      "acceptsRandom": "Accept letters from strangers",
+      "acceptsRandomHint": "Bottle at sea. You may receive letters from people you don't know.",
+      "dailyCap": "Daily limit",
+      "readReceipts": "Tell the sender when I open their letter",
+      "readReceiptsHint": "Only if the sender also asked for it.",
+      "transitCountdown": "Show the exact transit countdown",
+      "transitCountdownHint": "Turn off to see a fuzzy estimate instead."
+    },
+    "blocks": {
+      "title": "Blocks",
+      "description": "Blocked people can't write to you. They aren't told.",
+      "handle": "Postal handle",
+      "add": "Block",
+      "remove": "Unblock",
+      "empty": "You haven't blocked anyone."
+    },
+    "devices": {
+      "title": "Devices",
+      "description": "Sessions open in the mobile app.",
+      "current": "this device",
+      "revoke": "Sign out",
+      "empty": "No active mobile sessions."
+    },
+    "account": {
+      "title": "Account",
+      "handle": "Postal handle",
+      "rotateHandle": "Generate a new one",
+      "rotateHint": "Changing your handle cuts off a harasser. Once every 30 days.",
+      "handleRotated": "Handle updated.",
+      "dangerZone": "Danger zone",
+      "deactivate": "Deactivate my account",
+      "deactivateConfirm": "Deactivate the account? You can reactivate it by signing in.",
+      "destroy": "Delete my account",
+      "destroyConfirm": "Delete the account? It is permanently removed after 30 days."
+    }
   },
   "landing": {
     "title": "Write letters that arrive when they should.",
@@ -95,7 +272,15 @@
     "ACCOUNT_INACTIVE": "This account is no longer available.",
     "HANDLE_ROTATION_TOO_SOON": "You can only change your handle once every 30 days.",
     "RATE_LIMITED": "Too many attempts. Wait a moment.",
-    "UPGRADE_REQUIRED": "You need to update the app."
+    "UPGRADE_REQUIRED": "You need to update the app.",
+    "RECIPIENT_NOT_FOUND": "No one has that postal handle.",
+    "QUOTA_EXCEEDED": "You've used up this month's express letters.",
+    "LETTER_LOCKED": "This letter has been sent and can't be edited.",
+    "DRAFT_LIMIT_REACHED": "You have too many open drafts.",
+    "GRACE_PERIOD_EXPIRED": "The letter has left — it can't be pulled back now.",
+    "INVALID_STATE_TRANSITION": "That action doesn't apply to the current state.",
+    "ATTACHMENTS_NOT_ALLOWED": "This kind of letter can't carry attachments.",
+    "ATTACHMENT_LIMIT_REACHED": "The letter already has the maximum attachments."
   },
   "upgrade": {
     "title": "Update Evergarden",

@@ -1,8 +1,7 @@
 /*
  * TEMPORAL. Se reemplaza por `src/types/api.d.ts`, generado desde
  * `../docs/api/openapi.json` (Scramble) — ver `npm run api:types` y
- * `docs/setup.md`. Mantener este archivo al mínimo: solo lo que Fase 0
- * necesita para tipar la sesión. No añadir modelos de dominio aquí.
+ * `docs/setup.md`. Mantener al mínimo lo que el front necesita para tipar.
  */
 
 export type Locale = 'es' | 'en'
@@ -10,7 +9,6 @@ export type UserRole = 'client' | 'doll' | 'moderator' | 'admin'
 export type UserStatus = 'active' | 'suspended' | 'deactivated' | 'deleted'
 export type ThemePreference = 'light' | 'dark' | 'system'
 
-/** `GET /api/v1/me` — `data`. */
 export interface Me {
   id: string
   name: string
@@ -31,7 +29,6 @@ export interface Me {
   created_at: string
 }
 
-/** `GET /api/v1/users/{postal_handle}` — `data`. */
 export interface PublicUser {
   postal_handle: string
   display_name: string
@@ -43,7 +40,6 @@ export interface PublicUser {
   is_blocked_by_me: boolean
 }
 
-/** `GET/PATCH /api/v1/me/settings` — `data`. */
 export interface UserSettings {
   notify_email: boolean
   notify_push: boolean
@@ -61,17 +57,172 @@ export interface UserSettings {
   random_letters_daily_cap: number
 }
 
-/** `GET /api/v1/features` — `data`. */
 export interface FeaturePayload {
   features: Record<string, boolean>
 }
 
-/** Single-resource envelope. */
+// --- Letters -----------------------------------------------------------------
+
+/** Tiptap document — opaque JSON; the backend sanitises it. */
+export type TiptapDoc = import('@tiptap/core').JSONContent
+
+export interface LetterStyle {
+  paper?: string
+  texture?: string
+  font?: string
+  ink?: string
+  stamp?: string
+  border?: string
+  flourish?: boolean
+  seal?: { type?: 'wax'; color?: string; sigil?: string }
+}
+
+export type LetterKind = 'direct' | 'random' | 'unaddressed' | 'doll_draft'
+export type ModerationStatus = 'pending' | 'approved' | 'flagged' | 'rejected'
+
+export interface LetterAttachment {
+  id: string
+  type: 'image' | 'audio' | 'pressed_flower'
+  url: string
+  original_name: string
+  mime_type: string
+  size_bytes: number
+  metadata: Record<string, unknown>
+  created_at: string
+}
+
+export interface Letter {
+  id: string
+  title: string | null
+  body: TiptapDoc
+  style: LetterStyle
+  kind: LetterKind
+  word_count: number
+  reading_time_minutes: number
+  is_locked: boolean
+  moderation_status: ModerationStatus
+  in_reply_to_delivery_id: string | null
+  attachments?: LetterAttachment[]
+  deliveries_count?: number
+  created_at: string
+  updated_at: string
+}
+
+type StyleEntry = { key: string; name: string; locked: boolean } & Record<string, unknown>
+export interface StyleCatalog {
+  papers: StyleEntry[]
+  fonts: StyleEntry[]
+  inks: StyleEntry[]
+  seals: StyleEntry[]
+  sigils: StyleEntry[]
+  stamps: StyleEntry[]
+  borders: StyleEntry[]
+}
+
+// --- Deliveries / mailbox --------------------------------------------------
+
+export type DeliveryStatus = 'queued' | 'in_transit' | 'delivered' | 'read' | 'cancelled' | 'failed'
+export type TransitTier = 'express' | 'standard' | 'slow'
+
+export interface RecipientSummary {
+  display_name: string
+  postal_handle: string | null
+}
+
+export interface Delivery {
+  id: string
+  letter_id: string
+  status: DeliveryStatus
+  tier: TransitTier
+  is_anonymous: boolean
+  scheduled_for: string
+  dispatched_at: string | null
+  estimated_delivery_at: string | null
+  delivered_at: string | null
+  read_at: string | null
+  can_cancel: boolean
+  recipient: RecipientSummary | null
+}
+
+export interface TrackingEvent {
+  event: string
+  occurred_at: string
+  label: string
+  metadata?: { office?: string }
+}
+
+export interface SenderSummary {
+  display_name: string
+  postal_handle: string | null
+  avatar_url: string | null
+}
+
+export interface MailboxEnvelope {
+  id: string
+  status: 'delivered' | 'read'
+  is_opened: boolean
+  is_archived: boolean
+  is_favorite: boolean
+  is_anonymous: boolean
+  envelope: { paper: string | null; seal: LetterStyle['seal'] | null; stamp: string | null }
+  sender: SenderSummary
+  title: string | null
+  has_attachments: boolean
+  in_reply_to_delivery_id: string | null
+  delivered_at: string | null
+}
+
+export interface MailboxLetter {
+  id: string
+  status: 'delivered' | 'read'
+  is_archived: boolean
+  is_favorite: boolean
+  is_anonymous: boolean
+  sender: SenderSummary
+  title: string | null
+  body: TiptapDoc
+  style: LetterStyle
+  word_count: number
+  reading_time_minutes: number
+  attachments: LetterAttachment[]
+  in_reply_to_delivery_id: string | null
+  delivered_at: string | null
+  read_at: string | null
+}
+
+// --- Notifications / blocks ---------------------------------------------------
+
+export interface AppNotification {
+  id: string
+  type: string
+  data: Record<string, unknown>
+  read_at: string | null
+  created_at: string
+}
+
+export interface Block {
+  id: string
+  reason: string | null
+  created_at: string
+  user: {
+    id: string
+    postal_handle: string | null
+    display_name: string
+    avatar_url: string | null
+  }
+}
+
+// --- Envelopes -------------------------------------------------------------
+
 export interface Resource<T> {
   data: T
 }
 
-/** Error envelope — docs/api/_convenciones.md. */
+export interface CursorPage<T> {
+  data: T[]
+  meta: { per_page: number; next_cursor: string | null; has_more: boolean }
+}
+
 export interface ApiErrorBody {
   message: string
   error_code: string

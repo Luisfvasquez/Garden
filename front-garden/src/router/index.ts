@@ -49,6 +49,48 @@ const routes: RouteRecordRaw[] = [
     meta: { auth: true },
   },
   {
+    path: '/escribir',
+    name: 'letter-new',
+    component: () => import('@/views/letters/EditorView.vue'),
+    meta: { auth: true },
+  },
+  {
+    path: '/escribir/:id',
+    name: 'letter-edit',
+    component: () => import('@/views/letters/EditorView.vue'),
+    meta: { auth: true },
+  },
+  {
+    path: '/enviar/:id',
+    name: 'letter-send',
+    component: () => import('@/views/letters/SendView.vue'),
+    meta: { auth: true, verified: true },
+  },
+  {
+    path: '/buzon',
+    name: 'mailbox',
+    component: () => import('@/views/mailbox/MailboxView.vue'),
+    meta: { auth: true },
+  },
+  {
+    path: '/buzon/:id',
+    name: 'mailbox-read',
+    component: () => import('@/views/mailbox/MailboxReadView.vue'),
+    meta: { auth: true },
+  },
+  {
+    path: '/envios',
+    name: 'outbox',
+    component: () => import('@/views/deliveries/OutboxView.vue'),
+    meta: { auth: true },
+  },
+  {
+    path: '/envios/:id',
+    name: 'delivery-tracking',
+    component: () => import('@/views/deliveries/DeliveryTrackingView.vue'),
+    meta: { auth: true },
+  },
+  {
     path: '/actualiza',
     name: 'upgrade',
     component: () => import('@/views/UpgradeView.vue'),

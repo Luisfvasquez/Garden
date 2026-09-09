@@ -29,6 +29,11 @@ export const useAuthStore = defineStore('auth', () => {
     user.value = await authApi.me()
   }
 
+  /** Adopt a fresh `me` payload returned by a profile/avatar mutation. */
+  function setUser(me: Me): void {
+    user.value = me
+  }
+
   async function login(payload: LoginPayload): Promise<void> {
     await authApi.login(payload)
     await refresh()
@@ -69,6 +74,7 @@ export const useAuthStore = defineStore('auth', () => {
     isDoll,
     hydrate,
     refresh,
+    setUser,
     login,
     register,
     logout,

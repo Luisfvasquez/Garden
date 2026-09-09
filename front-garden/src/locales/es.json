@@ -26,8 +26,185 @@
   "nav": {
     "desk": "Escritorio",
     "settings": "Ajustes",
+    "mailbox": "Buzón",
     "signOut": "Cerrar sesión",
     "account": "Cuenta"
+  },
+  "desk": {
+    "writeLetter": "Escribir una carta",
+    "drafts": "Borradores",
+    "noDrafts": "No tienes borradores.",
+    "sent": "Enviadas",
+    "noSent": "Todavía no has enviado ninguna carta.",
+    "recipients": "sin destinatarios | 1 destinatario | {count} destinatarios",
+    "viewOutbox": "Ver mis envíos",
+    "mailbox": "Buzón",
+    "unreadLetters": "cartas sin leer"
+  },
+  "editor": {
+    "title": "Escribir",
+    "aria": "Cuerpo de la carta",
+    "toolbar": "Formato de texto",
+    "bold": "Negrita",
+    "italic": "Cursiva",
+    "underline": "Subrayado",
+    "quote": "Cita",
+    "divider": "Separador",
+    "letterTitle": "Título",
+    "letterTitleHint": "Opcional. Solo tú y el destinatario lo veréis.",
+    "untitled": "Sin título",
+    "preview": "Vista previa",
+    "backToEditing": "Seguir escribiendo",
+    "send": "Enviar",
+    "saving": "Guardando…",
+    "saved": "Guardado",
+    "saveError": "No se pudo guardar. Reintentando…",
+    "saveNow": "Guardar ahora",
+    "discard": "Descartar borrador"
+  },
+  "style": {
+    "show": "Elegir estética",
+    "hide": "Ocultar estética",
+    "none": "Ninguno",
+    "paper": "Papel",
+    "font": "Tipografía",
+    "ink": "Tinta",
+    "stamp": "Sello postal",
+    "border": "Marco",
+    "seal": "Lacre",
+    "sigil": "Sigilo"
+  },
+  "send": {
+    "title": "Enviar la carta",
+    "recipient": "Identificador postal del destinatario",
+    "recipientHint": "Por ejemplo, violet-e4f2.",
+    "recipientFound": "Se enviará a {name}.",
+    "recipientNotFound": "No existe nadie con ese identificador.",
+    "tier": "Velocidad de tránsito",
+    "tiers": {
+      "express": { "name": "Exprés", "hint": "De 30 min a 2 h. Máx. 3 al mes." },
+      "standard": { "name": "Normal", "hint": "De 2 a 12 horas." },
+      "slow": { "name": "Lenta", "hint": "De 1 a 3 días." }
+    },
+    "scheduleArrival": "Programar la fecha de llegada",
+    "arriveAt": "Debe llegar el…",
+    "anonymous": "Enviar de forma anónima",
+    "revealAt": "Revelar mi identidad el…",
+    "revealHint": "Opcional. Hasta entonces el destinatario no sabrá quién eres.",
+    "readReceipt": "Avisarme cuando la lean",
+    "submit": "Enviar carta",
+    "done": "Carta enviada. | Carta enviada. | {count} cartas enviadas."
+  },
+  "outbox": {
+    "title": "Mis envíos",
+    "empty": "Aún no has enviado ninguna carta.",
+    "anonymous": "Anónimo",
+    "filters": {
+      "all": "Todos",
+      "queued": "En cola",
+      "in_transit": "En tránsito",
+      "delivered": "Entregados"
+    }
+  },
+  "tracking": {
+    "title": "Seguimiento postal",
+    "eta": "Llegada estimada {when}.",
+    "cancel": "Retirar la carta",
+    "cancelled": "Carta retirada."
+  },
+  "delivery": {
+    "status": {
+      "queued": "En cola",
+      "in_transit": "En tránsito",
+      "delivered": "Entregada",
+      "read": "Leída",
+      "cancelled": "Retirada",
+      "failed": "No entregada"
+    }
+  },
+  "mailbox": {
+    "empty": "El buzón está vacío.",
+    "noSubject": "Sin asunto",
+    "from": "De {name}",
+    "unopened": "Sin abrir",
+    "tapToOpen": "Toca para abrir el sobre",
+    "favorite": "Marcar favorita",
+    "unfavorite": "Quitar de favoritas",
+    "archive": "Archivar",
+    "unarchive": "Desarchivar",
+    "reply": "Responder",
+    "filters": {
+      "all": "Todas",
+      "unread": "Sin leer",
+      "favorite": "Favoritas",
+      "archived": "Archivadas"
+    }
+  },
+  "settings": {
+    "save": "Guardar cambios",
+    "saved": "Cambios guardados.",
+    "avatarUpdated": "Avatar actualizado.",
+    "profile": {
+      "title": "Perfil",
+      "changeAvatar": "Cambiar avatar",
+      "penName": "Seudónimo",
+      "penNameHint": "Opcional. Se usa en el blog anónimo.",
+      "bio": "Biografía",
+      "country": "País",
+      "countryHint": "Código de dos letras, p. ej. ES.",
+      "timezone": "Zona horaria"
+    },
+    "notifications": {
+      "title": "Notificaciones",
+      "notify_email": "Recibir avisos por correo",
+      "notify_push": "Recibir notificaciones push",
+      "notify_on_arrival": "Cuando llega una carta a mi buzón",
+      "notify_on_dispatch_confirm": "Cuando se despacha o se entrega una carta mía",
+      "notify_on_doll_message": "Mensajes de una Auto Memory Doll",
+      "notify_on_blog_comment": "Comentarios en mis publicaciones",
+      "quietStart": "Silencio desde",
+      "quietEnd": "Silencio hasta",
+      "theme": "Tema",
+      "themeSystem": "Según el sistema"
+    },
+    "privacy": {
+      "title": "Privacidad",
+      "description": "Tú decides quién te escribe y qué se comparte.",
+      "acceptsRandom": "Aceptar cartas de desconocidos",
+      "acceptsRandomHint": "Botella al mar. Puedes recibir cartas de gente que no conoces.",
+      "dailyCap": "Máximo al día",
+      "readReceipts": "Avisar al remitente cuando abro su carta",
+      "readReceiptsHint": "Solo si el remitente también lo pidió.",
+      "transitCountdown": "Mostrar cuenta atrás exacta del tránsito",
+      "transitCountdownHint": "Si lo desactivas, verás una estimación difusa."
+    },
+    "blocks": {
+      "title": "Bloqueos",
+      "description": "Los bloqueados no pueden escribirte. No se enteran.",
+      "handle": "Identificador postal",
+      "add": "Bloquear",
+      "remove": "Desbloquear",
+      "empty": "No has bloqueado a nadie."
+    },
+    "devices": {
+      "title": "Dispositivos",
+      "description": "Sesiones abiertas en la app móvil.",
+      "current": "este dispositivo",
+      "revoke": "Cerrar sesión",
+      "empty": "No hay sesiones móviles activas."
+    },
+    "account": {
+      "title": "Cuenta",
+      "handle": "Identificador postal",
+      "rotateHandle": "Generar uno nuevo",
+      "rotateHint": "Cambiar tu identificador corta el flujo de un acosador. Solo una vez cada 30 días.",
+      "handleRotated": "Identificador actualizado.",
+      "dangerZone": "Zona peligrosa",
+      "deactivate": "Desactivar mi cuenta",
+      "deactivateConfirm": "¿Desactivar la cuenta? Podrás reactivarla iniciando sesión.",
+      "destroy": "Eliminar mi cuenta",
+      "destroyConfirm": "¿Eliminar la cuenta? Se borrará de forma permanente tras 30 días."
+    }
   },
   "landing": {
     "title": "Escribe cartas que llegan cuando deben llegar.",
@@ -95,7 +272,15 @@
     "ACCOUNT_INACTIVE": "Esta cuenta ya no está disponible.",
     "HANDLE_ROTATION_TOO_SOON": "Solo puedes cambiar tu identificador una vez cada 30 días.",
     "RATE_LIMITED": "Demasiados intentos. Espera un momento.",
-    "UPGRADE_REQUIRED": "Necesitas actualizar la aplicación."
+    "UPGRADE_REQUIRED": "Necesitas actualizar la aplicación.",
+    "RECIPIENT_NOT_FOUND": "No existe nadie con ese identificador postal.",
+    "QUOTA_EXCEEDED": "Has agotado los envíos exprés de este mes.",
+    "LETTER_LOCKED": "Esta carta ya se envió y no se puede editar.",
+    "DRAFT_LIMIT_REACHED": "Tienes demasiados borradores abiertos.",
+    "GRACE_PERIOD_EXPIRED": "La carta ya salió: ya no se puede retirar.",
+    "INVALID_STATE_TRANSITION": "Esa acción no aplica al estado actual.",
+    "ATTACHMENTS_NOT_ALLOWED": "Este tipo de carta no admite adjuntos.",
+    "ATTACHMENT_LIMIT_REACHED": "La carta ya tiene el máximo de adjuntos."
   },
   "upgrade": {
     "title": "Actualiza Evergarden",

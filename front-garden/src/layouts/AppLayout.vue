@@ -2,17 +2,21 @@
 import { ref } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { useQueryClient } from '@tanstack/vue-query'
 import { useAuthStore } from '@/stores/auth'
 import { useUiStore } from '@/stores/ui'
 import { useApiError } from '@/composables/useApiError'
+import { useUnreadCount } from '@/composables/useMailbox'
 import LocaleSwitch from '@/components/ui/LocaleSwitch.vue'
 import ThemeToggle from '@/components/ui/ThemeToggle.vue'
 
 const auth = useAuthStore()
 const ui = useUiStore()
 const router = useRouter()
+const queryClient = useQueryClient()
 const { t } = useI18n()
 const { messageFor } = useApiError()
+const unread = useUnreadCount()
 
 const signingOut = ref(false)
 
@@ -20,6 +24,7 @@ async function signOut() {
   signingOut.value = true
   try {
     await auth.logout()
+    queryClient.clear()
     await router.push({ name: 'login' })
   } catch (error) {
     ui.pushToast('error', messageFor(error))
@@ -45,6 +50,19 @@ async function signOut() {
           active-class="text-[var(--text)]"
         >
           {{ t('nav.desk') }}
+        </RouterLink>
+        <RouterLink
+          :to="{ name: 'mailbox' }"
+          class="flex items-center gap-1 text-sm text-[var(--text-muted)] hover:text-[var(--text)]"
+          active-class="text-[var(--text)]"
+        >
+          {{ t('nav.mailbox') }}
+          <span
+            v-if="unread.data.value"
+            class="rounded-full bg-[var(--accent)] px-1.5 text-xs text-[var(--accent-contrast)]"
+          >
+            {{ unread.data.value }}
+          </span>
         </RouterLink>
         <RouterLink
           :to="{ name: 'settings' }"

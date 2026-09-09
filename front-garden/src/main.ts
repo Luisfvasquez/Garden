@@ -1,10 +1,11 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
+import { VueQueryPlugin, QueryClient } from '@tanstack/vue-query'
 
 import App from './App.vue'
 import router from './router'
 import { i18n } from './i18n'
-import { clientHooks } from './api/client'
+import { clientHooks, isApiError } from './api/client'
 import { useAuthStore } from './stores/auth'
 import { useUiStore } from './stores/ui'
 import './assets/main.css'
@@ -12,9 +13,20 @@ import './assets/main.css'
 const app = createApp(App)
 const pinia = createPinia()
 
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 30_000,
+      retry: (count, error) => !isApiError(error) && count < 2,
+      refetchOnWindowFocus: false,
+    },
+  },
+})
+
 app.use(pinia)
 app.use(router)
 app.use(i18n)
+app.use(VueQueryPlugin, { queryClient })
 
 // Wire the HTTP client's cross-cutting reactions without importing the app into it.
 const auth = useAuthStore(pinia)
