@@ -27,6 +27,7 @@ use App\Http\Controllers\Api\V1\PostalHandleController;
 use App\Http\Controllers\Api\V1\PostController;
 use App\Http\Controllers\Api\V1\PostReactionController;
 use App\Http\Controllers\Api\V1\PublicUserController;
+use App\Http\Controllers\Api\V1\PushSubscriptionController;
 use App\Http\Controllers\Api\V1\RandomQuotaController;
 use App\Http\Controllers\Api\V1\ReportController;
 use App\Http\Controllers\Api\V1\ScheduleController;
@@ -34,6 +35,7 @@ use App\Http\Controllers\Api\V1\SendLetterController;
 use App\Http\Controllers\Api\V1\SendRandomLetterController;
 use App\Http\Controllers\Api\V1\SupportResourceController;
 use App\Http\Controllers\Api\V1\TagController;
+use App\Http\Controllers\Api\V1\VapidKeyController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -45,6 +47,7 @@ Route::middleware('throttle:api')->group(function (): void {
     Route::get('health', HealthController::class)->name('health');
     Route::get('features', FeatureFlagController::class)->name('features');
     Route::get('support-resources', [SupportResourceController::class, 'index'])->name('support-resources.index');
+    Route::get('push/vapid-public-key', VapidKeyController::class)->name('push.vapid-public-key');
 
     // --- Blog público (lectura) — contrato: docs/api/blog.md ---
     Route::middleware('feature:blog')->group(function (): void {
@@ -172,6 +175,9 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
         ->name('reports.store');
 
     // --- Notificaciones ---
+    Route::post('push-subscriptions', [PushSubscriptionController::class, 'store'])->name('push-subscriptions.store');
+    Route::delete('push-subscriptions/{id}', [PushSubscriptionController::class, 'destroy'])->name('push-subscriptions.destroy');
+
     Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::get('notifications/unread-count', [NotificationController::class, 'unreadCount'])->name('notifications.unread-count');
     Route::post('notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');

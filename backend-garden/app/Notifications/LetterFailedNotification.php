@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Notifications;
 
+use App\Models\User;
 use Illuminate\Notifications\Messages\MailMessage;
 
 /**
@@ -22,6 +23,19 @@ class LetterFailedNotification extends LetterNotification
             'delivery_id' => $this->delivery->id,
             'letter_id' => $this->delivery->letter_id,
             'reason' => $this->delivery->failure_reason,
+        ];
+    }
+
+    /**
+     * @return array{type: string, title: string, body: string, data?: array<string, mixed>}
+     */
+    public function toWebPush(User $notifiable): array
+    {
+        return [
+            'type' => 'letter.failed',
+            'title' => 'No pudimos entregar tu carta',
+            'body' => 'Revísala y vuelve a enviarla.',
+            'data' => ['url' => '/envios'],
         ];
     }
 

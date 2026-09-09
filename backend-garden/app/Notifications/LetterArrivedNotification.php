@@ -35,6 +35,24 @@ class LetterArrivedNotification extends LetterNotification
         ];
     }
 
+    /**
+     * @return array{type: string, title: string, body: string, data?: array<string, mixed>}
+     */
+    public function toWebPush(User $notifiable): array
+    {
+        // Never the body; never the sender when anonymous.
+        $body = SenderView::isHidden($this->delivery)
+            ? 'Alguien te ha escrito.'
+            : SenderView::summary($this->delivery)['display_name'].' te ha escrito.';
+
+        return [
+            'type' => 'letter.arrived',
+            'title' => 'Ha llegado una carta',
+            'body' => $body,
+            'data' => ['url' => "/buzon/{$this->delivery->id}"],
+        ];
+    }
+
     public function toMail(object $notifiable): MailMessage
     {
         $sender = SenderView::summary($this->delivery)['display_name'];

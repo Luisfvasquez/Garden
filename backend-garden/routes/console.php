@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Jobs\Maintenance\DispatchDuePushesJob;
 use App\Jobs\Maintenance\GenerateUpcomingDeliveriesJob;
 use App\Jobs\Postal\DeliverArrivedLettersJob;
 use App\Jobs\Postal\DispatchDueLettersJob;
@@ -27,3 +28,6 @@ Schedule::job(new GenerateUpcomingDeliveriesJob)->dailyAt('03:00')->withoutOverl
 
 // "Bottle at sea": keep the eligible-recipient pool warm (docs/api/botella-al-mar.md).
 Schedule::job(new RefreshRandomRecipientPoolJob)->everyFifteenMinutes();
+
+// Web Push: flush due rows, grouping siblings; quiet-hours rows join once due.
+Schedule::job(new DispatchDuePushesJob)->everyMinute()->withoutOverlapping();

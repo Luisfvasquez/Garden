@@ -179,6 +179,18 @@
       "theme": "Theme",
       "themeSystem": "Match system"
     },
+    "push": {
+      "title": "Push notifications",
+      "description": "Alerts on this device, even when the app isn't open.",
+      "enable": "Enable on this device",
+      "enableHint": "Your browser will ask for permission.",
+      "unsupported": "This browser doesn't support push notifications.",
+      "error": {
+        "permission_denied": "You didn't grant notification permission.",
+        "push_not_configured": "The server doesn't have push keys configured yet.",
+        "unknown": "Could not change the subscription."
+      }
+    },
     "privacy": {
       "title": "Privacy",
       "description": "You decide who writes to you and what is shared.",

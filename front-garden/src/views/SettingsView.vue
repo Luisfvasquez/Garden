@@ -8,6 +8,7 @@ import BlocksSection from '@/components/settings/BlocksSection.vue'
 import DevicesSection from '@/components/settings/DevicesSection.vue'
 import AccountSection from '@/components/settings/AccountSection.vue'
 import SupportResourcesSection from '@/components/settings/SupportResourcesSection.vue'
+import PushSection from '@/components/settings/PushSection.vue'
 
 const { t } = useI18n()
 </script>
@@ -18,6 +19,7 @@ const { t } = useI18n()
       <h1 class="text-2xl">{{ t('nav.settings') }}</h1>
       <ProfileSection />
       <NotificationsSection />
+      <PushSection />
       <PrivacySection />
       <BlocksSection />
       <DevicesSection />

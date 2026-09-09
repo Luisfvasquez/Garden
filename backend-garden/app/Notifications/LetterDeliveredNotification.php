@@ -34,6 +34,21 @@ class LetterDeliveredNotification extends LetterNotification
         ];
     }
 
+    /**
+     * @return array{type: string, title: string, body: string, data?: array<string, mixed>}
+     */
+    public function toWebPush(User $notifiable): array
+    {
+        $name = $this->delivery->recipient?->displayName() ?? 'tu destinatario';
+
+        return [
+            'type' => 'letter.delivered',
+            'title' => 'Tu carta llegó',
+            'body' => "Tu carta llegó a {$name}.",
+            'data' => ['url' => "/envios/{$this->delivery->id}"],
+        ];
+    }
+
     public function toMail(object $notifiable): MailMessage
     {
         $name = $this->delivery->recipient?->displayName() ?? 'tu destinatario';

@@ -25,6 +25,8 @@ export default defineConfig({
       },
       workbox: {
         navigateFallbackDenylist: [/^\/api/, /^\/sanctum/],
+        // Web Push handlers live in a hand-written script merged into the SW.
+        importScripts: ['/push-sw.js'],
         runtimeCaching: [
           {
             // Read the mailbox in airplane mode after the first visit.

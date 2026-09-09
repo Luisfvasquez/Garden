@@ -179,6 +179,18 @@
       "theme": "Tema",
       "themeSystem": "Según el sistema"
     },
+    "push": {
+      "title": "Notificaciones push",
+      "description": "Avisos en este dispositivo, aunque no tengas la app abierta.",
+      "enable": "Activar en este dispositivo",
+      "enableHint": "Se te pedirá permiso del navegador.",
+      "unsupported": "Este navegador no admite notificaciones push.",
+      "error": {
+        "permission_denied": "No diste permiso para las notificaciones.",
+        "push_not_configured": "El servidor aún no tiene las claves de push configuradas.",
+        "unknown": "No se pudo cambiar la suscripción."
+      }
+    },
     "privacy": {
       "title": "Privacidad",
       "description": "Tú decides quién te escribe y qué se comparte.",

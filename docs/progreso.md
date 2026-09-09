@@ -3,7 +3,7 @@
 **Actualizar al cerrar cada tarea.** Este archivo es lo que le dice al agente qué existe ya.
 Formato: `[ ]` pendiente · `[~]` en curso · `[x]` terminado.
 
-Última actualización: 2026-09-09 — **Fase 1 completa**. Fase 2 en curso: **2A moderación** (ADR-0008), **2B tiempo** (`letter_schedules` + `OccurrenceGenerator`, ADR-0002/0009), **2C botella al mar** (pool Redis, cuotas, filtro síncrono, respuesta anónima, `restrict_random`; ADR-0004/0010), **2D blog** (`public_posts`/`comments`/`reactions`/`tags`, consentimiento de `shared_letter`, filtro obligatorio previo). Siguiente: 2E (Web Push).
+Última actualización: 2026-09-09 — **Fase 1 completa**. Fase 2 en curso: **2A moderación** (ADR-0008), **2B tiempo** (`letter_schedules` + `OccurrenceGenerator`, ADR-0002/0009), **2C botella al mar** (pool Redis, cuotas, filtro síncrono, respuesta anónima, `restrict_random`; ADR-0004/0010), **2D blog** (`public_posts`/`comments`/`reactions`/`tags`, consentimiento de `shared_letter`, filtro obligatorio previo), **2E Web Push** (`push_subscriptions`, `WebPushChannel` → `scheduled_pushes`, `quiet_hours` + agrupación, `usePush` en Ajustes). Siguiente: 2F (panel Filament).
 
 ---
 
@@ -135,7 +135,8 @@ Formato: `[ ]` pendiente · `[~]` en curso · `[x]` terminado.
 - [~] `ContentModerator` (interfaz + driver local) + jobs de moderación
       _(2A: `ContentModerator` + `ModerationContext`/`ModerationVerdict` + enums + `LocalModerator` (léxico/regex de `config/moderation.php`) + `PiiScanner`, `MODERATION_DRIVER` → `ModerationServiceProvider`; ADR-0008. `self_harm`→`flagged` nunca `rejected`; `minor_safety`→`rejected`; PII bloquea en aleatorias, avisa en Doll chat. 2C: `moderation_actions` + `RandomAbuseGuard` (2 reportes `actioned` → `restrict_random`) + moderación síncrona en botella. **Pendiente:** `ModerateContentJob` asíncrono + escalado email/Slack → 2D/2F)_
 - [ ] Panel Filament: usuarios, cola de reportes, catálogos, métricas
-- [ ] Web Push (VAPID) + `quiet_hours` + agrupación
+- [x] Web Push (VAPID) + `quiet_hours` + agrupación
+      _(2E: `minishlink/web-push`; `push_subscriptions` + `POST/DELETE /push-subscriptions` + `GET /push/vapid-public-key` (público); `WebPushChannel` (clase) inserta en `scheduled_pushes` con `deliver_after` = fin de `quiet_hours` local (cruza medianoche) o ahora; `DispatchDuePushesJob` cada minuto agrupa por `(user,type)` → 1 push y poda suscripciones caídas; `WebPushClient` interfaz (Minishlink/Null/doble de test); llegada anónima no nombra al remitente; `toWebPush()` en arrived/delivered/failed. Front: `usePush` (permiso + `pushManager.subscribe` + VAPID key), `PushSection` en Ajustes, `public/push-sw.js` (`push`/`notificationclick`) vía `workbox.importScripts`, i18n)_
 - [x] `support_resources` + endpoint
       _(migración + modelo + `SupportResourceSeeder` (024/Esperanza ES, Línea de la Vida MX, CAS AR, 988 US, Befrienders global); `GET /support-resources?country_code=&topic=` público → país + fallback internacional por `priority`)_
 
@@ -150,7 +151,8 @@ Formato: `[ ]` pendiente · `[~]` en curso · `[x]` terminado.
       _(`ConsentRequestsView` (`/blog/consentimientos`): vista previa exacta anonimizada + dar/rechazar permiso vía `POST /consent-requests/{post}/respond`)_
 - [x] Botella al mar (envío + cuota + respuesta anónima única)
       _(`BottleView` (elige borrador, muestra cuota + motivos de inelegibilidad, `Idempotency-Key` por instancia, aviso de `held`); `RandomLetterActions` en `MailboxReadView` (responder una vez + proponer correspondencia abierta); `api/random.ts` + `useRandom`; `useFeature('bottle_at_sea')` gatea el nav; i18n es/en; `api/__tests__/random.spec.ts`)_
-- [ ] Suscripción a push + gestión de permisos
+- [x] Suscripción a push + gestión de permisos
+      _(`PushSection` en `SettingsView`: toggle activar/desactivar → `usePush` (feature-detect, `Notification.requestPermission`, `pushManager.subscribe` con la VAPID key, `POST /push-subscriptions`); errores por código i18n; `api/push.ts` + `api/__tests__/push.spec.ts`)_
 - [ ] i18n completo es/en
 
 ---

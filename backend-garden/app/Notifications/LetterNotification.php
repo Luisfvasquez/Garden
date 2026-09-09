@@ -6,6 +6,7 @@ namespace App\Notifications;
 
 use App\Models\LetterDelivery;
 use App\Models\User;
+use App\Notifications\Channels\WebPushChannel;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -41,7 +42,25 @@ abstract class LetterNotification extends Notification implements ShouldQueue
             $channels[] = 'mail';
         }
 
+        // Web Push (docs/api/comunidad-notificaciones.md). The channel itself
+        // still checks `notify_push` and whether the user has any subscription.
+        if ($notifiable instanceof User
+            && $notifiable->settings?->notify_push === true
+            && $this->toWebPush($notifiable) !== null) {
+            $channels[] = WebPushChannel::class;
+        }
+
         return $channels;
+    }
+
+    /**
+     * The Web Push payload, or null to skip push for this notification type.
+     *
+     * @return array{type: string, title: string, body: string, data?: array<string, mixed>}|null
+     */
+    public function toWebPush(User $notifiable): ?array
+    {
+        return null;
     }
 
     /** Per-type opt-out on top of the global `notify_email` switch. */
