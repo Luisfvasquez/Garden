@@ -67,7 +67,11 @@ final class ApiExceptionRenderer
             $e instanceof InvalidSignatureException => [
                 403, 'INVALID_VERIFICATION_LINK', 'El enlace no es válido o ha caducado.', [], [], [],
             ],
-            $e instanceof AuthorizationException || $e instanceof AccessDeniedHttpException => [
+            $e instanceof AuthorizationException => self::forStatus(
+                $e->status() ?? 403,
+                $e->status() === 404 ? 'Recurso no encontrado.' : 'No tienes permiso para esta acción.',
+            ),
+            $e instanceof AccessDeniedHttpException => [
                 403, 'FORBIDDEN', 'No tienes permiso para esta acción.', [], [], [],
             ],
             $e instanceof ModelNotFoundException || $e instanceof NotFoundHttpException => [
@@ -80,9 +84,11 @@ final class ApiExceptionRenderer
                 429, 'RATE_LIMITED', 'Demasiadas solicitudes. Inténtalo más tarde.', [], [],
                 array_filter(['Retry-After' => $e->getHeaders()['Retry-After'] ?? null]),
             ],
-            $e instanceof HttpExceptionInterface => [
-                $e->getStatusCode(), 'HTTP_ERROR', $e->getMessage() ?: 'Error de solicitud.', [], [], $e->getHeaders(),
-            ],
+            $e instanceof HttpExceptionInterface => self::forStatus(
+                $e->getStatusCode(),
+                $e->getMessage() ?: 'Error de solicitud.',
+                $e->getHeaders(),
+            ),
             default => [
                 500,
                 'SERVER_ERROR',
@@ -92,5 +98,24 @@ final class ApiExceptionRenderer
                 [],
             ],
         };
+    }
+
+    /**
+     * @param  array<string, string>  $headers
+     * @return array{0:int,1:string,2:string,3:array<string,mixed>,4:array<string,mixed>,5:array<string,string>}
+     */
+    private static function forStatus(int $status, string $message, array $headers = []): array
+    {
+        $code = match ($status) {
+            401 => 'UNAUTHENTICATED',
+            403 => 'FORBIDDEN',
+            404 => 'NOT_FOUND',
+            405 => 'METHOD_NOT_ALLOWED',
+            409 => 'CONFLICT',
+            429 => 'RATE_LIMITED',
+            default => 'HTTP_ERROR',
+        };
+
+        return [$status, $code, $message, [], [], $headers];
     }
 }

@@ -32,6 +32,8 @@ class AppServiceProvider extends ServiceProvider
 
         $this->configureRateLimiters();
         $this->configureEmailVerification();
+
+        // Listeners in app/Listeners are auto-discovered by their typed handle().
     }
 
     /**
@@ -44,6 +46,12 @@ class AppServiceProvider extends ServiceProvider
             : Limit::perMinute(30)->by($request->ip()));
 
         RateLimiter::for('auth', fn (Request $request) => Limit::perMinute(5)->by($request->ip()));
+
+        RateLimiter::for('send-letter', fn (Request $request) => Limit::perDay(30)
+            ->by((string) $request->user()?->getAuthIdentifier()));
+
+        RateLimiter::for('report', fn (Request $request) => Limit::perHour(10)
+            ->by((string) $request->user()?->getAuthIdentifier()));
     }
 
     /**

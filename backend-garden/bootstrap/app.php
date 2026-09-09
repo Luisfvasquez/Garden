@@ -5,6 +5,8 @@ declare(strict_types=1);
 use App\Exceptions\ApiException;
 use App\Exceptions\ApiExceptionRenderer;
 use App\Http\Middleware\AssignRequestId;
+use App\Http\Middleware\EnsureEmailIsVerified;
+use App\Http\Middleware\HandleIdempotency;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -23,6 +25,11 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->api(append: [
             AssignRequestId::class,
+        ]);
+
+        $middleware->alias([
+            'verified' => EnsureEmailIsVerified::class,
+            'idempotency' => HandleIdempotency::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

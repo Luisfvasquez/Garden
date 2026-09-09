@@ -17,7 +17,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call(FeatureFlagSeeder::class);
+        $this->call([
+            FeatureFlagSeeder::class,
+            TransitRouteSeeder::class,
+        ]);
 
         User::factory()->create([
             'name' => 'Test User',
