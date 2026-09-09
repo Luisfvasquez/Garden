@@ -3,7 +3,7 @@
 **Actualizar al cerrar cada tarea.** Este archivo es lo que le dice al agente qué existe ya.
 Formato: `[ ]` pendiente · `[~]` en curso · `[x]` terminado.
 
-Última actualización: 2026-09-09 — **Fase 1 completa** (backend + front): dos personas pueden escribirse cartas que tardan en llegar, incluso sin conexión al redactar. Siguiente: checklist de lanzamiento / Fase 2.
+Última actualización: 2026-09-09 — **Fase 1 completa**. Fase 2 en curso: **2A moderación** — `ContentModerator` desacoplado del proveedor (`LocalModerator` + `PiiScanner`, ADR-0008) y `support_resources` + `GET /support-resources` operativos. Siguiente: 2B (`letter_schedules` + `OccurrenceGenerator`).
 
 ---
 
@@ -127,12 +127,16 @@ Formato: `[ ]` pendiente · `[~]` en curso · `[x]` terminado.
 - [ ] `public_posts`, `comments`, `reactions`, `tags`
 - [ ] Flujo de consentimiento para publicar cartas recibidas
 - [ ] Botella al mar: `RandomRecipientPicker` + pool en Redis + cuotas
-- [ ] `ContentModerator` (interfaz + driver local) + jobs de moderación
+- [~] `ContentModerator` (interfaz + driver local) + jobs de moderación
+      _(2A: interfaz `ContentModerator`, `ModerationContext`/`ModerationVerdict`, enums `ModerationCategory`/`ModerationDecision`/`ModerationSurface`, `LocalModerator` (léxico+regex de `config/moderation.php`) + `PiiScanner`, `MODERATION_DRIVER` → `ModerationServiceProvider`; ADR-0008. `self_harm`→`flagged` nunca `rejected`; `minor_safety`→`rejected`; PII bloquea en aleatorias, avisa en Doll chat. **Pendiente:** `moderation_actions` + `ModerateContentJob` + escalado email/Slack, con sus consumidores en 2C/2D)_
 - [ ] Panel Filament: usuarios, cola de reportes, catálogos, métricas
 - [ ] Web Push (VAPID) + `quiet_hours` + agrupación
-- [ ] `support_resources` + endpoint
+- [x] `support_resources` + endpoint
+      _(migración + modelo + `SupportResourceSeeder` (024/Esperanza ES, Línea de la Vida MX, CAS AR, 988 US, Befrienders global); `GET /support-resources?country_code=&topic=` público → país + fallback internacional por `priority`)_
 
 ### Front
+- [x] Recursos de ayuda en Ajustes
+      _(`SupportResourcesSection` en `SettingsView`; `api/support.ts` + `useSupportResources` (TanStack Query, país de `auth.user.country_code`, fallback internacional); estados carga/error/vacío; i18n es/en; `tel:` y enlace a web)_
 - [ ] Vista de programaciones + línea de tiempo de ocurrencias
 - [ ] Blog: feed, post, publicar, comentar, reaccionar
 - [ ] Flujo de solicitud y respuesta de consentimiento

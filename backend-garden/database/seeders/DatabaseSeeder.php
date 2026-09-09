@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             FeatureFlagSeeder::class,
             TransitRouteSeeder::class,
+            SupportResourceSeeder::class,
         ]);
 
         User::factory()->create([

@@ -25,6 +25,7 @@ use App\Http\Controllers\Api\V1\PostalHandleController;
 use App\Http\Controllers\Api\V1\PublicUserController;
 use App\Http\Controllers\Api\V1\ReportController;
 use App\Http\Controllers\Api\V1\SendLetterController;
+use App\Http\Controllers\Api\V1\SupportResourceController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -35,6 +36,7 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('throttle:api')->group(function (): void {
     Route::get('health', HealthController::class)->name('health');
     Route::get('features', FeatureFlagController::class)->name('features');
+    Route::get('support-resources', [SupportResourceController::class, 'index'])->name('support-resources.index');
 });
 
 // --- Auth (bucket: 5/min per IP) ----------------------------------------

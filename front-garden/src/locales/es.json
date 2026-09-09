@@ -201,6 +201,15 @@
       "revoke": "Cerrar sesión",
       "empty": "No hay sesiones móviles activas."
     },
+    "support": {
+      "title": "Recursos de ayuda",
+      "description": "Líneas de escucha y apoyo en crisis. Siempre disponibles, sin coste.",
+      "global": "Internacional",
+      "callLabel": "Llamar {phone}",
+      "siteLabel": "Abrir web",
+      "empty": "No hay recursos configurados para tu país todavía.",
+      "error": "No se pudieron cargar los recursos de ayuda."
+    },
     "account": {
       "title": "Cuenta",
       "handle": "Identificador postal",

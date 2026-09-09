@@ -201,6 +201,15 @@
       "revoke": "Sign out",
       "empty": "No active mobile sessions."
     },
+    "support": {
+      "title": "Support resources",
+      "description": "Crisis and listening lines. Always available, free of charge.",
+      "global": "International",
+      "callLabel": "Call {phone}",
+      "siteLabel": "Open website",
+      "empty": "No resources configured for your country yet.",
+      "error": "Support resources could not be loaded."
+    },
     "account": {
       "title": "Account",
       "handle": "Postal handle",

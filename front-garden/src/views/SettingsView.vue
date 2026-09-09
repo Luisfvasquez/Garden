@@ -7,6 +7,7 @@ import PrivacySection from '@/components/settings/PrivacySection.vue'
 import BlocksSection from '@/components/settings/BlocksSection.vue'
 import DevicesSection from '@/components/settings/DevicesSection.vue'
 import AccountSection from '@/components/settings/AccountSection.vue'
+import SupportResourcesSection from '@/components/settings/SupportResourcesSection.vue'
 
 const { t } = useI18n()
 </script>
@@ -20,6 +21,7 @@ const { t } = useI18n()
       <PrivacySection />
       <BlocksSection />
       <DevicesSection />
+      <SupportResourcesSection />
       <AccountSection />
     </div>
   </AppLayout>

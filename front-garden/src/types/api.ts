@@ -61,6 +61,20 @@ export interface FeaturePayload {
   features: Record<string, boolean>
 }
 
+export interface SupportResource {
+  id: string
+  country_code: string | null
+  topic: string | null
+  name: string
+  description: string | null
+  phone: string | null
+  sms: string | null
+  url: string | null
+  hours: string | null
+  languages: string[]
+  is_global: boolean
+}
+
 // --- Letters -----------------------------------------------------------------
 
 /** Tiptap document — opaque JSON; the backend sanitises it. */

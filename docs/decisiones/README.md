@@ -15,3 +15,4 @@ de cambiar el código en silencio.
 | 0005 | El chat de Dolls es la única mensajería instantánea | Aceptado |
 | 0006 | PostgreSQL sobre MySQL | Aceptado |
 | 0007 | Bloqueo silencioso | Aceptado |
+| 0008 | Moderación desacoplada del proveedor | Aceptado |

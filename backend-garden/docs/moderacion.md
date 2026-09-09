@@ -1,6 +1,15 @@
 # Moderación — implementación
 
-> Reglas de producto en `../../docs/decisiones/0004-moderacion-antes-que-aleatorio.md`.
+> Reglas de producto en `../../docs/decisiones/0004-moderacion-antes-que-aleatorio.md` y arquitectura
+> del driver en `../../docs/decisiones/0008-moderacion-driver-agnostica.md`.
+
+**Estado (Fase 2A):** interfaz `ContentModerator` + value objects (`ModerationContext`,
+`ModerationVerdict`) + enums (`ModerationCategory`, `ModerationDecision`, `ModerationSurface`) +
+`LocalModerator` (léxico/regex de `config/moderation.php`) + `PiiScanner`, enlazados por
+`MODERATION_DRIVER` en `ModerationServiceProvider`. `support_resources` + `GET /support-resources`
+públicos, con seeder de líneas reales (ES, MX, AR, US + fallback internacional).
+**Pendiente:** `moderation_actions` + `ModerateContentJob` + escalado real (email/Slack) — llegan con
+sus consumidores en 2C (botella al mar) y 2D (blog).
 
 ## Capas
 

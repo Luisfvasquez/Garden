@@ -23,4 +23,8 @@ export const qk = {
     list: ['notifications', 'list'] as const,
     unreadCount: ['notifications', 'unread-count'] as const,
   },
+  support: {
+    resources: (country?: string | null, topic?: string) =>
+      ['support', 'resources', country ?? 'global', topic ?? 'all'] as const,
+  },
 } as const

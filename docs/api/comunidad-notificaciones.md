@@ -7,8 +7,10 @@ Estado: `[x] contrato definido` · `[~] backend` · `[ ] front`
 > **notificaciones** in-app + email: eventos de dominio (`LetterDispatched`/`LetterDelivered`/
 > `LetterFailed`/`LetterRead`) → listeners → `Notification` (`database` + `mail` según
 > `user_settings`), y `GET /notifications` · `/unread-count` · `/{id}/read` · `/read-all`.
-> **Pendiente:** `push_subscriptions` + Web Push, `support_resources`, `GET /features` per-usuario,
-> agrupación de notificaciones, `quiet_hours`, y el escalado real a email/Slack de reportes críticos.
+> **Fase 2A:** `support_resources` + `GET /support-resources?country_code=&topic=` (público, devuelve
+> las líneas del país + el fallback internacional, orden por `priority`).
+> **Pendiente:** `push_subscriptions` + Web Push, `GET /features` per-usuario, agrupación de
+> notificaciones, `quiet_hours`, y el escalado real a email/Slack de reportes críticos.
 > **Desviación:** `notify_on_dispatch_confirm` cubre a la vez el aviso de *despacho* y el de *entrega*
 > al remitente (el spec tiene un solo flag).
 
@@ -86,11 +88,13 @@ Para móvil: `platform: "ios"|"android"` y `device_token` en lugar de `endpoint`
 ```
 GET /api/v1/health                       # público. db, redis, queue, reverb
 GET /api/v1/features                     # flags activos para este usuario
-GET /api/v1/support-resources?country_code=ES
+GET /api/v1/support-resources?country_code=ES&topic=self_harm
 ```
 
 `GET /features` lo consultan PWA y app móvil al arrancar. Permite apagar un módulo en producción sin
 desplegar clientes.
 
-`GET /support-resources` devuelve líneas de ayuda del país del usuario. Se usa cuando el filtro detecta
-señales de riesgo, y debe estar accesible siempre desde los ajustes.
+`GET /support-resources` devuelve líneas de ayuda del país del usuario **más** el fallback
+internacional (`country_code: null`), ordenadas por `priority` descendente. Filtro opcional `?topic=`
+(`self_harm` | `grief` | `general`). Se usa cuando el filtro detecta señales de riesgo, y debe estar
+accesible siempre desde los ajustes.
