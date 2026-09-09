@@ -26,6 +26,7 @@ class DeliveryResource extends JsonResource
             'id' => $this->id,
             'letter_id' => $this->letter_id,
             'status' => $this->status->asSeenBySender()->value,
+            'mode' => $this->delivery_mode->value,
             'tier' => $this->tier->value,
             'is_anonymous' => $this->is_anonymous,
             'scheduled_for' => $this->scheduled_for->toIso8601ZuluString(),
@@ -35,6 +36,7 @@ class DeliveryResource extends JsonResource
             'read_at' => $this->read_at?->toIso8601ZuluString(),
             'can_cancel' => $this->canCancel(),
             'recipient' => $this->recipientSummary(),
+            'correspondence_opened' => $this->correspondenceOpened(),
         ];
     }
 
@@ -53,6 +55,12 @@ class DeliveryResource extends JsonResource
     {
         $recipient = $this->recipient;
         if ($recipient === null) {
+            return null;
+        }
+
+        // A "bottle at sea" never reveals the stranger to the sender — unless
+        // both sides have opened correspondence (docs/api/botella-al-mar.md).
+        if ($this->delivery_mode->value === 'random' && ! $this->correspondenceOpened()) {
             return null;
         }
 

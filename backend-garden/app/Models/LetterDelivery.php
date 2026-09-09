@@ -44,6 +44,11 @@ use Illuminate\Support\Facades\DB;
  * @property Carbon|null $cancelled_at
  * @property Carbon|null $archived_at
  * @property string|null $failure_reason
+ * @property Carbon|null $held_at
+ * @property string|null $anonymous_reply_delivery_id
+ * @property Carbon|null $open_correspondence_sender_at
+ * @property Carbon|null $open_correspondence_recipient_at
+ * @property Carbon|null $correspondence_opened_at
  * @property int $attempts
  * @property bool $is_anonymous
  * @property bool $is_favorite
@@ -112,6 +117,10 @@ class LetterDelivery extends Model
             'is_favorite' => 'boolean',
             'allow_read_receipt' => 'boolean',
             'reveal_sender_at' => 'datetime',
+            'held_at' => 'datetime',
+            'open_correspondence_sender_at' => 'datetime',
+            'open_correspondence_recipient_at' => 'datetime',
+            'correspondence_opened_at' => 'datetime',
         ];
     }
 
@@ -315,6 +324,49 @@ class LetterDelivery extends Model
     public function setFavorite(bool $favorite): void
     {
         $this->forceFill(['is_favorite' => $favorite])->save();
+    }
+
+    // --- Bottle at sea (docs/api/botella-al-mar.md) ------------------------
+
+    /** Records the single anonymous reply the recipient is allowed. */
+    public function linkAnonymousReply(string $replyDeliveryId): void
+    {
+        $this->forceFill(['anonymous_reply_delivery_id' => $replyDeliveryId])->save();
+    }
+
+    public function hasAnonymousReply(): bool
+    {
+        return $this->anonymous_reply_delivery_id !== null;
+    }
+
+    /**
+     * One party opts in to open correspondence. Handles are revealed only once
+     * BOTH sides have.
+     */
+    public function acceptOpenCorrespondence(string $userId): void
+    {
+        $column = match ($userId) {
+            $this->sender_id => 'open_correspondence_sender_at',
+            $this->recipient_id => 'open_correspondence_recipient_at',
+            default => null,
+        };
+
+        if ($column === null || $this->{$column} !== null) {
+            return;
+        }
+
+        $this->forceFill([$column => now()])->save();
+
+        if ($this->open_correspondence_sender_at !== null
+            && $this->open_correspondence_recipient_at !== null
+            && $this->correspondence_opened_at === null) {
+            $this->forceFill(['correspondence_opened_at' => now()])->save();
+        }
+    }
+
+    public function correspondenceOpened(): bool
+    {
+        return $this->correspondence_opened_at !== null;
     }
 
     /**

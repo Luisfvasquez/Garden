@@ -8,6 +8,7 @@ use App\Enums\ReportableType;
 use App\Enums\ReportCategory;
 use App\Enums\ReportSeverity;
 use App\Enums\ReportStatus;
+use App\Services\Moderation\RandomAbuseGuard;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -69,5 +70,34 @@ class Report extends Model
     public function reporter(): BelongsTo
     {
         return $this->belongsTo(User::class, 'reporter_id');
+    }
+
+    /**
+     * Uphold the report. Fires the automatic consequences (ADR-0004).
+     */
+    public function markActioned(?User $by = null, ?string $note = null): void
+    {
+        if ($this->status === ReportStatus::Actioned) {
+            return;
+        }
+
+        $this->forceFill([
+            'status' => ReportStatus::Actioned,
+            'handled_by' => $by?->getKey(),
+            'resolution_note' => $note,
+            'handled_at' => now(),
+        ])->save();
+
+        app(RandomAbuseGuard::class)->afterReportActioned($this);
+    }
+
+    public function markDismissed(?User $by = null, ?string $note = null): void
+    {
+        $this->forceFill([
+            'status' => ReportStatus::Dismissed,
+            'handled_by' => $by?->getKey(),
+            'resolution_note' => $note,
+            'handled_at' => now(),
+        ])->save();
     }
 }

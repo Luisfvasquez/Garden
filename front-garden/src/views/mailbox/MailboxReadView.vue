@@ -20,6 +20,7 @@ import SpinnerDots from '@/components/ui/SpinnerDots.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import LetterPaper from '@/components/letter/LetterPaper.vue'
 import WaxSeal from '@/components/letter/WaxSeal.vue'
+import RandomLetterActions from '@/components/mailbox/RandomLetterActions.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -126,6 +127,8 @@ function doReply() {
             </BaseButton>
           </div>
         </header>
+
+        <RandomLetterActions v-if="letter.is_random" :letter="letter" />
 
         <LetterPaper
           :body="letter.body"

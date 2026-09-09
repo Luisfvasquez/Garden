@@ -52,4 +52,21 @@ return [
         // Only occurrences within this window are materialised into deliveries.
         'materialize_horizon_days' => 90,
     ],
+
+    // "Bottle at sea" — random recipient (docs/api/botella-al-mar.md, ADR-0004).
+    'random' => [
+        // Sender quotas.
+        'daily_quota' => 3,
+        'weekly_quota' => 10,
+        'min_account_age_days' => 7,
+
+        // Who the RandomRecipientPicker will consider.
+        'recipient_active_within_days' => 30,
+        'recipient_default_daily_cap' => 3,
+        'same_sender_cooldown_days' => 90,
+
+        // Redis pool refresh + how hard the picker tries before giving up.
+        'pool_key' => 'random-pool:recipients',
+        'pick_attempts' => 8,
+    ],
 ];

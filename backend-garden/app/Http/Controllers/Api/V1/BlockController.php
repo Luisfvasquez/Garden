@@ -4,12 +4,16 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Enums\DeliveryEventType;
+use App\Enums\DeliveryMode;
+use App\Enums\DeliveryStatus;
 use App\Enums\UserStatus;
 use App\Exceptions\ApiException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreBlockRequest;
 use App\Http\Resources\BlockResource;
 use App\Models\Block;
+use App\Models\LetterDelivery;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -60,6 +64,8 @@ class BlockController extends Controller
             ['reason' => $request->input('reason')],
         );
 
+        $this->cancelPendingRandomBetween($me->getKey(), $target->getKey());
+
         return (new BlockResource($block->load('blocked')))->response()->setStatusCode(201);
     }
 
@@ -71,5 +77,28 @@ class BlockController extends Controller
             ->delete();
 
         return response()->noContent();
+    }
+
+    /**
+     * A block cancels any not-yet-delivered random letter between the pair, in
+     * either direction (ADR-0007, docs/api/botella-al-mar.md).
+     */
+    private function cancelPendingRandomBetween(string $a, string $b): void
+    {
+        LetterDelivery::query()
+            ->where('delivery_mode', DeliveryMode::Random)
+            ->whereIn('status', [DeliveryStatus::Queued, DeliveryStatus::Held])
+            ->where(function ($q) use ($a, $b): void {
+                $q->where(fn ($w) => $w->where('sender_id', $a)->where('recipient_id', $b))
+                    ->orWhere(fn ($w) => $w->where('sender_id', $b)->where('recipient_id', $a));
+            })
+            ->get()
+            ->each(function (LetterDelivery $delivery): void {
+                $delivery->forceFill([
+                    'status' => DeliveryStatus::Cancelled,
+                    'cancelled_at' => now(),
+                ])->save();
+                $delivery->recordEvent(DeliveryEventType::Cancelled, ['reason' => 'block']);
+            });
     }
 }

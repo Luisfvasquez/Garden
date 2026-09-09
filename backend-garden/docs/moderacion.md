@@ -8,8 +8,12 @@
 `LocalModerator` (léxico/regex de `config/moderation.php`) + `PiiScanner`, enlazados por
 `MODERATION_DRIVER` en `ModerationServiceProvider`. `support_resources` + `GET /support-resources`
 públicos, con seeder de líneas reales (ES, MX, AR, US + fallback internacional).
-**Pendiente:** `moderation_actions` + `ModerateContentJob` + escalado real (email/Slack) — llegan con
-sus consumidores en 2C (botella al mar) y 2D (blog).
+**Estado (Fase 2C):** `moderation_actions` (auditoría, 2 años) + `ModerationAction::restrictsRandom()` +
+`RandomAbuseGuard` (2 reportes `actioned` sobre cartas aleatorias → `restrict_random` automático con
+caducidad). Moderación **síncrona** en el envío de botella al mar (`RandomLetterSender`): `rejected` →
+bloquea; `flagged` (autolesión) → `held` para revisión humana, nunca bloqueo silencioso.
+**Pendiente:** `ModerateContentJob` asíncrono + escalado real email/Slack — con el blog en 2D y el
+panel Filament en 2F.
 
 ## Capas
 

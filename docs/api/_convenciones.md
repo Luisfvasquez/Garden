@@ -96,7 +96,8 @@ solo en catálogos estáticos.
 | `GRACE_PERIOD_EXPIRED` | Ya no se puede cancelar la entrega |
 | `QUOTA_EXCEEDED` | Cuota diaria/semanal superada |
 | `NO_RANDOM_RECIPIENT` | No hay destinatarios elegibles ahora mismo |
-| `CONTENT_FLAGGED` | Retenido por moderación |
+| `RANDOM_RESTRICTED` | El usuario tiene un `restrict_random` vigente (ADR-0004) |
+| `CONTENT_FLAGGED` | Rechazado por moderación (una carta aleatoria `flagged` no es error: `202` + estado `held`) |
 | `CONSENT_REQUIRED` | Falta el permiso del autor original |
 | `DOLL_UNAVAILABLE` | La Doll no acepta solicitudes |
 | `CHANNEL_CLOSED` | El chat ya no admite mensajes |

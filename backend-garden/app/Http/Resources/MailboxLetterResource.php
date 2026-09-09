@@ -39,6 +39,13 @@ class MailboxLetterResource extends JsonResource
             'in_reply_to_delivery_id' => $letter->in_reply_to_delivery_id,
             'delivered_at' => $this->delivered_at?->toIso8601ZuluString(),
             'read_at' => $this->read_at?->toIso8601ZuluString(),
+            'is_random' => $this->delivery_mode->value === 'random',
+            'can_reply_anonymously' => $this->delivery_mode->value === 'random' && ! $this->hasAnonymousReply(),
+            'correspondence' => $this->delivery_mode->value === 'random' ? [
+                'recipient_accepted' => $this->open_correspondence_recipient_at !== null,
+                'sender_accepted' => $this->open_correspondence_sender_at !== null,
+                'opened' => $this->correspondenceOpened(),
+            ] : null,
         ];
     }
 }

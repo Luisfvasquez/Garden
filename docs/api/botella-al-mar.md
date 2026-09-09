@@ -1,9 +1,31 @@
 # API — Botella al mar (cartas aleatorias)
 
-Estado: `[ ] contrato definido` · `[ ] backend` · `[ ] front`
+Estado: `[x] contrato definido` · `[x] backend` · `[~] front`
 
 > **Módulo de mayor riesgo del proyecto.** Enviar texto libre a un desconocido es un vector directo de
-> acoso y spam. Los controles de este documento no son opcionales. Ver ADR-0004.
+> acoso y spam. Los controles de este documento no son opcionales. Ver ADR-0004 y ADR-0010.
+
+> **Backend (Fase 2C):** todo tras el flag `bottle_at_sea` (`feature:bottle_at_sea` → 404).
+> `RandomLetterSender` (gates en orden: `verified` → antigüedad ≥7 d → sin `restrict_random` →
+> cuota 3/día·10/semana → sin adjuntos → **moderación síncrona** → pool no vacío), `RandomRecipientPool`
+> (interfaz; Redis/`predis` en prod, array en tests — ADR-0010), `RandomRecipientPicker`
+> (`SRANDMEMBER` + verificación en BD), `RefreshRandomRecipientPoolJob` (cada 15 min), integración en
+> `DispatchSingleLetterJob` (destinatario al despachar; sin pool → `failed`/`no_recipient` + vuelve a
+> borradores). `moderation_actions` + `RandomAbuseGuard` (2 reportes `actioned` → `restrict_random`).
+> Un bloqueo cancela las entregas aleatorias `queued`/`held` del par.
+>
+> **Desviaciones respecto a este documento (actualizadas aquí):**
+> - Filtro **síncrono** en la petición (driver local, determinista): `rejected` → `422 CONTENT_FLAGGED`;
+>   `flagged` (típicamente autolesión) → **no se bloquea**: `202`, entrega en estado **`held`**
+>   (revisión humana antes de llegar a un desconocido), `data.held_for_review: true`. `approved` → `201`.
+> - Nuevo `error_code` `RANDOM_RESTRICTED` (`403`) cuando hay un `restrict_random` vigente.
+> - `POST /mailbox/{id}/reply-anonymous` acepta `{ body: <doc tiptap>, tier? }` y **envía** la única
+>   respuesta (no crea borrador). Segundo intento → `409 CHANNEL_CLOSED`.
+> - `POST /mailbox/{id}/open-correspondence` lo llama **cada parte una vez**; cuando ambas → se revelan
+>   los handles (en `DeliveryResource.recipient` y en el buzón). Respuesta:
+>   `{ data: { sender_accepted, recipient_accepted, opened } }`.
+> - `message_to_stranger` se valida pero **no se persiste** todavía.
+> - Reciprocidad (leer la última recibida antes de enviar): no implementada (era opcional).
 
 ## Endpoints
 

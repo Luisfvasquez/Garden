@@ -97,6 +97,12 @@ const routes: RouteRecordRaw[] = [
     meta: { auth: true },
   },
   {
+    path: '/botella',
+    name: 'bottle',
+    component: () => import('@/views/random/BottleView.vue'),
+    meta: { auth: true, verified: true },
+  },
+  {
     path: '/envios/:id',
     name: 'delivery-tracking',
     component: () => import('@/views/deliveries/DeliveryTrackingView.vue'),

@@ -29,6 +29,7 @@
     "settings": "Ajustes",
     "mailbox": "Buzón",
     "schedules": "Programaciones",
+    "bottle": "Botella al mar",
     "signOut": "Cerrar sesión",
     "account": "Cuenta"
   },
@@ -309,6 +310,37 @@
     "title": "Aquí no hay nada",
     "body": "La página que buscas no existe o se ha movido.",
     "home": "Volver al inicio"
+  },
+  "bottle": {
+    "title": "Botella al mar",
+    "intro": "Una carta para un desconocido. No sabrás quién la recibe, ni ellos quién eres.",
+    "quota": "Te quedan {daily} de {dailyLimit} hoy · {weekly} esta semana",
+    "held": "Tu carta ha quedado en revisión antes de llegar a alguien. Si estás pasando un mal momento, mira los recursos de ayuda en Ajustes.",
+    "pickLetter": "Carta a enviar",
+    "pickLetterPlaceholder": "Elige un borrador…",
+    "untitled": "(sin título)",
+    "tier": "Velocidad",
+    "message": "Nota para quien la reciba (opcional)",
+    "send": "Lanzar la botella",
+    "sent": "Botella lanzada.",
+    "anonymityNote": "Se envía de forma anónima. El destinatario podrá responderte una sola vez.",
+    "reason": {
+      "EMAIL_NOT_VERIFIED": "Verifica tu correo primero.",
+      "ACCOUNT_TOO_NEW": "Tu cuenta necesita al menos 7 días.",
+      "RANDOM_RESTRICTED": "No puedes enviar cartas aleatorias ahora mismo.",
+      "QUOTA_EXCEEDED": "Has agotado tu cuota de botellas al mar."
+    },
+    "fromStranger": "Carta de un desconocido.",
+    "replyOnce": "Responder (solo una vez)",
+    "replyUsed": "Ya has usado tu respuesta.",
+    "replyPlaceholder": "Tu respuesta anónima…",
+    "replySend": "Enviar respuesta",
+    "replySent": "Respuesta enviada.",
+    "openCorr": "Proponer correspondencia abierta",
+    "corrWaiting": "Esperando a que la otra parte acepte.",
+    "corrOpened": "Ahora conocéis vuestros identificadores.",
+    "corrOpenedShort": "Correspondencia abierta.",
+    "replyUsedShort": "Respondida"
   },
   "schedules": {
     "title": "Programaciones",

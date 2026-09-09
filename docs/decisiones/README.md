@@ -17,3 +17,4 @@ de cambiar el código en silencio.
 | 0007 | Bloqueo silencioso | Aceptado |
 | 0008 | Moderación desacoplada del proveedor | Aceptado |
 | 0009 | Aritmética de recurrencias y zonas horarias | Aceptado |
+| 0010 | Cliente Redis `predis` y pool aleatorio | Aceptado |

@@ -3,7 +3,7 @@
 **Actualizar al cerrar cada tarea.** Este archivo es lo que le dice al agente qué existe ya.
 Formato: `[ ]` pendiente · `[~]` en curso · `[x]` terminado.
 
-Última actualización: 2026-09-09 — **Fase 1 completa**. Fase 2 en curso: **2A moderación** (`ContentModerator` desacoplado, `LocalModerator` + `PiiScanner`, `support_resources`; ADR-0008) y **2B tiempo** (`letter_schedules` + `OccurrenceGenerator` + `GenerateUpcomingDeliveriesJob`, 9 endpoints tras el flag `schedules`; ADR-0002/0009). Siguiente: 2C (botella al mar + Redis).
+Última actualización: 2026-09-09 — **Fase 1 completa**. Fase 2 en curso: **2A moderación** (ADR-0008), **2B tiempo** (`letter_schedules` + `OccurrenceGenerator`, ADR-0002/0009), **2C botella al mar** (`RandomRecipientPool`/`Picker`, cuotas, filtro síncrono, `reply-anonymous`, `open-correspondence`, `restrict_random` automático; ADR-0004/0010). Siguiente: 2D (blog).
 
 ---
 
@@ -128,9 +128,10 @@ Formato: `[ ]` pendiente · `[~]` en curso · `[x]` terminado.
       _(9 endpoints; `feature:schedules` (404 si flag off) + `verified` en `store`; `SchedulePolicy` 404 sin fuga; `OccurrenceTimeline` mezcla materializadas + virtuales con `meta.total/filled/delivered`; `PUT .../occurrences/{date}/letter` con 404/409; middleware `feature` nuevo y reutilizable para 2C/2D)_
 - [ ] `public_posts`, `comments`, `reactions`, `tags`
 - [ ] Flujo de consentimiento para publicar cartas recibidas
-- [ ] Botella al mar: `RandomRecipientPicker` + pool en Redis + cuotas
+- [x] Botella al mar: `RandomRecipientPicker` + pool en Redis + cuotas
+      _(2C: `RandomLetterSender` (gates en orden, filtro síncrono), `RandomRecipientPool` interfaz (Redis `predis` / array en tests — ADR-0010) + `RandomRecipientPicker` (`SRANDMEMBER` + verificación en BD) + `RefreshRandomRecipientPoolJob` (15 min); `DispatchSingleLetterJob` resuelve destinatario al despachar, `no_recipient` → borradores; `POST /letters/{id}/send-random` (feature+verified+throttle+idempotency), `GET /random/quota`, `POST /mailbox/{id}/reply-anonymous` (única), `POST /mailbox/{id}/open-correspondence` (doble → revela handles); `moderation_actions` + `RandomAbuseGuard` (2 reportes `actioned` → `restrict_random`); bloqueo cancela aleatorias pendientes; `held` estado nuevo)_
 - [~] `ContentModerator` (interfaz + driver local) + jobs de moderación
-      _(2A: interfaz `ContentModerator`, `ModerationContext`/`ModerationVerdict`, enums `ModerationCategory`/`ModerationDecision`/`ModerationSurface`, `LocalModerator` (léxico+regex de `config/moderation.php`) + `PiiScanner`, `MODERATION_DRIVER` → `ModerationServiceProvider`; ADR-0008. `self_harm`→`flagged` nunca `rejected`; `minor_safety`→`rejected`; PII bloquea en aleatorias, avisa en Doll chat. **Pendiente:** `moderation_actions` + `ModerateContentJob` + escalado email/Slack, con sus consumidores en 2C/2D)_
+      _(2A: `ContentModerator` + `ModerationContext`/`ModerationVerdict` + enums + `LocalModerator` (léxico/regex de `config/moderation.php`) + `PiiScanner`, `MODERATION_DRIVER` → `ModerationServiceProvider`; ADR-0008. `self_harm`→`flagged` nunca `rejected`; `minor_safety`→`rejected`; PII bloquea en aleatorias, avisa en Doll chat. 2C: `moderation_actions` + `RandomAbuseGuard` (2 reportes `actioned` → `restrict_random`) + moderación síncrona en botella. **Pendiente:** `ModerateContentJob` asíncrono + escalado email/Slack → 2D/2F)_
 - [ ] Panel Filament: usuarios, cola de reportes, catálogos, métricas
 - [ ] Web Push (VAPID) + `quiet_hours` + agrupación
 - [x] `support_resources` + endpoint
@@ -143,7 +144,8 @@ Formato: `[ ]` pendiente · `[~]` en curso · `[x]` terminado.
       _(`SchedulesView` (lista + pausar/reanudar/eliminar) + `ScheduleForm` (crea, con selector de recurrencia/leap/tier/carta) + `ScheduleTimelineView` (ocurrencias materializadas + virtuales, asignar carta por fecha, enlace a seguimiento); `api/schedules.ts` + `useSchedules`; `api/features.ts` + `useFeature('schedules')` gatea el enlace de nav; i18n es/en; `api/__tests__/schedules.spec.ts`)_
 - [ ] Blog: feed, post, publicar, comentar, reaccionar
 - [ ] Flujo de solicitud y respuesta de consentimiento
-- [ ] Botella al mar (envío + cuota + respuesta anónima única)
+- [x] Botella al mar (envío + cuota + respuesta anónima única)
+      _(`BottleView` (elige borrador, muestra cuota + motivos de inelegibilidad, `Idempotency-Key` por instancia, aviso de `held`); `RandomLetterActions` en `MailboxReadView` (responder una vez + proponer correspondencia abierta); `api/random.ts` + `useRandom`; `useFeature('bottle_at_sea')` gatea el nav; i18n es/en; `api/__tests__/random.spec.ts`)_
 - [ ] Suscripción a push + gestión de permisos
 - [ ] i18n completo es/en
 

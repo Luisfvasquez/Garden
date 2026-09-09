@@ -50,6 +50,11 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('send-letter', fn (Request $request) => Limit::perDay(30)
             ->by((string) $request->user()?->getAuthIdentifier()));
 
+        // Bottle at sea: the daily cap is enforced in RandomLetterQuota; this is
+        // just an abuse ceiling (docs/api/_convenciones.md §Rate limiting).
+        RateLimiter::for('send-random', fn (Request $request) => Limit::perDay(10)
+            ->by((string) $request->user()?->getAuthIdentifier()));
+
         RateLimiter::for('report', fn (Request $request) => Limit::perHour(10)
             ->by((string) $request->user()?->getAuthIdentifier()));
     }

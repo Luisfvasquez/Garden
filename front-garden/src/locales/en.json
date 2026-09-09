@@ -29,6 +29,7 @@
     "settings": "Settings",
     "mailbox": "Mailbox",
     "schedules": "Schedules",
+    "bottle": "Bottle at sea",
     "signOut": "Sign out",
     "account": "Account"
   },
@@ -309,6 +310,37 @@
     "title": "Nothing here",
     "body": "The page you're looking for doesn't exist or has moved.",
     "home": "Back to start"
+  },
+  "bottle": {
+    "title": "Bottle at sea",
+    "intro": "A letter to a stranger. You won't know who receives it, nor they who you are.",
+    "quota": "{daily} of {dailyLimit} left today · {weekly} this week",
+    "held": "Your letter is under review before it reaches anyone. If you're going through a hard time, see the support resources in Settings.",
+    "pickLetter": "Letter to send",
+    "pickLetterPlaceholder": "Choose a draft…",
+    "untitled": "(untitled)",
+    "tier": "Speed",
+    "message": "Note for whoever receives it (optional)",
+    "send": "Cast the bottle",
+    "sent": "Bottle cast.",
+    "anonymityNote": "Sent anonymously. The recipient may reply to you exactly once.",
+    "reason": {
+      "EMAIL_NOT_VERIFIED": "Verify your email first.",
+      "ACCOUNT_TOO_NEW": "Your account needs to be at least 7 days old.",
+      "RANDOM_RESTRICTED": "You can't send random letters right now.",
+      "QUOTA_EXCEEDED": "You've used up your bottle-at-sea quota."
+    },
+    "fromStranger": "A letter from a stranger.",
+    "replyOnce": "Reply (once only)",
+    "replyUsed": "You've used your reply.",
+    "replyPlaceholder": "Your anonymous reply…",
+    "replySend": "Send reply",
+    "replySent": "Reply sent.",
+    "openCorr": "Propose open correspondence",
+    "corrWaiting": "Waiting for the other side to accept.",
+    "corrOpened": "You now know each other's handles.",
+    "corrOpenedShort": "Correspondence open.",
+    "replyUsedShort": "Replied"
   },
   "schedules": {
     "title": "Schedules",

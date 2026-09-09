@@ -33,5 +33,8 @@ export const qk = {
     one: (id: string) => ['schedules', 'one', id] as const,
     occurrences: (id: string) => ['schedules', 'occurrences', id] as const,
   },
+  random: {
+    quota: ['random', 'quota'] as const,
+  },
   features: ['features'] as const,
 } as const

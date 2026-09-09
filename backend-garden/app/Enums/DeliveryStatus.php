@@ -18,6 +18,13 @@ enum DeliveryStatus: string
     case Failed = 'failed';
     case Blocked = 'blocked';
 
+    /**
+     * A random letter withheld from a stranger pending human review (self-harm
+     * or borderline content). Never enters the dispatch set
+     * (docs/api/botella-al-mar.md, backend-garden/docs/moderacion.md).
+     */
+    case Held = 'held';
+
     /** Visible in the recipient's mailbox and unread counts. */
     public function isInMailbox(): bool
     {

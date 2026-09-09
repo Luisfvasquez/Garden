@@ -202,6 +202,35 @@ export interface MailboxLetter {
   in_reply_to_delivery_id: string | null
   delivered_at: string | null
   read_at: string | null
+  is_random?: boolean
+  can_reply_anonymously?: boolean
+  correspondence?: {
+    recipient_accepted: boolean
+    sender_accepted: boolean
+    opened: boolean
+  } | null
+}
+
+// --- Bottle at sea (random letters) ------------------------------------------
+
+export interface RandomQuota {
+  daily_limit: number
+  daily_used: number
+  daily_remaining: number
+  weekly_limit: number
+  weekly_used: number
+  weekly_remaining: number
+  eligible: boolean
+  reasons: string[]
+}
+
+export interface RandomSendResult {
+  id: string
+  status: DeliveryStatus | 'held'
+  estimated_delivery_at: string | null
+  recipient: null
+  quota_remaining_today: number
+  held_for_review: boolean
 }
 
 // --- Notifications / blocks ---------------------------------------------------

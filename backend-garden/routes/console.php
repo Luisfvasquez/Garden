@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Jobs\Maintenance\GenerateUpcomingDeliveriesJob;
 use App\Jobs\Postal\DeliverArrivedLettersJob;
 use App\Jobs\Postal\DispatchDueLettersJob;
+use App\Jobs\Postal\RefreshRandomRecipientPoolJob;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
@@ -23,3 +24,6 @@ Schedule::job(new DeliverArrivedLettersJob)->everyMinute()->withoutOverlapping()
 
 // Recurring letters: materialise the next 90 days of occurrences (ADR-0002).
 Schedule::job(new GenerateUpcomingDeliveriesJob)->dailyAt('03:00')->withoutOverlapping();
+
+// "Bottle at sea": keep the eligible-recipient pool warm (docs/api/botella-al-mar.md).
+Schedule::job(new RefreshRandomRecipientPoolJob)->everyFifteenMinutes();

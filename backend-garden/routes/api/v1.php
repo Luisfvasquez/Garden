@@ -23,9 +23,11 @@ use App\Http\Controllers\Api\V1\MeSettingsController;
 use App\Http\Controllers\Api\V1\NotificationController;
 use App\Http\Controllers\Api\V1\PostalHandleController;
 use App\Http\Controllers\Api\V1\PublicUserController;
+use App\Http\Controllers\Api\V1\RandomQuotaController;
 use App\Http\Controllers\Api\V1\ReportController;
 use App\Http\Controllers\Api\V1\ScheduleController;
 use App\Http\Controllers\Api\V1\SendLetterController;
+use App\Http\Controllers\Api\V1\SendRandomLetterController;
 use App\Http\Controllers\Api\V1\SupportResourceController;
 use Illuminate\Support\Facades\Route;
 
@@ -84,6 +86,19 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
         ->scopeBindings()
         ->name('letters.attachments.destroy');
     Route::apiResource('letters', LetterController::class);
+
+    // --- Botella al mar — contrato: docs/api/botella-al-mar.md · ADR-0004 ---
+    Route::middleware('feature:bottle_at_sea')->group(function (): void {
+        Route::post('letters/{letter}/send-random', SendRandomLetterController::class)
+            ->middleware(['verified', 'throttle:send-random', 'idempotency'])
+            ->name('letters.send-random');
+        Route::get('random/quota', RandomQuotaController::class)->name('random.quota');
+        Route::post('mailbox/{delivery}/reply-anonymous', [MailboxController::class, 'replyAnonymous'])
+            ->middleware(['verified', 'throttle:send-random'])
+            ->name('mailbox.reply-anonymous');
+        Route::post('mailbox/{delivery}/open-correspondence', [MailboxController::class, 'openCorrespondence'])
+            ->name('mailbox.open-correspondence');
+    });
 
     // --- Programaciones y envíos recurrentes — contrato: docs/api/programaciones.md ---
     Route::middleware('feature:schedules')->group(function (): void {

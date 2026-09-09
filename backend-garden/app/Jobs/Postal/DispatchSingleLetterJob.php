@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace App\Jobs\Postal;
 
 use App\Enums\DeliveryEventType;
+use App\Enums\DeliveryMode;
 use App\Enums\DeliveryStatus;
 use App\Events\LetterDispatched;
 use App\Events\LetterFailed;
 use App\Models\Block;
 use App\Models\LetterDelivery;
 use App\Services\Postal\PostalRoutes;
+use App\Services\Postal\RandomRecipientPicker;
 use App\Services\Postal\TransitCalculator;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -36,7 +38,7 @@ class DispatchSingleLetterJob implements ShouldQueue
         $this->onQueue('postal');
     }
 
-    public function handle(TransitCalculator $calculator, PostalRoutes $routes): void
+    public function handle(TransitCalculator $calculator, PostalRoutes $routes, RandomRecipientPicker $picker): void
     {
         $delivery = LetterDelivery::with(['sender', 'recipient'])->find($this->deliveryId);
 
@@ -44,9 +46,27 @@ class DispatchSingleLetterJob implements ShouldQueue
             return; // already handled
         }
 
+        // Bottle at sea: the stranger is resolved now, not at send time.
+        if ($delivery->delivery_mode === DeliveryMode::Random && $delivery->recipient_id === null) {
+            $picked = $delivery->sender !== null ? $picker->pick($delivery->sender) : null;
+
+            if ($picked === null) {
+                // No one eligible right now: fail, notify the sender, and the
+                // letter falls back to drafts (it was never locked... it is now
+                // — unlock it so it can be re-sent).
+                $delivery->markFailed('no_recipient');
+                $delivery->letter->forceFill(['is_locked' => false])->save();
+                LetterFailed::dispatch($delivery);
+
+                return;
+            }
+
+            $delivery->forceFill(['recipient_id' => $picked->getKey()])->save();
+            $delivery->setRelation('recipient', $picked);
+        }
+
         $recipient = $delivery->recipient;
 
-        // Direct mode only for now; random assignment arrives with the bottle at sea (Fase 2).
         if ($recipient === null || ! $recipient->status->canAuthenticate()) {
             $delivery->markFailed('recipient_unavailable');
             LetterFailed::dispatch($delivery);

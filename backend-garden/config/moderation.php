@@ -14,6 +14,13 @@ return [
 
     'driver' => env('MODERATION_DRIVER', 'local'),
 
+    // Automatic consequences (ADR-0004). This many confirmed reports on a user's
+    // random letters triggers an automatic `restrict_random`.
+    'random_abuse' => [
+        'reports_to_restrict' => (int) env('MODERATION_RANDOM_REPORTS_TO_RESTRICT', 2),
+        'restrict_days' => (int) env('MODERATION_RANDOM_RESTRICT_DAYS', 30),
+    ],
+
     /*
      * LocalModerator: lexicon + regex. Zero external calls, good enough to gate
      * the launch and to run the whole test suite deterministically. The lists
@@ -37,7 +44,9 @@ return [
             'minor_safety' => ['weight' => 1.0, 'force' => 'reject'],
             'hate' => ['weight' => 0.6, 'force' => null],
             'sexual' => ['weight' => 0.5, 'force' => null],
-            'violence' => ['weight' => 0.5, 'force' => null],
+            // Lexicon entries here are explicit threats ("te voy a matar"), so a
+            // single hit is enough to hard-block.
+            'violence' => ['weight' => 0.9, 'force' => null],
             'harassment' => ['weight' => 0.4, 'force' => null],
             'self_harm' => ['weight' => 0.5, 'force' => 'flag'],
             'spam' => ['weight' => 0.35, 'force' => null],

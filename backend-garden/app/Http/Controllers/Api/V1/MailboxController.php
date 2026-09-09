@@ -6,16 +6,21 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Enums\DeliveryStatus;
 use App\Enums\LetterKind;
+use App\Enums\TransitTier;
 use App\Events\LetterRead;
 use App\Exceptions\ApiException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Mailbox\ArchiveMailboxRequest;
 use App\Http\Requests\Mailbox\FavoriteMailboxRequest;
+use App\Http\Requests\Mailbox\ReplyAnonymousRequest;
 use App\Http\Resources\LetterResource;
 use App\Http\Resources\MailboxEnvelopeResource;
 use App\Http\Resources\MailboxLetterResource;
+use App\Http\Resources\RandomDeliveryResource;
 use App\Models\Letter;
 use App\Models\LetterDelivery;
+use App\Services\Postal\RandomLetterQuota;
+use App\Services\Postal\RandomLetterSender;
 use App\Support\CursorPage;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -117,6 +122,55 @@ class MailboxController extends Controller
         $reply->save();
 
         return (new LetterResource($reply->loadCount('deliveries')))->response()->setStatusCode(201);
+    }
+
+    /**
+     * POST /api/v1/mailbox/{delivery}/reply-anonymous — the one reply the
+     * recipient of a bottle at sea may send back (docs/api/botella-al-mar.md).
+     */
+    public function replyAnonymous(
+        ReplyAnonymousRequest $request,
+        LetterDelivery $delivery,
+        RandomLetterSender $sender,
+        RandomLetterQuota $quota,
+    ): JsonResponse {
+        $this->authorize('mutateMailbox', $delivery);
+
+        $reply = $sender->replyAnonymously(
+            $delivery,
+            $request->user(),
+            (array) $request->input('body'),
+            TransitTier::from($request->validated('tier', 'standard')),
+        );
+
+        $remaining = $quota->snapshot($request->user())['daily_remaining'];
+
+        return (new RandomDeliveryResource($reply, $remaining))
+            ->response()
+            ->setStatusCode($reply->status->value === 'held' ? 202 : 201);
+    }
+
+    /**
+     * POST /api/v1/mailbox/{delivery}/open-correspondence — either party opts in
+     * to reveal handles. Both must accept before anything is revealed.
+     */
+    public function openCorrespondence(Request $request, LetterDelivery $delivery): JsonResponse
+    {
+        $me = $request->user()->getKey();
+
+        if ($delivery->delivery_mode->value !== 'random'
+            || ! in_array($me, [$delivery->sender_id, $delivery->recipient_id], true)) {
+            throw new ApiException('No existe.', 'NOT_FOUND', 404);
+        }
+
+        $delivery->acceptOpenCorrespondence($me);
+        $delivery->refresh();
+
+        return response()->json(['data' => [
+            'sender_accepted' => $delivery->open_correspondence_sender_at !== null,
+            'recipient_accepted' => $delivery->open_correspondence_recipient_at !== null,
+            'opened' => $delivery->correspondenceOpened(),
+        ]]);
     }
 
     public function unreadCount(Request $request): JsonResponse
