@@ -20,6 +20,7 @@ const { messageFor } = useApiError()
 const unread = useUnreadCount()
 const schedulesEnabled = useFeature('schedules')
 const bottleEnabled = useFeature('bottle_at_sea')
+const blogEnabled = useFeature('blog')
 
 const signingOut = ref(false)
 
@@ -82,6 +83,14 @@ async function signOut() {
           active-class="text-[var(--text)]"
         >
           {{ t('nav.bottle') }}
+        </RouterLink>
+        <RouterLink
+          v-if="blogEnabled"
+          :to="{ name: 'blog' }"
+          class="text-sm text-[var(--text-muted)] hover:text-[var(--text)]"
+          active-class="text-[var(--text)]"
+        >
+          {{ t('nav.blog') }}
         </RouterLink>
         <RouterLink
           :to="{ name: 'settings' }"

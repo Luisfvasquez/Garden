@@ -30,6 +30,7 @@
     "mailbox": "Buzón",
     "schedules": "Programaciones",
     "bottle": "Botella al mar",
+    "blog": "Blog",
     "signOut": "Cerrar sesión",
     "account": "Cuenta"
   },
@@ -310,6 +311,61 @@
     "title": "Aquí no hay nada",
     "body": "La página que buscas no existe o se ha movido.",
     "home": "Volver al inicio"
+  },
+  "blog": {
+    "title": "Blog de la comunidad",
+    "compose": "Escribir",
+    "consentRequests": "Solicitudes de permiso",
+    "backToFeed": "Volver al blog",
+    "empty": "Todavía no hay publicaciones.",
+    "allTags": "Todas",
+    "comments": "Comentarios",
+    "commentPlaceholder": "Escribe un comentario…",
+    "commentSend": "Comentar",
+    "commentsDisabled": "El autor ha desactivado los comentarios.",
+    "anon": "Anónimo",
+    "underReview": "Esta publicación está en revisión y aún no es pública.",
+    "awaitingConsent": "Esperando el permiso del autor de la carta original.",
+    "published": "Publicado.",
+    "pending": "Enviado. Se publicará cuando el autor original dé su permiso o pase la revisión.",
+    "type": {
+      "all": "Todo",
+      "shared_letter": "Carta compartida",
+      "unaddressed_letter": "Carta al vacío",
+      "poem": "Poema",
+      "reflection": "Reflexión"
+    },
+    "reaction": {
+      "heart": "Corazón",
+      "tear": "Lágrima",
+      "flower": "Flor",
+      "candle": "Vela"
+    },
+    "form": {
+      "type": "Tipo de publicación",
+      "sourceLetter": "Carta recibida a compartir",
+      "sourceLetterPlaceholder": "Elige una carta de tu buzón…",
+      "untitledLetter": "(carta sin título)",
+      "consentNote": "Se pedirá permiso a quien te la escribió antes de publicarla.",
+      "title": "Título",
+      "body": "Texto",
+      "testimonial": "Tu testimonio",
+      "tags": "Etiquetas",
+      "tagsHint": "Separadas por comas. Máximo 3.",
+      "anonymous": "Publicar como anónimo",
+      "commentsEnabled": "Permitir comentarios",
+      "submit": "Publicar"
+    },
+    "consent": {
+      "title": "Solicitudes de permiso",
+      "intro": "Alguien quiere publicar una carta que le escribiste. Esto es exactamente lo que se vería.",
+      "empty": "No tienes solicitudes pendientes.",
+      "publishedAs": "Se publicará como: {name}",
+      "allow": "Dar permiso",
+      "deny": "Rechazar",
+      "granted": "Permiso concedido.",
+      "denied": "Solicitud rechazada."
+    }
   },
   "bottle": {
     "title": "Botella al mar",

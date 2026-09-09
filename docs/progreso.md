@@ -3,7 +3,7 @@
 **Actualizar al cerrar cada tarea.** Este archivo es lo que le dice al agente qué existe ya.
 Formato: `[ ]` pendiente · `[~]` en curso · `[x]` terminado.
 
-Última actualización: 2026-09-09 — **Fase 1 completa**. Fase 2 en curso: **2A moderación** (ADR-0008), **2B tiempo** (`letter_schedules` + `OccurrenceGenerator`, ADR-0002/0009), **2C botella al mar** (`RandomRecipientPool`/`Picker`, cuotas, filtro síncrono, `reply-anonymous`, `open-correspondence`, `restrict_random` automático; ADR-0004/0010). Siguiente: 2D (blog).
+Última actualización: 2026-09-09 — **Fase 1 completa**. Fase 2 en curso: **2A moderación** (ADR-0008), **2B tiempo** (`letter_schedules` + `OccurrenceGenerator`, ADR-0002/0009), **2C botella al mar** (pool Redis, cuotas, filtro síncrono, respuesta anónima, `restrict_random`; ADR-0004/0010), **2D blog** (`public_posts`/`comments`/`reactions`/`tags`, consentimiento de `shared_letter`, filtro obligatorio previo). Siguiente: 2E (Web Push).
 
 ---
 
@@ -126,8 +126,10 @@ Formato: `[ ]` pendiente · `[~]` en curso · `[x]` terminado.
       _(2B: migraciones `letter_schedules` + `letter_schedule_occurrences` + FK `schedule_id` en `letter_deliveries`; `OccurrenceGenerator` puro (yearly/monthly/weekly/once/custom_dates, `leap_day_policy` vía método de Carbon, recorte mensual, DST — ADR-0009); `OccurrenceMaterializer` (idempotente, `scheduled_for` hacia atrás desde `runs_at`); `GenerateUpcomingDeliveriesJob` diario 03:00 cola `maintenance`, 90 días (ADR-0002), `ShouldBeUnique`. `evergarden:seed-demo` con ocurrencias: pendiente)_
 - [x] Endpoints de schedules y ocurrencias (incluye `leap_day_policy`)
       _(9 endpoints; `feature:schedules` (404 si flag off) + `verified` en `store`; `SchedulePolicy` 404 sin fuga; `OccurrenceTimeline` mezcla materializadas + virtuales con `meta.total/filled/delivered`; `PUT .../occurrences/{date}/letter` con 404/409; middleware `feature` nuevo y reutilizable para 2C/2D)_
-- [ ] `public_posts`, `comments`, `reactions`, `tags`
-- [ ] Flujo de consentimiento para publicar cartas recibidas
+- [x] `public_posts`, `comments`, `reactions`, `tags`
+      _(2D: migraciones `tags`/`taggables`/`public_posts` (`tsvector`+GIN, cuerpo sin cifrar)/`comments` (1 nivel, FK self tras crear)/`reactions`; enums `PostType`/`ReactionType`/`ConsentStatus`/`PostVisibility`; `BlogPublisher` (filtro síncrono: rejected→422, flagged→202 invisible), `PublicPost`/`Comment`/`Reaction`/`Tag` + policies 404; endpoints públicos `GET /posts`,`/posts/{slug}`,`/posts/{id}/comments`,`/tags` + escritura tras `verified` + `throttle:create-post`/`comment`; reacciones sin conteos públicos; `ReportableType` cablea `public_post`/`comment`)_
+- [x] Flujo de consentimiento para publicar cartas recibidas
+      _(`shared_letter` → `consent_status=pending`, 202, fuera del feed; `GET /consent-requests` (posts que esperan mi permiso, con vista previa exacta anonimizada), `POST /consent-requests/{post}/respond` (`granted` → publica; `denied` → veto 90 días para esa carta → `403 CONSENT_REQUIRED`); `POST /posts/{id}/request-consent` idempotente. Notificación real al autor → 2E)_
 - [x] Botella al mar: `RandomRecipientPicker` + pool en Redis + cuotas
       _(2C: `RandomLetterSender` (gates en orden, filtro síncrono), `RandomRecipientPool` interfaz (Redis `predis` / array en tests — ADR-0010) + `RandomRecipientPicker` (`SRANDMEMBER` + verificación en BD) + `RefreshRandomRecipientPoolJob` (15 min); `DispatchSingleLetterJob` resuelve destinatario al despachar, `no_recipient` → borradores; `POST /letters/{id}/send-random` (feature+verified+throttle+idempotency), `GET /random/quota`, `POST /mailbox/{id}/reply-anonymous` (única), `POST /mailbox/{id}/open-correspondence` (doble → revela handles); `moderation_actions` + `RandomAbuseGuard` (2 reportes `actioned` → `restrict_random`); bloqueo cancela aleatorias pendientes; `held` estado nuevo)_
 - [~] `ContentModerator` (interfaz + driver local) + jobs de moderación
@@ -142,8 +144,10 @@ Formato: `[ ]` pendiente · `[~]` en curso · `[x]` terminado.
       _(`SupportResourcesSection` en `SettingsView`; `api/support.ts` + `useSupportResources` (TanStack Query, país de `auth.user.country_code`, fallback internacional); estados carga/error/vacío; i18n es/en; `tel:` y enlace a web)_
 - [x] Vista de programaciones + línea de tiempo de ocurrencias
       _(`SchedulesView` (lista + pausar/reanudar/eliminar) + `ScheduleForm` (crea, con selector de recurrencia/leap/tier/carta) + `ScheduleTimelineView` (ocurrencias materializadas + virtuales, asignar carta por fecha, enlace a seguimiento); `api/schedules.ts` + `useSchedules`; `api/features.ts` + `useFeature('schedules')` gatea el enlace de nav; i18n es/en; `api/__tests__/schedules.spec.ts`)_
-- [ ] Blog: feed, post, publicar, comentar, reaccionar
-- [ ] Flujo de solicitud y respuesta de consentimiento
+- [x] Blog: feed, post, publicar, comentar, reaccionar
+      _(`BlogFeedView` (filtros por tipo/etiqueta) + `PostView` (`PostBody` renderiza el doc tiptap sin la dependencia pesada, comentarios 1 nivel, barra de reacciones toggle) + `PostComposeView` (tipo, cuerpo, testimonio/carta origen para `shared_letter`, etiquetas, anónimo); `api/blog.ts` + `useBlog`; `useFeature('blog')` gatea el nav; i18n es/en; `api/__tests__/blog.spec.ts`)_
+- [x] Flujo de solicitud y respuesta de consentimiento
+      _(`ConsentRequestsView` (`/blog/consentimientos`): vista previa exacta anonimizada + dar/rechazar permiso vía `POST /consent-requests/{post}/respond`)_
 - [x] Botella al mar (envío + cuota + respuesta anónima única)
       _(`BottleView` (elige borrador, muestra cuota + motivos de inelegibilidad, `Idempotency-Key` por instancia, aviso de `held`); `RandomLetterActions` en `MailboxReadView` (responder una vez + proponer correspondencia abierta); `api/random.ts` + `useRandom`; `useFeature('bottle_at_sea')` gatea el nav; i18n es/en; `api/__tests__/random.spec.ts`)_
 - [ ] Suscripción a push + gestión de permisos

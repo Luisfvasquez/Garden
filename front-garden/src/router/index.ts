@@ -103,6 +103,30 @@ const routes: RouteRecordRaw[] = [
     meta: { auth: true, verified: true },
   },
   {
+    path: '/blog',
+    name: 'blog',
+    component: () => import('@/views/blog/BlogFeedView.vue'),
+    meta: { auth: true },
+  },
+  {
+    path: '/blog/nuevo',
+    name: 'blog-compose',
+    component: () => import('@/views/blog/PostComposeView.vue'),
+    meta: { auth: true, verified: true },
+  },
+  {
+    path: '/blog/consentimientos',
+    name: 'blog-consent',
+    component: () => import('@/views/blog/ConsentRequestsView.vue'),
+    meta: { auth: true },
+  },
+  {
+    path: '/blog/:slug',
+    name: 'blog-post',
+    component: () => import('@/views/blog/PostView.vue'),
+    meta: { auth: true },
+  },
+  {
     path: '/envios/:id',
     name: 'delivery-tracking',
     component: () => import('@/views/deliveries/DeliveryTrackingView.vue'),

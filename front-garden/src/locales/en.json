@@ -30,6 +30,7 @@
     "mailbox": "Mailbox",
     "schedules": "Schedules",
     "bottle": "Bottle at sea",
+    "blog": "Blog",
     "signOut": "Sign out",
     "account": "Account"
   },
@@ -310,6 +311,61 @@
     "title": "Nothing here",
     "body": "The page you're looking for doesn't exist or has moved.",
     "home": "Back to start"
+  },
+  "blog": {
+    "title": "Community blog",
+    "compose": "Write",
+    "consentRequests": "Consent requests",
+    "backToFeed": "Back to the blog",
+    "empty": "No posts yet.",
+    "allTags": "All",
+    "comments": "Comments",
+    "commentPlaceholder": "Write a comment…",
+    "commentSend": "Comment",
+    "commentsDisabled": "The author has turned off comments.",
+    "anon": "Anonymous",
+    "underReview": "This post is under review and not public yet.",
+    "awaitingConsent": "Waiting for the original letter author's permission.",
+    "published": "Published.",
+    "pending": "Sent. It goes live once the original author agrees or it clears review.",
+    "type": {
+      "all": "All",
+      "shared_letter": "Shared letter",
+      "unaddressed_letter": "Unaddressed letter",
+      "poem": "Poem",
+      "reflection": "Reflection"
+    },
+    "reaction": {
+      "heart": "Heart",
+      "tear": "Tear",
+      "flower": "Flower",
+      "candle": "Candle"
+    },
+    "form": {
+      "type": "Post type",
+      "sourceLetter": "Received letter to share",
+      "sourceLetterPlaceholder": "Pick a letter from your mailbox…",
+      "untitledLetter": "(untitled letter)",
+      "consentNote": "The person who wrote it will be asked for permission before it's published.",
+      "title": "Title",
+      "body": "Text",
+      "testimonial": "Your testimony",
+      "tags": "Tags",
+      "tagsHint": "Comma-separated. Up to 3.",
+      "anonymous": "Publish anonymously",
+      "commentsEnabled": "Allow comments",
+      "submit": "Publish"
+    },
+    "consent": {
+      "title": "Consent requests",
+      "intro": "Someone wants to publish a letter you wrote to them. This is exactly how it would look.",
+      "empty": "You have no pending requests.",
+      "publishedAs": "Will be published as: {name}",
+      "allow": "Give permission",
+      "deny": "Decline",
+      "granted": "Permission granted.",
+      "denied": "Request declined."
+    }
   },
   "bottle": {
     "title": "Bottle at sea",

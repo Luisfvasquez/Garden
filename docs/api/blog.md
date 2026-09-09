@@ -1,6 +1,26 @@
 # API — Blog y cartas al vacío
 
-Estado: `[ ] contrato definido` · `[ ] backend` · `[ ] front`
+Estado: `[x] contrato definido` · `[x] backend` · `[~] front`
+
+> **Backend (Fase 2D):** todo tras el flag `blog` (`feature:blog` → 404). `public_posts` (cuerpo **sin
+> cifrar**, `body_plain` + `tsvector`/GIN para búsqueda), `comments` (un nivel; una respuesta a una
+> respuesta se aplana al comentario raíz), `reactions` (`heart|tear|flower|candle`, **sin conteos
+> públicos**), `tags` + `taggables`. `BlogPublisher` corre el **filtro obligatorio síncrono** antes de
+> publicar: `rejected` → `422 CONTENT_FLAGGED`; `flagged` (autolesión incluida) → `202`, post
+> `moderation_status=flagged` e invisible (revisión humana, nunca borrado). `PublicPostPolicy` /
+> `CommentPolicy` con 404 sin fuga. `throttle:create-post` 5/h, `throttle:comment` 30/h.
+>
+> **Desviaciones respecto a este documento (actualizadas aquí):**
+> - `POST /consent-requests/{id}/respond` devuelve `{ data: { id, consent_status, published } }` (no el
+>   post completo). `{id}` es el **id del post**.
+> - `POST /posts/{id}/request-consent` es idempotente: `202` si sigue `pending`, `409` si ya se
+>   resolvió. La **notificación real** al autor original (con la vista previa) queda pendiente para
+>   cuando se cablee Web Push / email en 2E; entretanto la solicitud se ve en `GET /consent-requests`.
+> - `PATCH /posts/{id}` solo permite `title`, `testimonial`, `comments_enabled`, `tags` (cambiar el
+>   cuerpo exigiría re-moderar).
+> - `GET /posts` `sort=featured` aún ordena por fecha (el feed destacado curado a mano llega después).
+> - `/feed.xml` (RSS) no implementado todavía.
+> - Nuevos códigos de estado: comentar en un post con comentarios desactivados → `409 CHANNEL_CLOSED`.
 
 ## Endpoints
 

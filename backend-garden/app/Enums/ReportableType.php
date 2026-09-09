@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Enums;
 
+use App\Models\Comment;
 use App\Models\LetterDelivery;
+use App\Models\PublicPost;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 
@@ -28,6 +30,8 @@ enum ReportableType: string
         return match ($this) {
             self::LetterDelivery => LetterDelivery::class,
             self::User => User::class,
+            self::PublicPost => PublicPost::class,
+            self::Comment => Comment::class,
             default => null, // module not built yet
         };
     }

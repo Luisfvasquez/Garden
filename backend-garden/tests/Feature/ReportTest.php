@@ -74,7 +74,7 @@ it('rejects reporting a type whose module is not built', function (): void {
     Sanctum::actingAs(User::factory()->create());
 
     $this->postJson('/api/v1/reports', [
-        'reportable_type' => 'comment',
+        'reportable_type' => 'doll_chat_message',
         'reportable_id' => Str::uuid()->toString(),
         'category' => 'spam',
     ])->assertStatus(422)->assertJsonPath('error_code', 'INVALID_TARGET');

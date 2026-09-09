@@ -12,6 +12,8 @@ use App\Http\Controllers\Api\V1\Auth\RegisterController;
 use App\Http\Controllers\Api\V1\Auth\TokenController;
 use App\Http\Controllers\Api\V1\AvatarController;
 use App\Http\Controllers\Api\V1\BlockController;
+use App\Http\Controllers\Api\V1\CommentController;
+use App\Http\Controllers\Api\V1\ConsentController;
 use App\Http\Controllers\Api\V1\DeliveryController;
 use App\Http\Controllers\Api\V1\FeatureFlagController;
 use App\Http\Controllers\Api\V1\HealthController;
@@ -22,6 +24,8 @@ use App\Http\Controllers\Api\V1\MeController;
 use App\Http\Controllers\Api\V1\MeSettingsController;
 use App\Http\Controllers\Api\V1\NotificationController;
 use App\Http\Controllers\Api\V1\PostalHandleController;
+use App\Http\Controllers\Api\V1\PostController;
+use App\Http\Controllers\Api\V1\PostReactionController;
 use App\Http\Controllers\Api\V1\PublicUserController;
 use App\Http\Controllers\Api\V1\RandomQuotaController;
 use App\Http\Controllers\Api\V1\ReportController;
@@ -29,6 +33,7 @@ use App\Http\Controllers\Api\V1\ScheduleController;
 use App\Http\Controllers\Api\V1\SendLetterController;
 use App\Http\Controllers\Api\V1\SendRandomLetterController;
 use App\Http\Controllers\Api\V1\SupportResourceController;
+use App\Http\Controllers\Api\V1\TagController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -40,6 +45,14 @@ Route::middleware('throttle:api')->group(function (): void {
     Route::get('health', HealthController::class)->name('health');
     Route::get('features', FeatureFlagController::class)->name('features');
     Route::get('support-resources', [SupportResourceController::class, 'index'])->name('support-resources.index');
+
+    // --- Blog público (lectura) — contrato: docs/api/blog.md ---
+    Route::middleware('feature:blog')->group(function (): void {
+        Route::get('posts', [PostController::class, 'index'])->name('posts.index');
+        Route::get('posts/{slug}', [PostController::class, 'show'])->name('posts.show');
+        Route::get('posts/{post}/comments', [CommentController::class, 'index'])->name('posts.comments.index');
+        Route::get('tags', [TagController::class, 'index'])->name('tags.index');
+    });
 });
 
 // --- Auth (bucket: 5/min per IP) ----------------------------------------
@@ -98,6 +111,25 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
             ->name('mailbox.reply-anonymous');
         Route::post('mailbox/{delivery}/open-correspondence', [MailboxController::class, 'openCorrespondence'])
             ->name('mailbox.open-correspondence');
+    });
+
+    // --- Blog público (escritura) — contrato: docs/api/blog.md ---
+    Route::middleware('feature:blog')->group(function (): void {
+        Route::post('posts', [PostController::class, 'store'])
+            ->middleware(['verified', 'throttle:create-post'])->name('posts.store');
+        Route::patch('posts/{post}', [PostController::class, 'update'])->name('posts.update');
+        Route::delete('posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
+
+        Route::post('posts/{post}/reactions', [PostReactionController::class, 'store'])->name('posts.reactions.store');
+        Route::delete('posts/{post}/reactions/{type}', [PostReactionController::class, 'destroy'])->name('posts.reactions.destroy');
+
+        Route::post('posts/{post}/comments', [CommentController::class, 'store'])
+            ->middleware(['verified', 'throttle:comment'])->name('posts.comments.store');
+        Route::delete('comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
+
+        Route::post('posts/{post}/request-consent', [ConsentController::class, 'request'])->name('posts.request-consent');
+        Route::get('consent-requests', [ConsentController::class, 'index'])->name('consent-requests.index');
+        Route::post('consent-requests/{post}/respond', [ConsentController::class, 'respond'])->name('consent-requests.respond');
     });
 
     // --- Programaciones y envíos recurrentes — contrato: docs/api/programaciones.md ---

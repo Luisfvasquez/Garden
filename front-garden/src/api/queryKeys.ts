@@ -36,5 +36,13 @@ export const qk = {
   random: {
     quota: ['random', 'quota'] as const,
   },
+  blog: {
+    all: ['blog'] as const,
+    feed: (type?: string, tag?: string) => ['blog', 'feed', type ?? 'all', tag ?? 'all'] as const,
+    post: (slug: string) => ['blog', 'post', slug] as const,
+    comments: (postId: string) => ['blog', 'comments', postId] as const,
+    tags: ['blog', 'tags'] as const,
+    consentRequests: ['blog', 'consent-requests'] as const,
+  },
   features: ['features'] as const,
 } as const

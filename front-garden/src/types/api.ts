@@ -233,6 +233,65 @@ export interface RandomSendResult {
   held_for_review: boolean
 }
 
+// --- Blog ------------------------------------------------------------------
+
+export type PostType = 'shared_letter' | 'unaddressed_letter' | 'poem' | 'reflection'
+export type ReactionType = 'heart' | 'tear' | 'flower' | 'candle'
+export type ConsentStatus = 'not_required' | 'pending' | 'granted' | 'denied'
+
+export interface PostAuthor {
+  display_name: string
+  postal_handle: string | null
+}
+
+export interface Post {
+  id: string
+  type: PostType
+  slug: string
+  title: string
+  body: TiptapDoc
+  testimonial: string | null
+  tags: { slug: string; label: string }[]
+  is_anonymous: boolean
+  author: PostAuthor
+  comments_enabled: boolean
+  published_at: string | null
+  created_at: string
+  my_reactions: ReactionType[]
+  moderation_status?: string
+  consent_status?: ConsentStatus
+  consent_denied_until?: string
+}
+
+export interface PostComment {
+  id: string
+  post_id: string
+  parent_id: string | null
+  body: string
+  is_anonymous: boolean
+  author: PostAuthor
+  replies?: PostComment[]
+  created_at: string
+}
+
+export interface BlogTag {
+  slug: string
+  label: string
+  usage_count: number
+}
+
+export interface CreatePostInput {
+  type: PostType
+  letter_delivery_id?: string
+  title: string
+  body: TiptapDoc
+  testimonial?: string | null
+  tags?: string[]
+  is_anonymous?: boolean
+  comments_enabled?: boolean
+  visibility?: 'public' | 'unlisted'
+}
+
 // --- Notifications / blocks ---------------------------------------------------
 
 export interface AppNotification {
