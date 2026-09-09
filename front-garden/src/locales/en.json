@@ -60,7 +60,15 @@
     "saved": "Saved",
     "saveError": "Couldn't save. Retrying…",
     "saveNow": "Save now",
-    "discard": "Discard draft"
+    "discard": "Discard draft",
+    "savedOffline": "Saved offline",
+    "sendOffline": "You need a connection to send the letter.",
+    "recovered": "We recovered a draft you wrote while offline."
+  },
+  "pwa": {
+    "updateReady": "A new version of Evergarden is available.",
+    "offlineReady": "Evergarden now works offline.",
+    "reload": "Update"
   },
   "style": {
     "show": "Choose look",

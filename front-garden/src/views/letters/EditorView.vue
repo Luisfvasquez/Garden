@@ -13,6 +13,7 @@ import {
 import { useAutosave } from '@/composables/useAutosave'
 import { useApiError } from '@/composables/useApiError'
 import { useUiStore } from '@/stores/ui'
+import { db } from '@/lib/db'
 import AppLayout from '@/layouts/AppLayout.vue'
 import LetterEditor from '@/components/letter/LetterEditor.vue'
 import LetterPaper from '@/components/letter/LetterPaper.vue'
@@ -38,6 +39,7 @@ const draft = reactive({
 const showPreview = ref(false)
 const showStyle = ref(false)
 const seeded = ref(false)
+const recoveredOffline = ref(false)
 
 const letterQuery = useLetter(id)
 const catalogQuery = useStyleCatalog()
@@ -54,15 +56,26 @@ if (!id.value) {
 
 watch(
   () => letterQuery.data.value,
-  (letter) => {
+  async (letter) => {
     if (!letter || seeded.value) return
     if (letter.is_locked) {
       void router.replace({ name: 'desk' })
       return
     }
+
     draft.title = letter.title ?? ''
     draft.body = letter.body ?? structuredClone(EMPTY_DOC)
     draft.style = letter.style ?? {}
+
+    // Prefer unsynced local edits made offline over the server copy.
+    const local = await db.drafts.get(letter.id)
+    if (local && (local.synced === 0 || local.updatedAt > Date.parse(letter.updated_at))) {
+      draft.title = local.payload.title ?? ''
+      draft.body = local.payload.body ?? structuredClone(EMPTY_DOC)
+      draft.style = local.payload.style ?? {}
+      recoveredOffline.value = local.synced === 0
+    }
+
     seeded.value = true
   },
   { immediate: true },
@@ -80,14 +93,18 @@ const savingLabel = computed(
       idle: '',
       saving: t('editor.saving'),
       saved: t('editor.saved'),
+      pending: t('editor.savedOffline'),
       error: t('editor.saveError'),
     })[autosave.state.value],
 )
 
 async function goToSend() {
   await autosave.saveNow()
-  if (autosave.state.value === 'error') {
-    ui.pushToast('error', t('editor.saveError'))
+  if (autosave.state.value === 'error' || autosave.state.value === 'pending') {
+    ui.pushToast(
+      'error',
+      t(`editor.${autosave.state.value === 'pending' ? 'sendOffline' : 'saveError'}`),
+    )
     return
   }
   void router.push({ name: 'letter-send', params: { id: id.value } })
@@ -113,6 +130,8 @@ function removeDraft() {
     </AlertBox>
 
     <section v-else class="flex flex-col gap-4">
+      <AlertBox v-if="recoveredOffline" kind="info">{{ t('editor.recovered') }}</AlertBox>
+
       <header class="flex flex-wrap items-center gap-3">
         <h1 class="text-xl">{{ t('editor.title') }}</h1>
         <span class="text-xs text-[var(--text-muted)]" aria-live="polite">{{ savingLabel }}</span>

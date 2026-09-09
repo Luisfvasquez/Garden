@@ -60,7 +60,15 @@
     "saved": "Guardado",
     "saveError": "No se pudo guardar. Reintentando…",
     "saveNow": "Guardar ahora",
-    "discard": "Descartar borrador"
+    "discard": "Descartar borrador",
+    "savedOffline": "Guardado sin conexión",
+    "sendOffline": "Necesitas conexión para enviar la carta.",
+    "recovered": "Recuperamos un borrador que escribiste sin conexión."
+  },
+  "pwa": {
+    "updateReady": "Hay una versión nueva de Evergarden.",
+    "offlineReady": "Evergarden ya funciona sin conexión.",
+    "reload": "Actualizar"
   },
   "style": {
     "show": "Elegir estética",

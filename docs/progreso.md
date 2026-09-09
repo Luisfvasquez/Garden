@@ -3,7 +3,7 @@
 **Actualizar al cerrar cada tarea.** Este archivo es lo que le dice al agente qué existe ya.
 Formato: `[ ]` pendiente · `[~]` en curso · `[x]` terminado.
 
-Última actualización: 2026-09-09 — Fase 1 front: + módulo de ajustes completo. Falta PWA (iconos + caché) y la cola offline de borradores (IndexedDB).
+Última actualización: 2026-09-09 — **Fase 1 completa** (backend + front): dos personas pueden escribirse cartas que tardan en llegar, incluso sin conexión al redactar. Siguiente: checklist de lanzamiento / Fase 2.
 
 ---
 
@@ -109,9 +109,10 @@ Formato: `[ ]` pendiente · `[~]` en curso · `[x]` terminado.
       _(`OutboxView` con filtros de estado; `DeliveryTrackingView` con timeline de `delivery_events` (etiquetas del backend) + cancelación dentro de la ventana de gracia)_
 - [x] Ajustes: perfil, notificaciones, privacidad, bloqueos, dispositivos
       _(`SettingsView` con 6 secciones: `ProfileSection` (`PATCH /me` + avatar `POST /me/avatar`), `NotificationsSection` (`GET/PATCH /me/settings` + tema → `ui.setTheme`), `PrivacySection` (aleatorias/cap/acuses/countdown), `BlocksSection` (`/blocks` por handle, `user.id` para desbloquear), `DevicesSection` (`GET/DELETE /auth/devices`, no revoca el actual), `AccountSection` (rotar handle, desactivar, borrar → logout). `api/{account,devices,blocks}.ts` + `composables/useAccount.ts`. `auth.setUser()` adopta el `me` fresco)_
-- [~] PWA instalable: manifest, service worker, caché offline del buzón
-      _(plugin + `npm run build` genera SW; faltan iconos en `public/icons/` y el runtime caching del buzón)_
-- [ ] Cola offline de borradores en IndexedDB
+- [x] PWA instalable: manifest, service worker, caché offline del buzón
+      _(iconos 192/512/maskable generados por `scripts/make-icons.mjs`; `runtimeCaching` de Workbox: `GET /api/v1/mailbox*` `StaleWhileRevalidate`, imágenes/fuentes `CacheFirst`; `PwaPrompt` con `virtual:pwa-register/vue` para «nueva versión» / «listo sin conexión»)_
+- [x] Cola offline de borradores en IndexedDB
+      _(Dexie `evergarden.drafts`; `useAutosave` escribe a IndexedDB **antes** de la red → estado `pending` si no hay conexión; `useDraftSync` reintenta al volver online / cada 30 s (`App.vue`); `EditorView` recupera el borrador local no sincronizado sobre la copia del servidor; conflicto → gana el local en el flush)_
 
 > Capa de datos: `@tanstack/vue-query` (`main.ts` + `qk` en `api/queryKeys.ts`), módulos `api/{letters,deliveries,mailbox,users}.ts`, composables `use{Letters,Deliveries,Mailbox}` con invalidación. `queryClient.clear()` al cerrar sesión.
 > Desviación anotada: `src/types/api.ts` sigue escrito a mano (crece con Fase 1) hasta Scramble. `LetterPaper` arrastra ~374 KB (prosemirror de `generateHTML`) pero se carga en lazy solo en preview/lectura.
