@@ -83,9 +83,15 @@ solo en catálogos estáticos.
 | `INVALID_RESET_TOKEN` | Token de recuperación inválido o caducado |
 | `HANDLE_ROTATION_TOO_SOON` | El `postal_handle` se rotó hace menos de 30 días |
 | `ACCOUNT_INACTIVE` | Cuenta desactivada o pendiente de borrado |
+| `IDEMPOTENCY_IN_PROGRESS` | Ya hay una petición con la misma `Idempotency-Key` en curso |
 | `RECIPIENT_NOT_FOUND` | El handle postal no existe |
 | `RECIPIENT_NOT_ACCEPTING` | No acepta este tipo de carta |
 | `LETTER_LOCKED` | La carta ya fue enviada, no se puede editar |
+| `DRAFT_LIMIT_REACHED` | Se alcanzó el máximo de borradores abiertos |
+| `ATTACHMENTS_NOT_ALLOWED` | Este tipo de carta no admite adjuntos |
+| `ATTACHMENT_LIMIT_REACHED` | La carta ya tiene el máximo de adjuntos |
+| `CANNOT_BLOCK_SELF` | No puedes bloquearte a ti mismo |
+| `INVALID_TARGET` | El objetivo de la acción no es válido (reportarte a ti mismo, tipo no soportado…) |
 | `INVALID_STATE_TRANSITION` | La operación no aplica al estado actual |
 | `GRACE_PERIOD_EXPIRED` | Ya no se puede cancelar la entrega |
 | `QUOTA_EXCEEDED` | Cuota diaria/semanal superada |

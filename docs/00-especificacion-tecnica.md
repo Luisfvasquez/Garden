@@ -405,6 +405,7 @@ Separado de `users` para no ensuciar la tabla principal y permitir crecer.
 | `kind` | enum | `direct`, `random`, `unaddressed`, `doll_draft` |
 | `is_locked` | boolean | `true` en cuanto tiene una entrega despachada |
 | `doll_request_id` | uuid, nullable (FK) | Si nació de una sesión con Doll |
+| `in_reply_to_delivery_id` | uuid, nullable (FK letter_deliveries) | Borrador de respuesta a una carta recibida |
 | `moderation_status` | enum | `pending`, `approved`, `flagged`, `rejected` |
 | `created_at` / `updated_at` / `deleted_at` | | |
 
@@ -438,6 +439,7 @@ Límites sugeridos: 3 adjuntos por carta, 5 MB por imagen, 60 s de audio.
 | `schedule_id` | uuid (FK letter_schedules), nullable | Si proviene de una recurrencia |
 | `status` | enum | `queued`, `in_transit`, `delivered`, `read`, `cancelled`, `failed`, `blocked` |
 | `delivery_mode` | enum | `direct`, `random` |
+| `tier` | enum | `express`, `standard`, `slow`. Elegido al enviar, usado al despachar |
 | `scheduled_for` | timestamp (UTC) | Cuándo debe **salir** de la oficina postal |
 | `dispatched_at` | timestamp, nullable | Cuándo salió realmente |
 | `transit_duration_minutes` | integer | Calculado al despachar |

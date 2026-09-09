@@ -1,6 +1,19 @@
 # API — Entregas, seguimiento y buzón
 
-Estado: `[ ] contrato definido` · `[ ] backend` · `[ ] front`
+Estado: `[x] contrato definido` · `[x] backend` · `[ ] front`
+
+> Backend hecho: `POST /letters/{id}/send`, `TransitCalculator`, el reloj postal
+> (`DispatchDueLettersJob` → `DispatchSingleLetterJob` → `DeliverArrivedLettersJob` + scheduler),
+> `GET /deliveries` + `/deliveries/{id}` + `/tracking` (etiquetas + oficinas ficticias de
+> `transit_routes`) + `/cancel`, y el buzón completo (`GET /mailbox`, `/{id}`, `/open`, `/archive`,
+> `/favorite`, `/reply`, `/unread-count`, `?updated_since=`).
+> **Pendiente:** el listener que notifica al remitente en `LetterRead` (evento ya emitido) y las
+> notificaciones de llegada/entrega/fallo — van con el chunk de notificaciones.
+>
+> **Desviaciones:** `delivery.mode` solo acepta `direct` (el aleatorio llega en Fase 2).
+> `delivery.arrive_timezone` se valida pero no se persiste (el instante de llegada ya es absoluto).
+> Cuota exprés: 3/mes por remitente → `422 QUOTA_EXCEEDED`. `letter_deliveries` gana la columna
+> `tier` (elegida al enviar, usada al despachar).
 
 > El módulo central del producto. Lee la sección 7.1 del spec (máquina de estados) antes de tocarlo.
 

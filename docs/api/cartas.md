@@ -1,6 +1,10 @@
 # API — Cartas (composición)
 
-Estado: `[ ] contrato definido` · `[ ] backend` · `[ ] front`
+Estado: `[x] contrato definido` · `[x] backend` · `[ ] front`
+
+> Backend hecho: CRUD, autoguardado, sanitización del cuerpo Tiptap, cifrado de `body`,
+> `GET /letters/styles` y `GET /letters/{id}/preview`. Los **adjuntos** (`POST/DELETE
+> /letters/{id}/attachments`) llegan con el chunk de envío.
 
 > Una `letter` es **solo contenido y estética**. No tiene destinatario. El destinatario vive en
 > `letter_delivery`. Ver ADR-0001.
@@ -36,9 +40,12 @@ GET    /api/v1/letters/styles                   # catálogo, cacheable
 ```
 
 - `body` es **JSON de Tiptap**, no HTML. Cada cliente renderiza como quiera (crítico para la app móvil).
-- Se sanitiza en servidor. Nunca confiar en el cliente.
-- Máx. 20 000 caracteres. Máx. 50 borradores simultáneos.
-- `body` se cifra en reposo.
+- Se sanitiza en servidor: solo `doc/paragraph/text/blockquote/horizontalRule/hardBreak` y marcas
+  `bold/italic/underline`. Todo lo demás se elimina. Nunca confiar en el cliente.
+- Máx. 20 000 caracteres (sobre el texto plano). Máx. 50 borradores abiertos → `422 DRAFT_LIMIT_REACHED`.
+- `body` se cifra en reposo (`encrypted:array`); `body_plain` guarda el texto para búsqueda/moderación.
+- `kind` vía API solo acepta `direct` | `unaddressed`. `random` y `doll_draft` los crean sus flujos.
+- `in_reply_to_delivery_id` debe ser una entrega **recibida por el usuario** (si no, `422`).
 
 ## Respuesta
 
@@ -84,10 +91,33 @@ desplegar la app móvil):
 }
 ```
 
-`locked: true` para estilos aún no desbloqueados por el usuario (extensión futura).
+`locked: true` para estilos aún no desbloqueados por el usuario (extensión futura). Dimensiones
+servidas: `papers, fonts, inks, seals, sigils, stamps, borders`.
+
+## GET /letters/{id}/preview
+
+Devuelve la carta más el `style` **resuelto** contra el catálogo, para que el cliente pinte la vista
+previa a página completa sin una segunda llamada:
+
+```json
+{
+  "data": {
+    "letter": { "id": "01J8...", "body": { }, "style": { } },
+    "resolved_style": {
+      "paper": { "key": "parchment", "name": "Pergamino", "texture": "linen" },
+      "ink":   { "key": "sepia", "name": "Sepia", "hex": "#6b4423" },
+      "seal":  { "color": { "key": "wax_burgundy", "name": "Lacre burdeos" }, "sigil": { } }
+    }
+  }
+}
+```
 
 ## Adjuntos
 
-- Máx. 3 por carta. Imagen ≤ 5 MB. Audio ≤ 60 s.
+- Máx. 3 por carta (`422 ATTACHMENT_LIMIT_REACHED`). Imagen ≤ 5 MB (jpg/png/webp).
 - `multipart/form-data`, campo `file` + `type` (`image` | `audio` | `pressed_flower`).
-- **Las cartas aleatorias no admiten adjuntos** (vector de abuso). Ver `botella-al-mar.md`.
+- Audio: se acepta `duration_seconds` (entero ≤ 60) del cliente y se guarda en `metadata`.
+  El servidor aún no verifica la duración real (necesita ffprobe) — se hace en Fase 4.
+- Imagen: el servidor calcula `metadata.width` / `height`.
+- **Las cartas aleatorias no admiten adjuntos** (`422 ATTACHMENTS_NOT_ALLOWED`, vector de abuso).
+- Solo el autor y solo mientras la carta **no esté enviada** (`409 LETTER_LOCKED`).
