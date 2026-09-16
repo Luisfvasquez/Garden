@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\V1\CommentController;
 use App\Http\Controllers\Api\V1\ConsentController;
 use App\Http\Controllers\Api\V1\DeliveryController;
 use App\Http\Controllers\Api\V1\DollDirectoryController;
+use App\Http\Controllers\Api\V1\DollRequestController;
 use App\Http\Controllers\Api\V1\FeatureFlagController;
 use App\Http\Controllers\Api\V1\HealthController;
 use App\Http\Controllers\Api\V1\LetterController;
@@ -163,6 +164,15 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
         Route::patch('me/doll-profile', [MyDollProfileController::class, 'update'])->name('me.doll-profile.update');
         Route::post('me/doll-profile/availability', [MyDollProfileController::class, 'availability'])
             ->name('me.doll-profile.availability');
+
+        Route::get('doll-requests', [DollRequestController::class, 'index'])->name('doll-requests.index');
+        Route::post('doll-requests', [DollRequestController::class, 'store'])
+            ->middleware(['verified', 'throttle:create-doll-request'])->name('doll-requests.store');
+        Route::get('doll-requests/{dollRequest}', [DollRequestController::class, 'show'])->name('doll-requests.show');
+        Route::post('doll-requests/{dollRequest}/accept', [DollRequestController::class, 'accept'])->name('doll-requests.accept');
+        Route::post('doll-requests/{dollRequest}/reject', [DollRequestController::class, 'reject'])->name('doll-requests.reject');
+        Route::post('doll-requests/{dollRequest}/start', [DollRequestController::class, 'start'])->name('doll-requests.start');
+        Route::post('doll-requests/{dollRequest}/cancel', [DollRequestController::class, 'cancel'])->name('doll-requests.cancel');
     });
 
     // --- Envíos: bandeja de salida, seguimiento y cancelación ---

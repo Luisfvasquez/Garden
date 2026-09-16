@@ -454,6 +454,39 @@
       "save": "Save changes",
       "requested": "Request sent. A moderator will review it soon.",
       "updated": "Profile updated."
+    },
+    "newRequest": {
+      "title": "Ask for help",
+      "intro": "Tell the Doll what you need. Never include contact details: she only ever sees the brief and the chat.",
+      "occasion": "What's the occasion?",
+      "briefNotes": "Tell her more",
+      "recipientHint": "Hint about the recipient (no contact details)",
+      "recipientHintWarning": "Don't include emails, phone numbers or handles — it'll be rejected.",
+      "desiredTone": "Desired tone (comma-separated)",
+      "deadline": "Deadline",
+      "submit": "Send request"
+    },
+    "requests": {
+      "title": "My requests",
+      "roleAll": "All",
+      "roleClient": "As client",
+      "roleDoll": "As Doll",
+      "empty": "You don't have any requests yet.",
+      "expiresAt": "Expires",
+      "accept": "Accept",
+      "reject": "Reject",
+      "start": "Start working",
+      "cancel": "Cancel request"
+    },
+    "status": {
+      "pending": "Pending",
+      "accepted": "Accepted",
+      "in_progress": "In progress",
+      "awaiting_client": "Awaiting your reply",
+      "completed": "Completed",
+      "rejected": "Rejected",
+      "expired": "Expired",
+      "cancelled": "Cancelled"
     }
   },
   "schedules": {

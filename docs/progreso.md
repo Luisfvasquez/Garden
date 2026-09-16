@@ -168,7 +168,15 @@ Formato: `[ ]` pendiente · `[~]` en curso · `[x]` terminado.
       _(3A: migración `doll_profiles` (capacidad, no rol); `DollProfile::markVerified()`/`markUnverified()` flipan `users.role` — nunca automático; `POST/PATCH /me/doll-profile` + `GET /me/doll-profile` (deviación) + `POST /me/doll-profile/availability`; `DollProfilePolicy` (perfil no verificado → 404 salvo al dueño); Filament `DollProfileResource` (cola de pendientes, verificar/retirar verificación, badge de nav). Sin pagos — ADR-0012)_
 - [x] Directorio con filtros
       _(`GET /dolls?specialty=&language=&available=` solo perfiles verificados, `whereJsonContains` sobre jsonb, orden por `rating_avg`; `GET /dolls/{handle}` por `postal_handle` (deviación, consistente con `GET /users/{handle}`); nunca expone `email` ni `verified_at`/`max_concurrent_requests` a terceros)_
-- [ ] `doll_requests` con máquina de estados + `ExpireStaleDollRequestsJob`
+- [x] `doll_requests` con máquina de estados + `ExpireStaleDollRequestsJob`
+      _(3B: `DollRequest` con métodos guardados `accept()`/`reject()`/`start()`/`cancel()`/`expire()` (409
+      `INVALID_STATE_TRANSITION` si no aplica) — mismo patrón que `LetterDelivery`; `awaitClient()`/
+      `resume()`/`complete()`/`rate()` ya existen en el modelo pero solo se disparan desde 3C (chat/
+      drafts), no hay endpoint aún; `DollRequestPolicy` (cliente/Doll, 404 a terceros, como
+      `LetterDeliveryPolicy`); `POST /doll-requests` resuelve `doll_handle`→uuid, exige verificada +
+      disponible + cupo (`DollProfile::hasCapacity()`, cuenta solo `accepted`/`in_progress`/
+      `awaiting_client`) y filtra PII en `target_recipient_hint` (`PiiScanner`); `GET /doll-requests
+      ?role=&status=`; `ExpireStaleDollRequestsJob` cada hora)_
 - [ ] Reverb + `routes/channels.php` + doble validación en controlador
 - [ ] `doll_chat_messages` + borradores versionados + aprobación
 - [ ] Filtro anti-intercambio de contactos
@@ -179,7 +187,12 @@ Formato: `[ ]` pendiente · `[~]` en curso · `[x]` terminado.
 ### Front
 - [x] Directorio de Dolls + perfil
       _(`DollDirectoryView` (filtros especialidad/idioma/disponibilidad) + `DollProfileView` (bio, especialidades, valoración, CTA "pedir ayuda") + `BecomeDollView` (solicitar el rol / editar / toggle de disponibilidad, estado pendiente vs verificado); `api/dolls.ts` + `useDolls`; `useFeature('dolls')` gatea el nav; i18n es/en; `api/__tests__/dolls.spec.ts`)_
-- [ ] Crear solicitud con brief
+- [x] Crear solicitud con brief
+      _(`DollRequestNewView` (brief: ocasión, notas, pista sobre destinatario con aviso anti-PII, tono,
+      fecha límite) enlazada desde el CTA de `DollProfileView`; `DollRequestsListView` ("mis
+      solicitudes", filtro cliente/Doll) + `DollRequestDetailView` (detalle + aceptar/rechazar/empezar/
+      cancelar según el rol del usuario respecto a la solicitud); `api/dollRequests.ts` + `useDollRequests`;
+      i18n es/en; `api/__tests__/dollRequests.spec.ts`)_
 - [ ] Chat en tiempo real (Echo) + indicador de escritura
 - [ ] Visor de borradores versionados + aprobación
 - [ ] Panel de la Doll (bandeja de solicitudes)

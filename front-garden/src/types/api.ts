@@ -334,6 +334,53 @@ export interface DollProfileInput {
   currency?: string | null
 }
 
+export type DollRequestStatus =
+  | 'pending'
+  | 'accepted'
+  | 'in_progress'
+  | 'awaiting_client'
+  | 'completed'
+  | 'rejected'
+  | 'expired'
+  | 'cancelled'
+
+export interface DollRequestParty {
+  postal_handle: string
+  display_name: string
+  avatar_url: string | null
+}
+
+export interface DollRequest {
+  id: string
+  status: DollRequestStatus
+  client: DollRequestParty | null
+  doll: DollRequestParty | null
+  occasion: string
+  brief_notes: string | null
+  target_recipient_hint: string | null
+  desired_tone: string[]
+  deadline_at: string | null
+  expires_at: string | null
+  accepted_at: string | null
+  started_at: string | null
+  completed_at: string | null
+  rejected_at: string | null
+  cancelled_at: string | null
+  client_rating: number | null
+  client_rating_comment: string | null
+  rated_at: string | null
+  created_at: string
+}
+
+export interface CreateDollRequestInput {
+  doll_handle: string
+  occasion: string
+  brief_notes?: string | null
+  target_recipient_hint?: string | null
+  desired_tone?: string[]
+  deadline_at?: string | null
+}
+
 // --- Notifications / blocks ---------------------------------------------------
 
 export interface AppNotification {

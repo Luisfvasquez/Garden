@@ -63,6 +63,9 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('comment', fn (Request $request) => Limit::perHour(30)
             ->by((string) $request->user()?->getAuthIdentifier()));
+
+        RateLimiter::for('create-doll-request', fn (Request $request) => Limit::perHour(5)
+            ->by((string) $request->user()?->getAuthIdentifier()));
     }
 
     /**

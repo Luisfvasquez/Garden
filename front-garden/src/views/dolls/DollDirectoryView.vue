@@ -23,9 +23,14 @@ const dolls = useDollDirectory(specialty, language, () => (onlyAvailable.value ?
     <section class="flex flex-col gap-4">
       <div class="flex items-center justify-between">
         <h1 class="text-2xl">{{ t('dolls.directory.title') }}</h1>
-        <RouterLink :to="{ name: 'doll-become' }" class="text-sm text-[var(--accent)] underline">
-          {{ t('dolls.directory.becomeADoll') }}
-        </RouterLink>
+        <div class="flex gap-3 text-sm">
+          <RouterLink :to="{ name: 'doll-requests' }" class="text-[var(--accent)] underline">
+            {{ t('dolls.requests.title') }}
+          </RouterLink>
+          <RouterLink :to="{ name: 'doll-become' }" class="text-[var(--accent)] underline">
+            {{ t('dolls.directory.becomeADoll') }}
+          </RouterLink>
+        </div>
       </div>
       <p class="text-sm text-[var(--text-muted)]">{{ t('dolls.directory.intro') }}</p>
 

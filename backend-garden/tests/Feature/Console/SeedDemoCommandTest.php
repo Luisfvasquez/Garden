@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Enums\DeliveryStatus;
 use App\Models\DollProfile;
+use App\Models\DollRequest;
 use App\Models\FeatureFlag;
 use App\Models\LetterDelivery;
 use App\Models\LetterSchedule;
@@ -20,6 +21,8 @@ it('seeds a coherent demo scenario', function (): void {
         ->and(PublicPost::where('consent_status', 'pending')->count())->toBe(1)
         ->and(DollProfile::verified()->count())->toBe(2)
         ->and(DollProfile::whereNull('verified_at')->count())->toBe(1)
+        ->and(DollRequest::count())->toBe(2)
+        ->and(DollRequest::where('status', 'in_progress')->count())->toBe(1)
         ->and(FeatureFlag::where('enabled', false)->count())->toBe(0);
 });
 
@@ -28,7 +31,8 @@ it('is idempotent — a second run replaces the demo users instead of piling up'
     $this->artisan('evergarden:seed-demo')->assertSuccessful();
 
     expect(User::where('email', 'like', '%@demo.evergarden.test')->count())->toBe(6)
-        ->and(DollProfile::count())->toBe(3);
+        ->and(DollProfile::count())->toBe(3)
+        ->and(DollRequest::count())->toBe(2);
 });
 
 it('refuses to run in production', function (): void {

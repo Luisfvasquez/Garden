@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Jobs\Dolls\ExpireStaleDollRequestsJob;
 use App\Jobs\Maintenance\DispatchDuePushesJob;
 use App\Jobs\Maintenance\GenerateUpcomingDeliveriesJob;
 use App\Jobs\Postal\DeliverArrivedLettersJob;
@@ -31,3 +32,6 @@ Schedule::job(new RefreshRandomRecipientPoolJob)->everyFifteenMinutes();
 
 // Web Push: flush due rows, grouping siblings; quiet-hours rows join once due.
 Schedule::job(new DispatchDuePushesJob)->everyMinute()->withoutOverlapping();
+
+// Auto Memory Dolls: a Doll who never responds loses the request (docs/api/dolls.md).
+Schedule::job(new ExpireStaleDollRequestsJob)->hourly()->withoutOverlapping();

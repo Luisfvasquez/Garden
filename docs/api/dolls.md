@@ -1,6 +1,6 @@
 # API — Auto Memory Dolls
 
-Estado: `[x] contrato definido` · `[~] backend` · `[~] front`
+Estado: `[x] contrato definido` · `[~] backend (3A, 3B)` · `[~] front (3A)`
 
 > **Única excepción** a la regla "todo se comunica por cartas". Contratar a alguien para que te ayude a
 > escribir. Ver ADR-0005.
@@ -12,15 +12,32 @@ Estado: `[x] contrato definido` · `[~] backend` · `[~] front`
 > `POST/PATCH /me/doll-profile`, `POST /me/doll-profile/availability`. Verificación manual desde
 > Filament (`DollProfileResource`, cola de pendientes con badge de nav).
 >
+> **Backend (Fase 3B — `doll_requests`):** máquina de estados vía métodos guardados en el modelo
+> (`accept()`/`reject()`/`start()`/`cancel()`/…, nunca `->update(['status' => …])`), mismo patrón que
+> `LetterDelivery`. `DollRequestPolicy` (dos perspectivas — cliente y Doll — 404 para cualquier otra
+> persona, como `LetterDeliveryPolicy`). `ExpireStaleDollRequestsJob` corre cada hora.
+>
 > **Desviaciones respecto a este documento (actualizadas aquí):**
 > - `GET /dolls/{handle}` usa `postal_handle`, no el `id` literal — mismo identificador público que
->   `GET /users/{postal_handle}` en todo el resto del contrato. `POST /doll-requests` (Fase 3B) hará lo
->   mismo: acepta un handle público, resuelve `doll_id` (uuid) en el servidor.
+>   `GET /users/{postal_handle}` en todo el resto del contrato.
+> - `POST /doll-requests` acepta `doll_handle` (el `postal_handle` público), no `doll_id`: el cliente
+>   nunca tiene el uuid crudo de la Doll. El servidor lo resuelve.
 > - Añadido `GET /me/doll-profile` (no estaba en el contrato) para que el front sepa si el usuario ya
 >   tiene perfil y en qué estado (`verified_at`).
 > - Sin pagos: ver ADR-0012. `rate_type` distinto de `free` es informativo.
 > - `doll_profiles.verified_at` y `max_concurrent_requests` solo se exponen al dueño del perfil, nunca
 >   a un tercero (ni siquiera si el perfil es visible en el directorio).
+> - `max_concurrent_requests` cuenta solicitudes `accepted`/`in_progress`/`awaiting_client` — **no**
+>   `pending`. Una ráfaga de solicitudes entrantes no debe por sí misma bloquear a la Doll de recibir
+>   más; lo que ocupa un "cupo" es el trabajo activo, no las preguntas sin responder.
+> - `POST /doll-requests/{id}/complete` **no existe como endpoint independiente en 3B.** La transición
+>   real a `completed` la dispara `POST /drafts/{draftId}/approve` (Fase 3C, ver "Aprobar y cerrar" más
+>   abajo) — el modelo ya tiene el método guardado (`DollRequest::complete()`), listo para que 3C lo
+>   llame. Igual con la alternancia `in_progress ⇄ awaiting_client`: los métodos (`awaitClient()`/
+>   `resume()`) existen pero solo el chat de 3C los dispara.
+> - `POST /doll-requests/{id}/rate` se difiere a cuando exista `RecalculateDollRatingsJob`: valorar una
+>   solicitud que aún no se puede completar (ver punto anterior) no tenía sentido enviarlo en 3B. El
+>   modelo ya tiene `DollRequest::rate()` guardado y listo.
 
 ## Endpoints
 
@@ -66,7 +83,7 @@ expired
 
 ```json
 {
-  "doll_id": "01J8...",
+  "doll_handle": "cattleya",
   "occasion": "Disculpa a un hermano",
   "brief_notes": "Llevamos tres años sin hablar...",
   "target_recipient_hint": "Mi hermano mayor",

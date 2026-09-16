@@ -454,6 +454,39 @@
       "save": "Guardar cambios",
       "requested": "Solicitud enviada. Un moderador la revisará pronto.",
       "updated": "Perfil actualizado."
+    },
+    "newRequest": {
+      "title": "Pedir ayuda",
+      "intro": "Cuéntale a la Doll qué necesitas. Nunca incluyas datos de contacto: ella solo ve el brief y el chat.",
+      "occasion": "¿Para qué ocasión?",
+      "briefNotes": "Cuéntale más",
+      "recipientHint": "Pista sobre el destinatario (sin datos de contacto)",
+      "recipientHintWarning": "No incluyas emails, teléfonos ni redes sociales — se rechazará.",
+      "desiredTone": "Tono deseado (separado por comas)",
+      "deadline": "Fecha límite",
+      "submit": "Enviar solicitud"
+    },
+    "requests": {
+      "title": "Mis solicitudes",
+      "roleAll": "Todas",
+      "roleClient": "Como cliente",
+      "roleDoll": "Como Doll",
+      "empty": "No tienes solicitudes todavía.",
+      "expiresAt": "Expira",
+      "accept": "Aceptar",
+      "reject": "Rechazar",
+      "start": "Empezar a trabajar",
+      "cancel": "Cancelar solicitud"
+    },
+    "status": {
+      "pending": "Pendiente",
+      "accepted": "Aceptada",
+      "in_progress": "En curso",
+      "awaiting_client": "Esperando tu respuesta",
+      "completed": "Completada",
+      "rejected": "Rechazada",
+      "expired": "Expirada",
+      "cancelled": "Cancelada"
     }
   },
   "schedules": {

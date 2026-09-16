@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\DollRateType;
+use App\Enums\DollRequestStatus;
 use App\Enums\UserRole;
 use Database\Factories\DollProfileFactory;
 use Illuminate\Database\Eloquent\Builder;
@@ -137,6 +138,25 @@ class DollProfile extends Model
         }
     }
 
-    // Capacity checks against `doll_requests` (`activeRequestsCount()`,
-    // `hasCapacity()`) land with that table in the next module.
+    /**
+     * Requests that currently occupy a "slot" — accepted or in progress.
+     * `pending` requests don't count: a burst of incoming asks shouldn't
+     * itself lock the Doll out of receiving more.
+     */
+    public function activeRequestsCount(): int
+    {
+        return DollRequest::query()
+            ->where('doll_id', $this->user_id)
+            ->whereIn('status', [
+                DollRequestStatus::Accepted,
+                DollRequestStatus::InProgress,
+                DollRequestStatus::AwaitingClient,
+            ])
+            ->count();
+    }
+
+    public function hasCapacity(): bool
+    {
+        return $this->activeRequestsCount() < $this->max_concurrent_requests;
+    }
 }

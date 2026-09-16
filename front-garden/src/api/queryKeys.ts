@@ -51,5 +51,10 @@ export const qk = {
     one: (userId: string) => ['dolls', 'one', userId] as const,
     myProfile: ['dolls', 'me'] as const,
   },
+  dollRequests: {
+    all: ['doll-requests'] as const,
+    list: (role?: string, status?: string) => ['doll-requests', 'list', role ?? 'all', status ?? 'all'] as const,
+    one: (id: string) => ['doll-requests', 'one', id] as const,
+  },
   features: ['features'] as const,
 } as const

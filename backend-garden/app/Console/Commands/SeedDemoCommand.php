@@ -13,6 +13,7 @@ use App\Enums\ModerationStatus;
 use App\Enums\RecurrenceType;
 use App\Enums\TransitTier;
 use App\Models\DollProfile;
+use App\Models\DollRequest;
 use App\Models\FeatureFlag;
 use App\Models\Letter;
 use App\Models\LetterDelivery;
@@ -29,9 +30,10 @@ use Illuminate\Support\Facades\DB;
 /**
  * A coherent demo scenario for local front-end work: readable handles, letters
  * in every delivery state, a schedule with occurrences, blog posts (including
- * one awaiting consent and one held for review), and Doll profiles (verified
- * and pending) — backend-garden/docs/migraciones.md ("sin esto, probar el
- * front es lentísimo").
+ * one awaiting consent and one held for review), Doll profiles (verified
+ * and pending) and Doll requests (pending and in progress) —
+ * backend-garden/docs/migraciones.md ("sin esto, probar el front es
+ * lentísimo").
  *
  * Safe to re-run: every demo user shares the `@demo.evergarden.test` domain and
  * is wiped (cascading through their letters, deliveries, posts…) before
@@ -82,6 +84,15 @@ class SeedDemoCommand extends Command
         }
 
         $this->components->info("Retirando {$existing->count()} usuarios de una tanda anterior…");
+
+        // doll_requests.client_id/doll_id are nullOnDelete (like letter_deliveries'
+        // sender/recipient — preserves history for real accounts), so a stale run's
+        // requests would otherwise survive as orphans instead of being replaced.
+        $ids = $existing->pluck('id');
+        DollRequest::query()
+            ->where(fn ($q) => $q->whereIn('client_id', $ids)->orWhereIn('doll_id', $ids))
+            ->delete();
+
         $existing->each(fn (User $user) => $user->forceDelete());
     }
 
@@ -335,7 +346,27 @@ class SeedDemoCommand extends Command
         $iris->user_id = $u['iris']->getKey();
         $iris->save();
 
-        $this->components->info('3 perfiles Doll (2 verificadas, 1 pendiente de revisión).');
+        // A pending ask (Cattleya hasn't answered yet) and one already underway —
+        // exercises the accept/reject/start/cancel flow in the front demo.
+        DollRequest::factory()->create([
+            'client_id' => $u['violet']->getKey(),
+            'doll_id' => $u['cattleya']->getKey(),
+            'occasion' => 'Disculpa a un hermano',
+            'brief_notes' => 'Llevamos tres años sin hablar y no sé cómo empezar.',
+            'target_recipient_hint' => 'Mi hermano mayor',
+            'desired_tone' => ['íntimo', 'sobrio'],
+        ]);
+
+        DollRequest::factory()->inProgress()->create([
+            'client_id' => $u['gilbert']->getKey(),
+            'doll_id' => $u['cattleya']->getKey(),
+            'occasion' => 'Carta de agradecimiento',
+            'brief_notes' => 'Quiero agradecerle a mi mentor todo lo que hizo por mí.',
+            'target_recipient_hint' => 'Mi antiguo mentor',
+            'desired_tone' => ['cálido', 'formal'],
+        ]);
+
+        $this->components->info('3 perfiles Doll (2 verificadas, 1 pendiente de revisión) + 2 solicitudes (pendiente, en curso).');
     }
 
     private function enableFlags(): void

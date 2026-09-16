@@ -145,6 +145,24 @@ const routes: RouteRecordRaw[] = [
     meta: { auth: true, verified: true },
   },
   {
+    path: '/dolls/solicitudes',
+    name: 'doll-requests',
+    component: () => import('@/views/dolls/DollRequestsListView.vue'),
+    meta: { auth: true },
+  },
+  {
+    path: '/dolls/solicitudes/nueva',
+    name: 'doll-request-new',
+    component: () => import('@/views/dolls/DollRequestNewView.vue'),
+    meta: { auth: true, verified: true },
+  },
+  {
+    path: '/dolls/solicitudes/:id',
+    name: 'doll-request-detail',
+    component: () => import('@/views/dolls/DollRequestDetailView.vue'),
+    meta: { auth: true },
+  },
+  {
     path: '/dolls/:id',
     name: 'doll-profile',
     component: () => import('@/views/dolls/DollProfileView.vue'),
