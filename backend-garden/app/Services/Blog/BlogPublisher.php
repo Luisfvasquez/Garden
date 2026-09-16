@@ -16,10 +16,10 @@ use App\Models\PublicPost;
 use App\Models\Tag;
 use App\Models\User;
 use App\Services\Moderation\ContentModerator;
+use App\Services\Moderation\CriticalAlertDispatcher;
 use App\Services\Moderation\ModerationContext;
 use App\Support\TiptapContent;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 /**
  * Creates blog posts and comments, running the mandatory pre-publication filter
@@ -32,7 +32,10 @@ class BlogPublisher
 {
     private const MAX_TAGS = 3;
 
-    public function __construct(private readonly ContentModerator $moderator) {}
+    public function __construct(
+        private readonly ContentModerator $moderator,
+        private readonly CriticalAlertDispatcher $alerts,
+    ) {}
 
     /**
      * @param  array<string, mixed>  $data
@@ -58,15 +61,8 @@ class BlogPublisher
         }
 
         $flagged = $verdict->blocks();
-        if ($flagged) {
-            Log::warning('Blog post held for review', [
-                'author_id' => $author->getKey(),
-                'categories' => $verdict->toArray()['categories'],
-                'critical' => $verdict->isCritical(),
-            ]);
-        }
 
-        return DB::transaction(function () use ($author, $data, $type, $body, $plain, $testimonial, $source, $flagged): PublicPost {
+        return DB::transaction(function () use ($author, $data, $type, $body, $plain, $testimonial, $source, $flagged, $verdict): PublicPost {
             $post = new PublicPost([
                 'type' => $type,
                 'title' => trim((string) $data['title']),
@@ -82,6 +78,15 @@ class BlogPublisher
             $post->consent_status = $source !== null ? ConsentStatus::Pending : ConsentStatus::NotRequired;
             $post->source_delivery_id = $source?->getKey();
             $post->save();
+
+            if ($flagged) {
+                $this->alerts->alertIfCritical(
+                    'Blog post held for review',
+                    $verdict,
+                    "{$author->postal_handle}'s blog post was held for review.",
+                    ['post_id' => $post->id, 'author_id' => $author->getKey()],
+                );
+            }
 
             $this->syncTags($post, (array) ($data['tags'] ?? []));
 
@@ -132,6 +137,15 @@ class BlogPublisher
         $comment->moderation_status = $flagged ? ModerationStatus::Flagged : ModerationStatus::Approved;
         $comment->published_at = $flagged ? null : now();
         $comment->save();
+
+        if ($flagged) {
+            $this->alerts->alertIfCritical(
+                'Blog comment held for review',
+                $verdict,
+                "{$author->postal_handle}'s comment was held for review.",
+                ['comment_id' => $comment->id, 'post_id' => $post->id, 'author_id' => $author->getKey()],
+            );
+        }
 
         return $comment;
     }

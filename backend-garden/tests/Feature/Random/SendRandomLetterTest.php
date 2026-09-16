@@ -8,8 +8,10 @@ use App\Models\Letter;
 use App\Models\LetterDelivery;
 use App\Models\ModerationAction;
 use App\Models\User;
+use App\Notifications\CriticalModerationAlertNotification;
 use App\Services\Postal\ArrayRandomRecipientPool;
 use App\Services\Postal\RandomRecipientPool;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 
@@ -148,6 +150,19 @@ it('holds a self-harm letter for human review instead of blocking it', function 
     $delivery = LetterDelivery::firstWhere('sender_id', $sender->id);
     expect($delivery->status)->toBe(DeliveryStatus::Held)
         ->and($delivery->held_at)->not->toBeNull();
+});
+
+it('emails the team when a held random letter is self-harm — the real escalation', function (): void {
+    Notification::fake();
+    config(['moderation.critical_alert_email' => 'team@evergarden.test']);
+
+    $sender = eligibleSender();
+    Sanctum::actingAs($sender);
+    $letter = randomDraft($sender, 'A veces pienso que no quiero seguir viviendo, y necesitaba decirlo.');
+
+    sendRandom($this, $letter->id)->assertStatus(202);
+
+    Notification::assertSentOnDemandTimes(CriticalModerationAlertNotification::class, 1);
 });
 
 it('rejects with NO_RANDOM_RECIPIENT when the pool is empty', function (): void {

@@ -3,7 +3,8 @@
 Estado: `[x] contrato definido` · `[~] backend` · `[ ] front`
 
 > Backend hecho: **bloqueos** (`GET/POST/DELETE /blocks`, silencioso, ya consumido por el despacho),
-> **reportes** (`POST /reports`, severidad automática, `throttle:report` 10/h, críticos → log) y
+> **reportes** (`POST /reports`, severidad automática, `throttle:report` 10/h, críticos → `Log::critical`
+> + correo real vía `CriticalAlertDispatcher`, ver más abajo) y
 > **notificaciones** in-app + email: eventos de dominio (`LetterDispatched`/`LetterDelivered`/
 > `LetterFailed`/`LetterRead`) → listeners → `Notification` (`database` + `mail` según
 > `user_settings`), y `GET /notifications` · `/unread-count` · `/{id}/read` · `/read-all`.
@@ -17,8 +18,7 @@ Estado: `[x] contrato definido` · `[~] backend` · `[ ] front`
 > agrupa por `(user, type)` → una sola notificación ("N novedades nuevas") y poda suscripciones caídas.
 > `WebPushClient` es interfaz: `MinishlinkWebPushClient` (VAPID) / `NullWebPushClient` (sin claves) /
 > doble de test. La llegada anónima nunca nombra al remitente en el payload.
-> **Pendiente:** `GET /features` per-usuario, escalado real email/Slack de reportes críticos, push
-> nativo iOS/Android (Fase 4).
+> **Pendiente:** `GET /features` per-usuario, push nativo iOS/Android (Fase 4).
 > **Desviación:** `notify_on_dispatch_confirm` cubre a la vez el aviso de *despacho* y el de *entrega*
 > al remitente (el spec tiene un solo flag).
 
@@ -56,7 +56,9 @@ POST /api/v1/reports
 `category`: `harassment` | `sexual` | `hate` | `violence` | `self_harm` | `spam` | `minor_safety` | `other`.
 
 **Escalado crítico:** `minor_safety` y `self_harm` con severidad `critical` generan alerta inmediata al
-equipo (email/Slack), no esperan en la cola de moderación.
+equipo — `Log::critical` siempre, y correo real (`CriticalAlertDispatcher` → `MODERATION_ALERT_EMAIL`)
+cuando está configurado —, no esperan en la cola de moderación
+(`backend-garden/docs/moderacion.md`).
 
 ## Notificaciones
 

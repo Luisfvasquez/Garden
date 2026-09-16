@@ -7,6 +7,8 @@ use App\Models\FeatureFlag;
 use App\Models\PublicPost;
 use App\Models\Reaction;
 use App\Models\User;
+use App\Notifications\CriticalModerationAlertNotification;
+use Illuminate\Support\Facades\Notification;
 use Laravel\Sanctum\Sanctum;
 
 beforeEach(function (): void {
@@ -55,6 +57,19 @@ it('holds a flagged comment out of the public list', function (): void {
         ->assertStatus(202);
 
     $this->getJson("/api/v1/posts/{$post->id}/comments")->assertJsonCount(0, 'data');
+});
+
+it('emails the team when a held comment is self-harm — the real escalation', function (): void {
+    Notification::fake();
+    config(['moderation.critical_alert_email' => 'team@evergarden.test']);
+
+    $post = PublicPost::factory()->create();
+    Sanctum::actingAs(User::factory()->create(['email_verified_at' => now()]));
+
+    $this->postJson("/api/v1/posts/{$post->id}/comments", ['body' => 'A veces creo que no quiero seguir viviendo.'])
+        ->assertStatus(202);
+
+    Notification::assertSentOnDemandTimes(CriticalModerationAlertNotification::class, 1);
 });
 
 it('lets the post author delete any comment', function (): void {

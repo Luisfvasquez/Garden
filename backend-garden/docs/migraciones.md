@@ -35,6 +35,12 @@ CREATE INDEX idx_deliveries_sender   ON letter_deliveries (sender_id, created_at
 
 ## Seeds
 
-`evergarden:seed-demo` debe crear un escenario coherente: usuarios con handles legibles, cartas en los
-distintos estados, una programación con ocurrencias, posts del blog, una Doll verificada con una
-solicitud en curso. Sin esto, probar el front es lentísimo.
+`php artisan evergarden:seed-demo` crea un escenario coherente: 6 usuarios de demo con handles
+legibles (contraseña `password`), cartas en los distintos estados (`queued`, `in_transit`,
+`delivered`, `read`, `cancelled`, `failed`, más una aleatoria `held` para que la cola de moderación
+nunca esté vacía), una programación anual con ocurrencias materializadas, y tres posts de blog
+(incluida una `shared_letter` pendiente de consentimiento). Activa todos los feature flags. Es
+**idempotente**: cada re-ejecución retira la tanda anterior (usuarios `@demo.evergarden.test`, cuyas
+cartas/posts/programaciones caen en cascada) antes de recrearla, y se niega a correr en producción.
+
+Pendiente: una Doll verificada con una solicitud en curso, cuando exista el módulo (Fase 3).

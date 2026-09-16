@@ -5,6 +5,8 @@ declare(strict_types=1);
 use App\Models\FeatureFlag;
 use App\Models\PublicPost;
 use App\Models\User;
+use App\Notifications\CriticalModerationAlertNotification;
+use Illuminate\Support\Facades\Notification;
 use Laravel\Sanctum\Sanctum;
 
 beforeEach(function (): void {
@@ -82,6 +84,21 @@ it('holds a self-harm post for review instead of publishing it', function (): vo
     ]))->assertStatus(202)->assertJsonPath('data.moderation_status', 'flagged');
 
     $this->getJson('/api/v1/posts')->assertJsonCount(0, 'data');
+});
+
+it('emails the team when a held post is self-harm — the real escalation', function (): void {
+    Notification::fake();
+    config(['moderation.critical_alert_email' => 'team@evergarden.test']);
+
+    Sanctum::actingAs(User::factory()->create(['email_verified_at' => now()]));
+
+    $this->postJson('/api/v1/posts', postPayload([
+        'body' => ['type' => 'doc', 'content' => [
+            ['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => 'Llevo semanas pensando que no quiero seguir viviendo.']]],
+        ]],
+    ]))->assertStatus(202);
+
+    Notification::assertSentOnDemandTimes(CriticalModerationAlertNotification::class, 1);
 });
 
 it('rejects a post that hard-fails the filter', function (): void {

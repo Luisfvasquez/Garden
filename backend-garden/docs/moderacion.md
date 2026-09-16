@@ -18,8 +18,19 @@ reportes** ordenada por `severity` con «Confirmar» (`Report::markActioned()` �
 `RandomAbuseGuard`) / «Descartar», moderación del blog (posts `flagged` → aprobar/rechazar), catálogos
 (`feature_flags`, `support_resources`, `tags`), y `PlatformStatsWidget` (usuarios, tránsito, salud del
 reloj postal, moderación pendiente).
-**Pendiente:** `ModerateContentJob` asíncrono + escalado real email/Slack; cola dedicada de comentarios
-retenidos; recursos de `transit_routes`/`postal_holidays`.
+**Estado (Fase 2, cierre):** `CriticalAlertDispatcher` — el **escalado real** de `minor_safety`/
+`self_harm`: siempre registra `Log::critical`/`Log::warning`, y además envía un correo (notificación
+*on-demand* a `MODERATION_ALERT_EMAIL`, vacío = solo log) cuando la categoría es crítica. Un fallo del
+mailer nunca revienta la petición del usuario (se traga y se loguea aparte). Cableado en los cuatro
+puntos que retienen contenido: `ReportController` (reporte crítico), `RandomLetterSender::send()` y
+`::replyAnonymously()` (carta/respuesta aleatoria retenida), `BlogPublisher::createPost()` y
+`::createComment()` (post/comentario retenido). La política vive **una sola vez** en
+`CriticalAlertDispatcher::alertIfCritical()`.
+**Pendiente:** `ModerateContentJob` asíncrono — deliberadamente no implementado: `LocalModerator`
+responde en microsegundos, así que la moderación síncrona ya cumple el contrato (`422`/`202` en la
+misma respuesta) sin la complejidad de una cola. Llega si se añade un driver alojado (`OpenAiModerator`)
+lo bastante lento como para justificarlo. También pendiente: cola dedicada de comentarios retenidos en
+el panel (hoy comparten vista con los posts); recursos de `transit_routes`/`postal_holidays` en Filament.
 
 ## Capas
 
@@ -62,7 +73,8 @@ Patrones de email, teléfono, @handles y URLs en:
 ## Escalado crítico
 
 `minor_safety` y `self_harm` con severidad `critical` → alerta inmediata al equipo, fuera de la cola
-normal.
+normal, vía `CriticalAlertDispatcher` (`App\Services\Moderation`): log siempre, correo si
+`MODERATION_ALERT_EMAIL` está configurado.
 
 ## Autolesión: qué NO hacer
 

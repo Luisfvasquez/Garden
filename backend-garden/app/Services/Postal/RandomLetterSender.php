@@ -16,10 +16,10 @@ use App\Models\Letter;
 use App\Models\LetterDelivery;
 use App\Models\User;
 use App\Services\Moderation\ContentModerator;
+use App\Services\Moderation\CriticalAlertDispatcher;
 use App\Services\Moderation\ModerationContext;
 use App\Support\TiptapContent;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 /**
  * Sends a "bottle at sea": one queued delivery with no recipient — the stranger
@@ -46,6 +46,7 @@ class RandomLetterSender
         private readonly RandomRecipientPool $pool,
         private readonly ContentModerator $moderator,
         private readonly TransitCalculator $calculator,
+        private readonly CriticalAlertDispatcher $alerts,
     ) {}
 
     public function send(Letter $letter, User $sender, TransitTier $tier): LetterDelivery
@@ -118,12 +119,12 @@ class RandomLetterSender
             }
 
             if ($held) {
-                Log::warning('Random letter held for review', [
-                    'delivery_id' => $delivery->id,
-                    'sender_id' => $sender->getKey(),
-                    'categories' => $verdict->toArray()['categories'],
-                    'critical' => $verdict->isCritical(),
-                ]);
+                $this->alerts->alertIfCritical(
+                    'Random letter held for review',
+                    $verdict,
+                    "{$sender->postal_handle}'s random letter was held for review.",
+                    ['delivery_id' => $delivery->id, 'user_id' => $sender->getKey()],
+                );
             }
 
             return $delivery;
@@ -209,10 +210,12 @@ class RandomLetterSender
                 $reply->recordEvent(DeliveryEventType::Queued);
                 $letter->lock();
             } else {
-                Log::warning('Anonymous reply held for review', [
-                    'delivery_id' => $reply->id,
-                    'categories' => $verdict->toArray()['categories'],
-                ]);
+                $this->alerts->alertIfCritical(
+                    'Anonymous reply held for review',
+                    $verdict,
+                    "{$replier->postal_handle}'s anonymous reply was held for review.",
+                    ['delivery_id' => $reply->id, 'user_id' => $replier->getKey()],
+                );
             }
 
             $original->linkAnonymousReply($reply->getKey());

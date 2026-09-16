@@ -21,6 +21,12 @@ return [
         'restrict_days' => (int) env('MODERATION_RANDOM_RESTRICT_DAYS', 30),
     ],
 
+    // Real escalation for `minor_safety` / `self_harm` at `critical` severity:
+    // a report filed as critical, or a `flagged` verdict on random/blog content
+    // whose categories include one of those two (docs/moderacion.md §Escalado
+    // crítico). Always logged; emailed here too when set. Empty = log only.
+    'critical_alert_email' => env('MODERATION_ALERT_EMAIL', ''),
+
     /*
      * LocalModerator: lexicon + regex. Zero external calls, good enough to gate
      * the launch and to run the whole test suite deterministically. The lists

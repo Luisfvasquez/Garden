@@ -11,11 +11,13 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreReportRequest;
 use App\Http\Resources\ReportResource;
 use App\Models\Report;
+use App\Services\Moderation\CriticalAlertDispatcher;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Log;
 
 class ReportController extends Controller
 {
+    public function __construct(private readonly CriticalAlertDispatcher $alerts) {}
+
     public function store(StoreReportRequest $request): JsonResponse
     {
         $data = $request->validated();
@@ -50,12 +52,12 @@ class ReportController extends Controller
         );
 
         if ($report->severity->isCritical()) {
-            // Skips the moderation queue — alerting (email/Slack) lands with the notifications work.
-            Log::critical('Critical report filed', [
-                'report_id' => $report->id,
-                'category' => $category->value,
-                'reportable' => "{$type->value}:{$data['reportable_id']}",
-            ]);
+            // Skips the moderation queue entirely (docs/moderacion.md §Escalado crítico).
+            $this->alerts->alert(
+                'Critical report filed',
+                "{$me->postal_handle} reported {$type->value}:{$data['reportable_id']} as {$category->value}.",
+                ['report_id' => $report->id, 'category' => $category->value, 'reportable' => "{$type->value}:{$data['reportable_id']}"],
+            );
         }
 
         return (new ReportResource($report))->response()->setStatusCode(201);
