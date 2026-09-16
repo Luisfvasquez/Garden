@@ -31,6 +31,7 @@
     "schedules": "Schedules",
     "bottle": "Bottle at sea",
     "blog": "Blog",
+    "dolls": "Dolls",
     "signOut": "Sign out",
     "account": "Account"
   },
@@ -409,6 +410,51 @@
     "corrOpened": "You now know each other's handles.",
     "corrOpenedShort": "Correspondence open.",
     "replyUsedShort": "Replied"
+  },
+  "dolls": {
+    "directory": {
+      "title": "Auto Memory Dolls",
+      "intro": "Hire someone to help you write the letter you don't know how to start.",
+      "becomeADoll": "Offer to become a Doll",
+      "specialtyPlaceholder": "Specialty (e.g. grief)",
+      "languagePlaceholder": "Language",
+      "onlyAvailable": "Available only",
+      "available": "Available",
+      "busy": "Unavailable",
+      "empty": "No Dolls match those filters.",
+      "rating": "{avg}★ ({count})"
+    },
+    "profile": {
+      "backToDirectory": "Back to the directory",
+      "specialties": "Specialties",
+      "languages": "Languages",
+      "tone": "Tone",
+      "completed": "0 completed requests | 1 completed request | {count} completed requests",
+      "requestHelp": "Ask this Doll for help"
+    },
+    "rateType": {
+      "free": "Volunteer",
+      "per_letter": "Per letter",
+      "hourly": "Hourly"
+    },
+    "become": {
+      "title": "Become an Auto Memory Doll",
+      "intro": "Help someone else write the letter they can't find a way to start.",
+      "pendingReview": "Your request is under review. We'll let you know once it's verified.",
+      "verified": "Your profile is verified and visible in the directory.",
+      "available": "Available for new requests",
+      "headline": "Headline",
+      "bio": "Bio",
+      "specialties": "Specialties",
+      "languages": "Languages",
+      "tone": "Tone",
+      "commaHint": "Comma-separated.",
+      "rateType": "Rate",
+      "submit": "Send request",
+      "save": "Save changes",
+      "requested": "Request sent. A moderator will review it soon.",
+      "updated": "Profile updated."
+    }
   },
   "schedules": {
     "title": "Schedules",

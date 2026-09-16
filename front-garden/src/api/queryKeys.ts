@@ -44,5 +44,12 @@ export const qk = {
     tags: ['blog', 'tags'] as const,
     consentRequests: ['blog', 'consent-requests'] as const,
   },
+  dolls: {
+    all: ['dolls'] as const,
+    directory: (specialty?: string, language?: string, available?: boolean) =>
+      ['dolls', 'directory', specialty ?? 'all', language ?? 'all', available ?? 'any'] as const,
+    one: (userId: string) => ['dolls', 'one', userId] as const,
+    myProfile: ['dolls', 'me'] as const,
+  },
   features: ['features'] as const,
 } as const

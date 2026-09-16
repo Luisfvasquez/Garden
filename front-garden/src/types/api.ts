@@ -292,6 +292,48 @@ export interface CreatePostInput {
   visibility?: 'public' | 'unlisted'
 }
 
+// --- Auto Memory Dolls -------------------------------------------------------
+
+export type DollRateType = 'free' | 'per_letter' | 'hourly'
+
+export interface DollSummary {
+  postal_handle: string
+  display_name: string
+  avatar_url: string | null
+}
+
+export interface DollProfile {
+  id: string
+  doll: DollSummary
+  headline: string
+  bio: string | null
+  specialties: string[]
+  languages: string[]
+  tone_tags: string[]
+  rate_type: DollRateType
+  rate_amount: number | null
+  currency: string | null
+  is_available: boolean
+  rating_avg: number
+  rating_count: number
+  completed_requests_count: number
+  response_time_avg_minutes: number | null
+  portfolio: unknown[]
+  verified_at?: string | null
+  max_concurrent_requests?: number
+}
+
+export interface DollProfileInput {
+  headline: string
+  bio?: string | null
+  specialties?: string[]
+  languages?: string[]
+  tone_tags?: string[]
+  rate_type?: DollRateType
+  rate_amount?: number | null
+  currency?: string | null
+}
+
 // --- Notifications / blocks ---------------------------------------------------
 
 export interface AppNotification {

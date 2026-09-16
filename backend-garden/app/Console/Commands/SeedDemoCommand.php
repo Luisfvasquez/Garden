@@ -12,6 +12,7 @@ use App\Enums\LetterKind;
 use App\Enums\ModerationStatus;
 use App\Enums\RecurrenceType;
 use App\Enums\TransitTier;
+use App\Models\DollProfile;
 use App\Models\FeatureFlag;
 use App\Models\Letter;
 use App\Models\LetterDelivery;
@@ -28,14 +29,13 @@ use Illuminate\Support\Facades\DB;
 /**
  * A coherent demo scenario for local front-end work: readable handles, letters
  * in every delivery state, a schedule with occurrences, blog posts (including
- * one awaiting consent and one held for review) — backend-garden/docs/migraciones.md
- * ("sin esto, probar el front es lentísimo").
+ * one awaiting consent and one held for review), and Doll profiles (verified
+ * and pending) — backend-garden/docs/migraciones.md ("sin esto, probar el
+ * front es lentísimo").
  *
  * Safe to re-run: every demo user shares the `@demo.evergarden.test` domain and
  * is wiped (cascading through their letters, deliveries, posts…) before
  * reseeding. Refuses to run in production.
- *
- * Auto Memory Dolls (Fase 3) are not seeded yet — the module doesn't exist.
  */
 class SeedDemoCommand extends Command
 {
@@ -65,6 +65,7 @@ class SeedDemoCommand extends Command
             $this->seedLetters($users);
             $this->seedSchedule($users, $generator, $materializer);
             $this->seedBlog($users, $blog);
+            $this->seedDolls($users);
             $this->enableFlags();
         });
 
@@ -292,6 +293,49 @@ class SeedDemoCommand extends Command
         ]);
 
         $this->components->info('3 publicaciones de blog (una pendiente de consentimiento) + 1 comentario.');
+    }
+
+    /**
+     * @param  array<string, User>  $u
+     */
+    private function seedDolls(array $u): void
+    {
+        $cattleya = new DollProfile([
+            'headline' => 'Especialista en cartas de despedida',
+            'bio' => 'Diez años escuchando lo que la gente no sabe decir.',
+            'specialties' => ['duelo', 'disculpa'],
+            'languages' => ['es', 'fr'],
+            'tone_tags' => ['íntimo', 'sobrio'],
+            'is_available' => true,
+        ]);
+        $cattleya->user_id = $u['cattleya']->getKey();
+        $cattleya->save();
+        $cattleya->markVerified();
+
+        $erica = new DollProfile([
+            'headline' => 'Cartas de celebración y negocios',
+            'bio' => 'De propuestas a agradecimientos corporativos, con la formalidad justa.',
+            'specialties' => ['celebración', 'negocios'],
+            'languages' => ['en'],
+            'tone_tags' => ['formal'],
+            'is_available' => false,
+        ]);
+        $erica->user_id = $u['erica']->getKey();
+        $erica->save();
+        $erica->markVerified();
+
+        // Pending review — keeps the Filament verification queue non-empty.
+        $iris = new DollProfile([
+            'headline' => 'Me encantaría ayudar con cartas de amor',
+            'bio' => 'Nueva en esto, pero llevo un diario desde los doce años.',
+            'specialties' => ['amor'],
+            'languages' => ['en'],
+            'tone_tags' => ['poético'],
+        ]);
+        $iris->user_id = $u['iris']->getKey();
+        $iris->save();
+
+        $this->components->info('3 perfiles Doll (2 verificadas, 1 pendiente de revisión).');
     }
 
     private function enableFlags(): void

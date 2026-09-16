@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\V1\BlockController;
 use App\Http\Controllers\Api\V1\CommentController;
 use App\Http\Controllers\Api\V1\ConsentController;
 use App\Http\Controllers\Api\V1\DeliveryController;
+use App\Http\Controllers\Api\V1\DollDirectoryController;
 use App\Http\Controllers\Api\V1\FeatureFlagController;
 use App\Http\Controllers\Api\V1\HealthController;
 use App\Http\Controllers\Api\V1\LetterController;
@@ -22,6 +23,7 @@ use App\Http\Controllers\Api\V1\LetterStyleController;
 use App\Http\Controllers\Api\V1\MailboxController;
 use App\Http\Controllers\Api\V1\MeController;
 use App\Http\Controllers\Api\V1\MeSettingsController;
+use App\Http\Controllers\Api\V1\MyDollProfileController;
 use App\Http\Controllers\Api\V1\NotificationController;
 use App\Http\Controllers\Api\V1\PostalHandleController;
 use App\Http\Controllers\Api\V1\PostController;
@@ -148,6 +150,19 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
             ->name('schedules.occurrences.letter');
         Route::post('schedules/{schedule}/pause', [ScheduleController::class, 'pause'])->name('schedules.pause');
         Route::post('schedules/{schedule}/resume', [ScheduleController::class, 'resume'])->name('schedules.resume');
+    });
+
+    // --- Auto Memory Dolls — contrato: docs/api/dolls.md · ADR-0005 ---
+    Route::middleware('feature:dolls')->group(function (): void {
+        Route::get('dolls', [DollDirectoryController::class, 'index'])->name('dolls.index');
+        Route::get('dolls/{handle}', [DollDirectoryController::class, 'show'])->name('dolls.show');
+
+        Route::get('me/doll-profile', [MyDollProfileController::class, 'show'])->name('me.doll-profile.show');
+        Route::post('me/doll-profile', [MyDollProfileController::class, 'store'])
+            ->middleware('verified')->name('me.doll-profile.store');
+        Route::patch('me/doll-profile', [MyDollProfileController::class, 'update'])->name('me.doll-profile.update');
+        Route::post('me/doll-profile/availability', [MyDollProfileController::class, 'availability'])
+            ->name('me.doll-profile.availability');
     });
 
     // --- Envíos: bandeja de salida, seguimiento y cancelación ---

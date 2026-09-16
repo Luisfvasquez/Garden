@@ -164,18 +164,21 @@ Formato: `[ ]` pendiente · `[~]` en curso · `[x]` terminado.
 ## Fase 3 — Auto Memory Dolls
 
 ### Backend
-- [ ] `doll_profiles` + solicitud y verificación del rol
-- [ ] Directorio con filtros
+- [x] `doll_profiles` + solicitud y verificación del rol
+      _(3A: migración `doll_profiles` (capacidad, no rol); `DollProfile::markVerified()`/`markUnverified()` flipan `users.role` — nunca automático; `POST/PATCH /me/doll-profile` + `GET /me/doll-profile` (deviación) + `POST /me/doll-profile/availability`; `DollProfilePolicy` (perfil no verificado → 404 salvo al dueño); Filament `DollProfileResource` (cola de pendientes, verificar/retirar verificación, badge de nav). Sin pagos — ADR-0012)_
+- [x] Directorio con filtros
+      _(`GET /dolls?specialty=&language=&available=` solo perfiles verificados, `whereJsonContains` sobre jsonb, orden por `rating_avg`; `GET /dolls/{handle}` por `postal_handle` (deviación, consistente con `GET /users/{handle}`); nunca expone `email` ni `verified_at`/`max_concurrent_requests` a terceros)_
 - [ ] `doll_requests` con máquina de estados + `ExpireStaleDollRequestsJob`
 - [ ] Reverb + `routes/channels.php` + doble validación en controlador
 - [ ] `doll_chat_messages` + borradores versionados + aprobación
 - [ ] Filtro anti-intercambio de contactos
 - [ ] Valoraciones + `RecalculateDollRatingsJob`
 - [ ] `PurgeOldDollChatsJob` (90 días)
-- [ ] (Opcional) Stripe Connect + pagos retenidos
+- [x] (Opcional) Stripe Connect + pagos retenidos — **diferido a propósito, ver ADR-0012**
 
 ### Front
-- [ ] Directorio de Dolls + perfil
+- [x] Directorio de Dolls + perfil
+      _(`DollDirectoryView` (filtros especialidad/idioma/disponibilidad) + `DollProfileView` (bio, especialidades, valoración, CTA "pedir ayuda") + `BecomeDollView` (solicitar el rol / editar / toggle de disponibilidad, estado pendiente vs verificado); `api/dolls.ts` + `useDolls`; `useFeature('dolls')` gatea el nav; i18n es/en; `api/__tests__/dolls.spec.ts`)_
 - [ ] Crear solicitud con brief
 - [ ] Chat en tiempo real (Echo) + indicador de escritura
 - [ ] Visor de borradores versionados + aprobación

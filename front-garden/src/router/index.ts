@@ -133,6 +133,24 @@ const routes: RouteRecordRaw[] = [
     meta: { auth: true },
   },
   {
+    path: '/dolls',
+    name: 'dolls',
+    component: () => import('@/views/dolls/DollDirectoryView.vue'),
+    meta: { auth: true },
+  },
+  {
+    path: '/dolls/ser-doll',
+    name: 'doll-become',
+    component: () => import('@/views/dolls/BecomeDollView.vue'),
+    meta: { auth: true, verified: true },
+  },
+  {
+    path: '/dolls/:id',
+    name: 'doll-profile',
+    component: () => import('@/views/dolls/DollProfileView.vue'),
+    meta: { auth: true },
+  },
+  {
     path: '/actualiza',
     name: 'upgrade',
     component: () => import('@/views/UpgradeView.vue'),

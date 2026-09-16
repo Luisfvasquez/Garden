@@ -19,3 +19,4 @@ de cambiar el código en silencio.
 | 0009 | Aritmética de recurrencias y zonas horarias | Aceptado |
 | 0010 | Cliente Redis `predis` y pool aleatorio | Aceptado |
 | 0011 | Panel de moderación server-side (Filament) | Aceptado |
+| 0012 | Dolls voluntarias, sin pagos (Stripe diferido) | Aceptado |

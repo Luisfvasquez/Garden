@@ -41,4 +41,5 @@ it('renders the core admin pages for an admin', function (): void {
     $this->get('/admin/feature-flags')->assertSuccessful();
     $this->get('/admin/supports')->assertSuccessful();
     $this->get('/admin/tags')->assertSuccessful();
+    $this->get('/admin/doll-profiles')->assertSuccessful();
 });

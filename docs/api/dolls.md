@@ -1,9 +1,26 @@
 # API — Auto Memory Dolls
 
-Estado: `[ ] contrato definido` · `[ ] backend` · `[ ] front`
+Estado: `[x] contrato definido` · `[~] backend` · `[~] front`
 
 > **Única excepción** a la regla "todo se comunica por cartas". Contratar a alguien para que te ayude a
 > escribir. Ver ADR-0005.
+
+> **Backend (Fase 3A — `doll_profiles`):** `doll_profiles` (capacidad, no rol — `users.role` solo pasa a
+> `doll` cuando `verified_at` se marca a mano, vía `DollProfile::markVerified()`/`markUnverified()`),
+> tras el flag `dolls`. `GET /dolls` (directorio, solo perfiles verificados, filtros
+> `specialty`/`language`/`available`, `whereJsonContains`), `GET /dolls/{handle}`,
+> `POST/PATCH /me/doll-profile`, `POST /me/doll-profile/availability`. Verificación manual desde
+> Filament (`DollProfileResource`, cola de pendientes con badge de nav).
+>
+> **Desviaciones respecto a este documento (actualizadas aquí):**
+> - `GET /dolls/{handle}` usa `postal_handle`, no el `id` literal — mismo identificador público que
+>   `GET /users/{postal_handle}` en todo el resto del contrato. `POST /doll-requests` (Fase 3B) hará lo
+>   mismo: acepta un handle público, resuelve `doll_id` (uuid) en el servidor.
+> - Añadido `GET /me/doll-profile` (no estaba en el contrato) para que el front sepa si el usuario ya
+>   tiene perfil y en qué estado (`verified_at`).
+> - Sin pagos: ver ADR-0012. `rate_type` distinto de `free` es informativo.
+> - `doll_profiles.verified_at` y `max_concurrent_requests` solo se exponen al dueño del perfil, nunca
+>   a un tercero (ni siquiera si el perfil es visible en el directorio).
 
 ## Endpoints
 

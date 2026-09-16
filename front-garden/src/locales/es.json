@@ -31,6 +31,7 @@
     "schedules": "Programaciones",
     "bottle": "Botella al mar",
     "blog": "Blog",
+    "dolls": "Dolls",
     "signOut": "Cerrar sesión",
     "account": "Cuenta"
   },
@@ -409,6 +410,51 @@
     "corrOpened": "Ahora conocéis vuestros identificadores.",
     "corrOpenedShort": "Correspondencia abierta.",
     "replyUsedShort": "Respondida"
+  },
+  "dolls": {
+    "directory": {
+      "title": "Auto Memory Dolls",
+      "intro": "Contrata a alguien que te ayude a escribir la carta que no sabes cómo empezar.",
+      "becomeADoll": "Ofrecerme como Doll",
+      "specialtyPlaceholder": "Especialidad (p. ej. duelo)",
+      "languagePlaceholder": "Idioma",
+      "onlyAvailable": "Solo disponibles",
+      "available": "Disponible",
+      "busy": "Sin disponibilidad",
+      "empty": "No hay Dolls que coincidan con esos filtros.",
+      "rating": "{avg}★ ({count})"
+    },
+    "profile": {
+      "backToDirectory": "Volver al directorio",
+      "specialties": "Especialidades",
+      "languages": "Idiomas",
+      "tone": "Tono",
+      "completed": "0 solicitudes completadas | 1 solicitud completada | {count} solicitudes completadas",
+      "requestHelp": "Pedir ayuda a esta Doll"
+    },
+    "rateType": {
+      "free": "Voluntaria",
+      "per_letter": "Por carta",
+      "hourly": "Por hora"
+    },
+    "become": {
+      "title": "Ser Auto Memory Doll",
+      "intro": "Ayuda a otras personas a escribir la carta que no encuentran cómo empezar.",
+      "pendingReview": "Tu solicitud está en revisión. Te avisaremos cuando esté verificada.",
+      "verified": "Tu perfil está verificado y visible en el directorio.",
+      "available": "Disponible para nuevas solicitudes",
+      "headline": "Titular",
+      "bio": "Biografía",
+      "specialties": "Especialidades",
+      "languages": "Idiomas",
+      "tone": "Tono",
+      "commaHint": "Separado por comas.",
+      "rateType": "Tarifa",
+      "submit": "Enviar solicitud",
+      "save": "Guardar cambios",
+      "requested": "Solicitud enviada. Un moderador la revisará pronto.",
+      "updated": "Perfil actualizado."
+    }
   },
   "schedules": {
     "title": "Programaciones",

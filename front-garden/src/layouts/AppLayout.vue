@@ -21,6 +21,7 @@ const unread = useUnreadCount()
 const schedulesEnabled = useFeature('schedules')
 const bottleEnabled = useFeature('bottle_at_sea')
 const blogEnabled = useFeature('blog')
+const dollsEnabled = useFeature('dolls')
 
 const signingOut = ref(false)
 
@@ -91,6 +92,14 @@ async function signOut() {
           active-class="text-[var(--text)]"
         >
           {{ t('nav.blog') }}
+        </RouterLink>
+        <RouterLink
+          v-if="dollsEnabled"
+          :to="{ name: 'dolls' }"
+          class="text-sm text-[var(--text-muted)] hover:text-[var(--text)]"
+          active-class="text-[var(--text)]"
+        >
+          {{ t('nav.dolls') }}
         </RouterLink>
         <RouterLink
           :to="{ name: 'settings' }"
