@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { formatDateTime } from '@/lib/datetime'
 import PostBody from '@/components/blog/PostBody.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
+import SafetyActions from '@/components/safety/SafetyActions.vue'
 import type { DollChatMessage } from '@/types/api'
 
 /**
@@ -91,5 +92,14 @@ const flagged = computed(() => props.message.pii_flags.length > 0)
       <span>{{ formatDateTime(message.created_at) }}</span>
       <span v-if="flagged" :title="t('dolls.chat.flaggedTitle')" aria-hidden="true">⚠</span>
     </p>
+
+    <!-- Botón de reporte dentro del chat: lo exige docs/api/dolls.md
+         § Salvaguardas. Sin bloqueo: no se bloquea a alguien con quien tienes
+         un encargo abierto; para eso se cancela la solicitud. -->
+    <SafetyActions
+      v-if="!message.is_mine"
+      reportable-type="doll_chat_message"
+      :reportable-id="message.id"
+    />
   </li>
 </template>

@@ -20,6 +20,7 @@ import SpinnerDots from '@/components/ui/SpinnerDots.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import LetterPaper from '@/components/letter/LetterPaper.vue'
 import WaxSeal from '@/components/letter/WaxSeal.vue'
+import SafetyActions from '@/components/safety/SafetyActions.vue'
 import RandomLetterActions from '@/components/mailbox/RandomLetterActions.vue'
 
 const route = useRoute()
@@ -136,6 +137,23 @@ function doReply() {
           :catalog="catalog.data.value"
           :title="letter.title"
         />
+
+        <footer class="flex flex-wrap items-center gap-3 border-t border-[var(--border-soft)] pt-3">
+          <a
+            :href="`/api/v1/mailbox/${letter.id}/pdf`"
+            class="text-xs text-[var(--text-muted)] underline hover:text-[var(--text)]"
+          >
+            {{ t('mailbox.downloadPdf') }}
+          </a>
+          <!-- `postal_handle` es null si el buzón sigue ocultando a quien escribe:
+               entonces se puede reportar pero no bloquear (ADR-0007). -->
+          <SafetyActions
+            class="ml-auto"
+            reportable-type="letter_delivery"
+            :reportable-id="letter.id"
+            :postal-handle="letter.sender.postal_handle"
+          />
+        </footer>
       </template>
     </section>
   </AppLayout>

@@ -8,6 +8,7 @@ import AppLayout from '@/layouts/AppLayout.vue'
 import AlertBox from '@/components/ui/AlertBox.vue'
 import SpinnerDots from '@/components/ui/SpinnerDots.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
+import SafetyActions from '@/components/safety/SafetyActions.vue'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -68,6 +69,13 @@ const doll = useDollProfile(handle)
             {{ t('dolls.profile.requestHelp') }}
           </BaseButton>
         </RouterLink>
+
+        <!-- Una persona se reporta por handle: el cliente nunca tiene su uuid. -->
+        <SafetyActions
+          class="border-t border-[var(--border-soft)] pt-3"
+          reportable-type="user"
+          :postal-handle="doll.data.value.doll.postal_handle"
+        />
       </template>
     </section>
   </AppLayout>

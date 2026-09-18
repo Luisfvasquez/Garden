@@ -3,7 +3,7 @@
 **Actualizar al cerrar cada tarea.** Este archivo es lo que le dice al agente qué existe ya.
 Formato: `[ ]` pendiente · `[~]` en curso · `[x]` terminado.
 
-Última actualización: 2026-09-18 — **Fases 1, 2 y 3 completas. Fase 4 entregada en lo que se puede entregar y verificar aquí:** **4A** Scramble → `docs/api/openapi.json` → tipos TS (ADR-0014: los del front siguen a mano porque los generados son más débiles; `contract.ts` impide que se desvíen), **4B** sincronización delta (`?updated_since=` con marca de agua del servidor, ventana `>`, orden por `updated_at` y lápidas), **4C** exportación a PDF (Dompdf, no Chromium headless — ADR-0015) y **4D** búsqueda del blog en Postgres (`tsvector` `spanish` con pesos, **sin Meilisearch** — ADR-0016). **Fuera a propósito, con motivo escrito en ADR-0017:** Capacitor (no verificable sin SDK nativos), cartas póstumas (decisión de producto + aviso legal) y particionado (el volumen no lo pide). **Diferido de antes:** pagos con Stripe (ADR-0012), `ModerateContentJob` asíncrono, Horizon y la contenerización. **Siguiente paso natural:** el checklist previo al lanzamiento.
+Última actualización: 2026-09-18 — **Fases 1, 2 y 3 completas; Fase 4 entregada en lo verificable (4A OpenAPI/tipos, 4B delta sync, 4C PDF, 4D búsqueda).** Validación previa al MVP hecha: el checklist de lanzamiento pasa de 4 a **7 verificados**, y encontró tres cosas que faltaban de verdad — **no había forma de reportar nada desde el front** (backend listo desde Fase 1, UI inexistente), `POST /reports` **no podía apuntar a una persona** (el cliente nunca tiene su uuid), y cualquier petición sin `Accept: application/json` a una ruta protegida devolvía **500 en vez de 401** (afectaba al enlace de descarga del PDF). Las tres corregidas con tests. Guía de arranque en **`docs/como-probar.md`**. **Fuera a propósito (ADR-0017):** Capacitor, cartas póstumas y particionado. **Diferido de antes:** pagos con Stripe (ADR-0012), `ModerateContentJob` asíncrono, Horizon y contenerización.
 
 ---
 
@@ -325,6 +325,8 @@ Formato: `[ ]` pendiente · `[~]` en curso · `[x]` terminado.
 
 > Sólo se marca lo **verificado**, no lo que "debería estar". Es la puerta de lanzamiento: una casilla
 > marcada por optimismo aquí es peor que una vacía.
+>
+> Para levantar el sistema y recorrerlo a mano: **`docs/como-probar.md`**.
 
 - [x] Cartas aleatorias en opt-in explícito
       _(`users.accepts_random_letters` nace `false` en la migración; además `restrict_random` puede
@@ -338,16 +340,29 @@ Formato: `[ ]` pendiente · `[~]` en curso · `[x]` terminado.
       60/min y las costosas tienen el suyo. El audit encontró un hueco real y se corrigió: **las subidas
       de ficheros** (`me/avatar`, `letters/{id}/attachments`) sólo tenían el bucket general, que limita
       peticiones pero no megabytes de procesado de imagen → `throttle:upload` 30/h)_
-- [~] Verificación de email obligatoria activa
-      _(el middleware `verified` cubre enviar carta, publicar, comentar, chat de Dolls y crear
-      solicitudes. **Queda decidir** si leer también debe exigirlo)_
+- [x] Verificación de email obligatoria activa
+      _(auditado ruta por ruta. La regla real es coherente: **`verified` se exige para originar contacto
+      o consumir tránsito** (enviar, botella al mar, publicar, comentar, crear solicitud de Doll, chat,
+      compartir borrador), y **no** para gestionar la propia cuenta ni para protegerse. Bloquear,
+      reportar, cerrar sesión, borrar la cuenta y marcar notificaciones funcionan sin verificar **a
+      propósito**: exigirlo ahí dejaría a alguien sin herramientas de seguridad por no haber abierto un
+      correo)_
 - [~] `APP_DEBUG=false`, `/docs` protegido, Telescope desactivado
       _(`/docs` protegido y con tests en 4A: abierto sólo en `local`, fuera de ahí gate `viewApiDocs` =
       staff activo. Telescope no está instalado. `APP_DEBUG` es cosa del despliegue)_
-- [ ] Edad mínima verificada en el registro
-      _(`UNDER_MINIMUM_AGE` existe desde Fase 0, pero es **autodeclarada**; falta decidir si eso basta)_
-- [ ] Bloqueo y reporte accesibles desde cada carta, post y perfil
-      _(sin auditar pantalla por pantalla — no se marca a ojo)_
+- [x] Edad mínima verificada en el registro
+      _(`birth_date` obligatoria y mínimo 16 años en `RegisterController`, con `UNDER_MINIMUM_AGE`.
+      Es **autodeclarada**, como en el resto del sector; una verificación real exigiría documento y eso
+      es otra decisión de producto)_
+- [x] Bloqueo y reporte accesibles desde cada carta, post y perfil
+      _(**estaba sin construir**: el backend tenía `POST /reports` desde Fase 1 y la cola en Filament,
+      pero el front no tenía forma de reportar nada y bloquear sólo existía en Ajustes. Añadido
+      `SafetyActions` (+ `ReportDialog`) al pie de: carta abierta del buzón, post, comentario, mensaje
+      del chat de Dolls (lo exige `docs/api/dolls.md`) y perfil de Doll. `self_harm` se presenta aparte,
+      sin lenguaje de denuncia, porque escala como crítico y nunca borra contenido.
+      Además hizo falta un cambio de contrato: `POST /reports` no se podía usar sobre una **persona**
+      porque el cliente nunca tiene su uuid — ahora acepta `reportable_handle`, misma desviación que
+      `/blocks` y `/doll-requests`)_
 - [ ] Términos y política de privacidad publicados
       _(texto legal, no código. Bloquea también las cartas póstumas — ADR-0017)_
 - [ ] Backups automáticos con restauración probada

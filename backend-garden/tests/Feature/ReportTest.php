@@ -105,3 +105,46 @@ it('validates the payload', function (): void {
 it('requires authentication', function (): void {
     $this->postJson('/api/v1/reports', [])->assertUnauthorized();
 });
+
+it('reports a user by their public handle, since clients never hold a uuid', function (): void {
+    $me = User::factory()->create();
+    $target = User::factory()->create();
+    Sanctum::actingAs($me);
+
+    $this->postJson('/api/v1/reports', [
+        'reportable_type' => 'user',
+        'reportable_handle' => $target->postal_handle,
+        'category' => 'harassment',
+    ])->assertCreated();
+
+    expect(Report::where('reporter_id', $me->id)->value('reportable_id'))->toBe($target->id);
+});
+
+it('404s a handle that does not exist', function (): void {
+    Sanctum::actingAs(User::factory()->create());
+
+    $this->postJson('/api/v1/reports', [
+        'reportable_type' => 'user',
+        'reportable_handle' => 'nadie-0000',
+        'category' => 'spam',
+    ])->assertNotFound();
+});
+
+it('refuses a handle for content that is addressed by id', function (): void {
+    Sanctum::actingAs(User::factory()->create());
+
+    $this->postJson('/api/v1/reports', [
+        'reportable_type' => 'public_post',
+        'reportable_handle' => 'alguien-0000',
+        'category' => 'spam',
+    ])->assertStatus(422)->assertJsonPath('error_code', 'INVALID_TARGET');
+});
+
+it('still requires one of id or handle', function (): void {
+    Sanctum::actingAs(User::factory()->create());
+
+    $this->postJson('/api/v1/reports', [
+        'reportable_type' => 'user',
+        'category' => 'spam',
+    ])->assertStatus(422);
+});

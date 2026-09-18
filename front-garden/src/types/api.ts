@@ -427,6 +427,46 @@ export interface CreateDollDraftInput {
   note?: string | null
 }
 
+// --- Reportes -----------------------------------------------------------------
+
+export type ReportableType =
+  | 'letter_delivery'
+  | 'public_post'
+  | 'comment'
+  | 'user'
+  | 'doll_chat_message'
+
+export type ReportCategory =
+  | 'harassment'
+  | 'sexual'
+  | 'hate'
+  | 'violence'
+  | 'self_harm'
+  | 'spam'
+  | 'minor_safety'
+  | 'other'
+
+export interface CreateReportInput {
+  reportable_type: ReportableType
+  /** Para contenido. Para `user` se manda `reportable_handle` en su lugar. */
+  reportable_id?: string
+  /** Sólo para `user`: el cliente nunca tiene el uuid de una persona. */
+  reportable_handle?: string
+  category: ReportCategory
+  details?: string | null
+}
+
+export interface Report {
+  id: string
+  reportable_type: ReportableType
+  reportable_id: string
+  category: ReportCategory
+  severity: 'low' | 'medium' | 'high' | 'critical'
+  status: string
+  details: string | null
+  created_at: string
+}
+
 // --- Notifications / blocks ---------------------------------------------------
 
 export interface AppNotification {

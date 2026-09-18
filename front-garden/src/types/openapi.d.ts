@@ -2070,8 +2070,14 @@ export interface components {
         /** StoreReportRequest */
         StoreReportRequest: {
             reportable_type: components["schemas"]["ReportableType"];
-            /** Format: uuid */
-            reportable_id: string;
+            /**
+             * Format: uuid
+             * @description El cliente nunca tiene el uuid de una persona: sólo su handle
+             *     público. Para `user` se acepta `reportable_handle` en su lugar,
+             *     misma desviación que ya hacen /blocks y /doll-requests.
+             */
+            reportable_id?: string;
+            reportable_handle?: string;
             category: components["schemas"]["ReportCategory"];
             details?: string | null;
         };

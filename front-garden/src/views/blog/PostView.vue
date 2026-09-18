@@ -10,6 +10,7 @@ import type { ReactionType } from '@/types/api'
 import AppLayout from '@/layouts/AppLayout.vue'
 import AlertBox from '@/components/ui/AlertBox.vue'
 import SpinnerDots from '@/components/ui/SpinnerDots.vue'
+import SafetyActions from '@/components/safety/SafetyActions.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import PostBody from '@/components/blog/PostBody.vue'
 
@@ -97,6 +98,13 @@ async function submitComment() {
           </button>
         </div>
 
+        <SafetyActions
+          class="border-t border-[var(--border-soft)] pt-3"
+          reportable-type="public_post"
+          :reportable-id="post.data.value.id"
+          :postal-handle="post.data.value.author.postal_handle"
+        />
+
         <section class="flex flex-col gap-3">
           <h2 class="text-lg">{{ t('blog.comments') }}</h2>
 
@@ -123,6 +131,11 @@ async function submitComment() {
           <ul v-else class="flex flex-col gap-3">
             <li v-for="c in comments.data.value ?? []" :key="c.id" class="text-sm">
               <p class="text-[var(--text-muted)]">{{ c.author.display_name }} · {{ relativeTime(c.created_at) }}</p>
+              <SafetyActions
+                reportable-type="comment"
+                :reportable-id="c.id"
+                :postal-handle="c.author.postal_handle"
+              />
               <p class="whitespace-pre-line">{{ c.body }}</p>
               <ul v-if="c.replies?.length" class="mt-2 flex flex-col gap-2 border-l border-[var(--border-soft)] pl-3">
                 <li v-for="r in c.replies" :key="r.id">

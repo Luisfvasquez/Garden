@@ -14,6 +14,7 @@ import type {
   Post,
   PostComment,
   PublicUser,
+  Report,
   Schedule,
   SupportResource,
   UserSettings,
@@ -65,6 +66,7 @@ const _publicUser: SameKeys<PublicUser, Schema<'PublicUserResource'>> = true
 const _settings: SameKeys<UserSettings, Schema<'UserSettingsResource'>> = true
 const _support: SameKeys<SupportResource, Schema<'SupportResourceResource'>> = true
 const _block: SameKeys<Block, Schema<'BlockResource'>> = true
+const _report: SameKeys<Report, Schema<'ReportResource'>> = true
 
 // --- Correo ------------------------------------------------------------------
 const _letter: SameKeys<Letter, Schema<'LetterResource'>> = true

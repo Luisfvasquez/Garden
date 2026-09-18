@@ -12,6 +12,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -35,6 +36,19 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->api(append: [
             AssignRequestId::class,
         ]);
+
+        /*
+         * Este backend está desacoplado: no hay login en HTML al que mandar a
+         * nadie. Sin esto, Laravel registra por defecto un redirect a
+         * `route('login')` y **cualquier petición sin `Accept: application/json`**
+         * a una ruta protegida revienta con "Route [login] not defined" —
+         * un 500 en lugar de un 401. Le pasa a un navegador siguiendo el enlace
+         * de descarga del PDF, a `curl`, y a un cliente móvil con cabeceras por
+         * defecto. Devolver null hace que se renderice el 401 de siempre.
+         */
+        $middleware->redirectGuestsTo(
+            fn (Request $request): ?string => Route::has('login') ? route('login') : null,
+        );
 
         $middleware->alias([
             'verified' => EnsureEmailIsVerified::class,

@@ -617,5 +617,36 @@
       "submit": "Crear programación",
       "created": "Programación creada."
     }
+  },
+  "safety": {
+    "report": {
+      "action": "Reportar",
+      "title": "Reportar contenido",
+      "intro": "Nadie sabrá que has sido tú. Un moderador lo revisará.",
+      "reason": "¿Qué ocurre?",
+      "details": "Cuéntanos algo más (opcional)",
+      "submit": "Enviar reporte",
+      "sent": "Reporte enviado. Gracias por avisar.",
+      "selfHarmNotice": "Esto no borra nada ni castiga a nadie: avisa a nuestro equipo para que pueda acercarse. Si crees que hay peligro inmediato, llama a emergencias.",
+      "category": {
+        "harassment": "Acoso o insistencia no deseada",
+        "sexual": "Contenido sexual",
+        "hate": "Odio o discriminación",
+        "violence": "Violencia o amenazas",
+        "spam": "Spam o publicidad",
+        "minor_safety": "Puede afectar a un menor",
+        "self_harm": "Me preocupa que esta persona se haga daño",
+        "other": "Otra cosa"
+      },
+      "categoryHint": {
+        "minor_safety": "Se revisa de inmediato, fuera de la cola normal.",
+        "self_harm": "No es una denuncia. Avisa a nuestro equipo para ofrecer ayuda."
+      }
+    },
+    "block": {
+      "action": "Bloquear",
+      "confirm": "¿Bloquear a {handle}? No recibirás más cartas suyas y no se le avisará.",
+      "done": "Bloqueado. No se le ha notificado."
+    }
   }
 }

@@ -70,6 +70,10 @@ export default defineConfig({
     proxy: {
       '/api': { target: 'http://localhost:8000', changeOrigin: false },
       '/sanctum': { target: 'http://localhost:8000', changeOrigin: false },
+      // Handshake de Echo/Reverb. Sin esto el chat de Dolls no autentica en
+      // desarrollo: laravel-echo pide /broadcasting/auth contra el origen del
+      // front, no contra el backend.
+      '/broadcasting': { target: 'http://localhost:8000', changeOrigin: false },
     },
   },
 })

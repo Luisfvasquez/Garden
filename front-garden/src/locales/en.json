@@ -617,5 +617,36 @@
       "submit": "Create schedule",
       "created": "Schedule created."
     }
+  },
+  "safety": {
+    "report": {
+      "action": "Report",
+      "title": "Report content",
+      "intro": "Nobody will know it was you. A moderator will review it.",
+      "reason": "What's going on?",
+      "details": "Tell us a bit more (optional)",
+      "submit": "Send report",
+      "sent": "Report sent. Thank you for speaking up.",
+      "selfHarmNotice": "This deletes nothing and punishes nobody: it tells our team so they can reach out. If you believe there is immediate danger, call emergency services.",
+      "category": {
+        "harassment": "Harassment or unwanted persistence",
+        "sexual": "Sexual content",
+        "hate": "Hate or discrimination",
+        "violence": "Violence or threats",
+        "spam": "Spam or advertising",
+        "minor_safety": "This may involve a minor",
+        "self_harm": "I'm worried this person may hurt themselves",
+        "other": "Something else"
+      },
+      "categoryHint": {
+        "minor_safety": "Reviewed immediately, outside the normal queue.",
+        "self_harm": "Not a complaint. It tells our team so they can offer help."
+      }
+    },
+    "block": {
+      "action": "Block",
+      "confirm": "Block {handle}? You won't receive their letters any more, and they won't be told.",
+      "done": "Blocked. They have not been notified."
+    }
   }
 }

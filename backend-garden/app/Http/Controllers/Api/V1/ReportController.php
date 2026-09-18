@@ -12,6 +12,7 @@ use App\Http\Requests\StoreReportRequest;
 use App\Http\Resources\ReportResource;
 use App\Models\DollChatMessage;
 use App\Models\Report;
+use App\Models\User;
 use App\Services\Moderation\CriticalAlertDispatcher;
 use Illuminate\Http\JsonResponse;
 
@@ -27,6 +28,23 @@ class ReportController extends Controller
         $me = $request->user();
 
         $modelClass = $type->modelClass();
+
+        // A client never holds a person's uuid — only their public handle. For
+        // `user` targets `reportable_handle` stands in, the same deviation
+        // /blocks and /doll-requests already make.
+        if (! isset($data['reportable_id'])) {
+            if ($type !== ReportableType::User) {
+                throw new ApiException('Ese tipo de contenido se reporta por id.', 'INVALID_TARGET', 422);
+            }
+
+            $data['reportable_id'] = User::query()
+                ->where('postal_handle', $data['reportable_handle'])
+                ->value('id');
+
+            if ($data['reportable_id'] === null) {
+                throw new ApiException('El contenido reportado no existe.', 'NOT_FOUND', 404);
+            }
+        }
 
         if (! $modelClass::query()->whereKey($data['reportable_id'])->exists()) {
             throw new ApiException('El contenido reportado no existe.', 'NOT_FOUND', 404);

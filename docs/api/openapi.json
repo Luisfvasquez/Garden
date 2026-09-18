@@ -7400,7 +7400,11 @@
                     },
                     "reportable_id": {
                         "type": "string",
-                        "format": "uuid"
+                        "format": "uuid",
+                        "description": "El cliente nunca tiene el uuid de una persona: s\u00f3lo su handle\np\u00fablico. Para `user` se acepta `reportable_handle` en su lugar,\nmisma desviaci\u00f3n que ya hacen /blocks y /doll-requests."
+                    },
+                    "reportable_handle": {
+                        "type": "string"
                     },
                     "category": {
                         "$ref": "#/components/schemas/ReportCategory"
@@ -7415,7 +7419,6 @@
                 },
                 "required": [
                     "reportable_type",
-                    "reportable_id",
                     "category"
                 ],
                 "title": "StoreReportRequest"
