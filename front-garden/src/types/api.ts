@@ -1,7 +1,13 @@
 /*
- * TEMPORAL. Se reemplaza por `src/types/api.d.ts`, generado desde
- * `../docs/api/openapi.json` (Scramble) — ver `npm run api:types` y
- * `docs/setup.md`. Mantener al mínimo lo que el front necesita para tipar.
+ * Tipos que consume la app. Escritos a mano **a propósito** (ya no es un
+ * stand-in temporal): son más estrechos que los generados, porque Scramble sólo
+ * puede decir `string` donde aquí hay uniones literales (`DeliveryStatus`,
+ * `DollRequestStatus`…), y de esas uniones dependen los `switch` exhaustivos y
+ * las claves de i18n.
+ *
+ * Lo generado vive en `./openapi.d.ts` (`npm run api:types`) y `./contract.ts`
+ * comprueba en cada `typecheck` que este fichero no se desvía de él. Si añades
+ * un campo aquí, tiene que existir allí, y al revés. Ver ADR-0014.
  */
 
 export type Locale = 'es' | 'en'
@@ -143,10 +149,14 @@ export interface RecipientSummary {
   postal_handle: string | null
 }
 
+/** `random` = botella al mar (docs/api/botella-al-mar.md). */
+export type DeliveryMode = 'direct' | 'random'
+
 export interface Delivery {
   id: string
   letter_id: string
   status: DeliveryStatus
+  mode: DeliveryMode
   tier: TransitTier
   is_anonymous: boolean
   scheduled_for: string
@@ -155,6 +165,8 @@ export interface Delivery {
   delivered_at: string | null
   read_at: string | null
   can_cancel: boolean
+  /** Sólo en aleatorias: ambas partes aceptaron abrir la correspondencia. */
+  correspondence_opened: boolean
   recipient: RecipientSummary | null
 }
 

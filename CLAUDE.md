@@ -71,5 +71,5 @@ cd front-garden && npm run typecheck
 
 # Regenerar tipos del front desde el contrato del backend
 cd backend-garden && php artisan scramble:export --path=../docs/api/openapi.json
-cd front-garden && npx openapi-typescript ../docs/api/openapi.json -o src/types/api.d.ts
+cd front-garden && npm run api:types   # → src/types/openapi.d.ts (NO api.d.ts, ver ADR-0014)
 ```

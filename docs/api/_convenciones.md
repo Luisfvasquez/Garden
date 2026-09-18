@@ -138,3 +138,26 @@ Se aplican en el API Resource, no en la vista:
 
 Todo cliente envía `X-App-Version: 1.4.2`. El backend puede responder `426` con
 `{ "error_code": "UPGRADE_REQUIRED", "meta": { "min_version": "1.5.0" } }`.
+
+## El documento OpenAPI generado
+
+`docs/api/openapi.json` lo genera Scramble desde el código:
+
+```bash
+cd backend-garden && php artisan scramble:export --path=../docs/api/openapi.json
+```
+
+**No sustituye a los `.md` de esta carpeta**, que siguen siendo el contrato escrito y la fuente de verdad
+(CLAUDE.md, regla 1). El JSON es lo que el código dice de sí mismo; sirve para contrastar los dos y para
+generar los tipos del front (`npm run api:types` → `src/types/openapi.d.ts`). Ver **ADR-0014**.
+
+Reglas al tocarlo:
+
+- **Se regenera y se commitea junto al cambio de endpoint.** `ApiDocsTest` falla si una ruta `api/v1`
+  no aparece en el documento versionado.
+- El `server` es relativo (`/api/v1`). No debe hornear el `APP_URL` de quien lo genere.
+- Las rutas salen sin el prefijo `api/v1` (está en `servers`) y Scramble pasa los parámetros de ruta a
+  camelCase (`{postal_handle}` → `{postalHandle}`). Es cosmético: el nombre de un parámetro de ruta no
+  llega nunca a la URL.
+- `/docs/api` sirve la UI: abierta en `local`, y fuera de `local` sólo para staff activo
+  (gate `viewApiDocs`, en `ApiDocsServiceProvider`).

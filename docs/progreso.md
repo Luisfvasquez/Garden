@@ -3,7 +3,7 @@
 **Actualizar al cerrar cada tarea.** Este archivo es lo que le dice al agente qué existe ya.
 Formato: `[ ]` pendiente · `[~]` en curso · `[x]` terminado.
 
-Última actualización: 2026-09-17 — **Fases 1, 2 y 3 completas.** Fase 3 (Auto Memory Dolls) cerrada: **3A** perfiles y directorio, **3B** `doll_requests` con máquina de estados, **3C** chat en tiempo real (Reverb + doble validación de canal, mensajes cifrados, borradores versionados, aprobación que crea la carta del cliente y cierra la solicitud, filtro anti-intercambio de contactos que avisa sin bloquear; ADR-0013) y **3D** valoraciones (`RecalculateDollRatingsJob`, agregado derivado nunca incrementado), `PurgeOldDollChatsJob` (90 días), panel de la Doll e indicador de escritura por whispers. **Diferido a propósito:** pagos con Stripe (ADR-0012) y `ModerateContentJob` asíncrono. **Siguiente: Fase 4 — móvil y refinamiento**, que arranca por Scramble → `openapi.json` → tipos TS (retira el stand-in a mano de `src/types/api.ts`).
+Última actualización: 2026-09-17 — **Fases 1, 2 y 3 completas.** Fase 4 en curso: **4A** Scramble → `docs/api/openapi.json` → tipos TS, con la desviación de ADR-0014 (los tipos del front siguen a mano porque los generados son más débiles; `src/types/contract.ts` impide que se desvíen). **Pendiente de Fase 4:** Capacitor + push nativo, sincronización delta (`updated_since`), exportación a PDF, búsqueda con Meilisearch, cartas póstumas y particionado de `letter_deliveries`. **Diferido a propósito:** pagos con Stripe (ADR-0012), `ModerateContentJob` asíncrono, Horizon y la contenerización.
 
 ---
 
@@ -44,9 +44,11 @@ Formato: `[ ]` pendiente · `[~]` en curso · `[x]` terminado.
 - [~] PWA instalable
       _(plugin configurado, `npm run build` genera SW; faltan iconos en `public/icons/` — se completa en Fase 1)_
 
-> Desviación consciente: `src/types/api.ts` es un stand-in **escrito a mano y mínimo** (solo sesión)
-> hasta que el backend exponga `openapi.json` con Scramble (Fase 4). `npm run api:types` sigue siendo
-> el recordatorio. Front CI en `.github/workflows/front-ci.yml`.
+> ~~Desviación consciente: `src/types/api.ts` es un stand-in escrito a mano hasta Scramble (Fase 4).~~
+> **Resuelto en 4A, aunque no como se había previsto:** los tipos generados resultaron ser *más débiles*
+> que los escritos a mano (Scramble sólo puede decir `string` donde hay uniones literales), así que
+> `api.ts` se queda a mano a propósito y `src/types/contract.ts` vigila en cada `typecheck` que no se
+> desvíe del OpenAPI generado. Ver **ADR-0014**. Front CI en `.github/workflows/front-ci.yml`.
 
 ---
 
@@ -249,7 +251,21 @@ Formato: `[ ]` pendiente · `[~]` en curso · `[x]` terminado.
 
 ## Fase 4 — Móvil y refinamiento
 
-- [ ] Scramble → `openapi.json` → tipos TS generados
+- [x] Scramble → `openapi.json` → tipos TS generados
+      _(4A: `dedoc/scramble`, `config/scramble.php` (`api_path: api/v1`, sólo v1 — `routes/api.php` es un
+      manifiesto de versiones, no contrato) y `ApiDocsServiceProvider` (server **relativo** `/api/v1`,
+      porque el valor de config pasa por `url()` y hornearía el `APP_URL` de quien genere el fichero;
+      + gate `viewApiDocs` = staff activo, que cierra el ítem "/docs protegido" del checklist).
+      `docs/api/openapi.json` versionado: 82 rutas, 66 esquemas. **Desviación: los tipos generados NO
+      sustituyen a `src/types/api.ts`** — son más débiles (`status: string` en vez de la unión literal),
+      y de esas uniones dependen los `switch` exhaustivos y las claves de i18n. En su lugar:
+      `src/types/openapi.d.ts` (generado, `npm run api:types`) + `src/types/contract.ts`, que falla el
+      `typecheck` nombrando la clave si una interfaz a mano se desvía del esquema. ADR-0014.
+      Hallazgos reales al activarlo: `DeliveryResource` exponía `mode` y `correspondence_opened` sin
+      declarar en el front desde Fase 2; `avatar_url` se publicaba como `null` en vez de `string|null`
+      (arreglado extrayendo `PartyResource`, que además quita la duplicación en 4 sitios del módulo de
+      Dolls); `GET /features` publicaba `features: string` (arreglado con `#[Response]`).
+      `ApiDocsTest` falla si una ruta `api/v1` no está en el documento versionado)_
 - [ ] Capacitor sobre la PWA + push nativo (FCM/APNs)
 - [ ] Sincronización delta (`updated_since`)
 - [ ] Exportación de cartas a PDF

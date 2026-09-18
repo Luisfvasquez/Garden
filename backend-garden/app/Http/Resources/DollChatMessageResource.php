@@ -27,11 +27,7 @@ class DollChatMessageResource extends JsonResource
             'doll_request_id' => $this->doll_request_id,
             'type' => $this->type->value,
             'body' => $this->body,
-            'sender' => $this->when($this->sender !== null, fn () => [
-                'postal_handle' => $this->sender->postal_handle,
-                'display_name' => $this->sender->displayName(),
-                'avatar_url' => $this->sender->avatarUrl(),
-            ]),
+            'sender' => $this->when($this->sender !== null, fn () => new PartyResource($this->sender)),
             'is_mine' => $this->sender_id !== null
                 && $this->sender_id === $request->user()?->getKey(),
             'draft_payload' => $this->draft_payload,

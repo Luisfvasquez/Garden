@@ -17,7 +17,7 @@
     "lint:oxlint": "oxlint . --fix",
     "lint:eslint": "eslint . --fix --cache",
     "format": "prettier --write --experimental-cli src/",
-    "api:types": "openapi-typescript ../docs/api/openapi.json -o src/types/api.d.ts"
+    "api:types": "openapi-typescript ../docs/api/openapi.json -o src/types/openapi.d.ts"
   },
   "dependencies": {
     "@tanstack/vue-query": "^5.102.7",

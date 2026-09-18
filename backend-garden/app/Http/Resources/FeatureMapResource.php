@@ -15,12 +15,16 @@ use Illuminate\Http\Resources\Json\JsonResource;
 class FeatureMapResource extends JsonResource
 {
     /**
-     * @return array<string, array<string, bool>>
+     * Shape spelled out so the generated OpenAPI says "map of flag => bool"
+     * instead of guessing from `JsonResource::$resource`, which is `mixed`.
+     *
+     * @return array{features: array<string, bool>}
      */
     public function toArray(Request $request): array
     {
-        return [
-            'features' => $this->resource,
-        ];
+        /** @var array<string, bool> $features */
+        $features = $this->resource;
+
+        return ['features' => $features];
     }
 }

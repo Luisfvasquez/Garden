@@ -25,16 +25,8 @@ class DollRequestResource extends JsonResource
         return [
             'id' => $this->id,
             'status' => $this->status->value,
-            'client' => $this->when($this->client !== null, fn () => [
-                'postal_handle' => $this->client->postal_handle,
-                'display_name' => $this->client->displayName(),
-                'avatar_url' => $this->client->avatarUrl(),
-            ]),
-            'doll' => $this->when($this->doll !== null, fn () => [
-                'postal_handle' => $this->doll->postal_handle,
-                'display_name' => $this->doll->displayName(),
-                'avatar_url' => $this->doll->avatarUrl(),
-            ]),
+            'client' => $this->when($this->client !== null, fn () => new PartyResource($this->client)),
+            'doll' => $this->when($this->doll !== null, fn () => new PartyResource($this->doll)),
             'occasion' => $this->occasion,
             'brief_notes' => $this->brief_notes,
             'target_recipient_hint' => $this->target_recipient_hint,

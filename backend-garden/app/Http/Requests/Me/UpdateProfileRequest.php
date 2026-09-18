@@ -27,7 +27,9 @@ class UpdateProfileRequest extends FormRequest
                 'string',
                 'min:2',
                 'max:60',
-                Rule::unique('users', 'pen_name')->ignore($this->user()->getKey()),
+                // Null-safe on purpose: the route is behind `auth`, but rules() is also
+                // evaluated outside the request lifecycle (Scramble's static analysis).
+                Rule::unique('users', 'pen_name')->ignore($this->user()?->getKey()),
             ],
             'bio' => ['sometimes', 'nullable', 'string', 'max:500'],
             'country_code' => ['sometimes', 'nullable', 'string', 'size:2', 'alpha'],

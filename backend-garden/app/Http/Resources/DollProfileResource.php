@@ -26,11 +26,7 @@ class DollProfileResource extends JsonResource
 
         return [
             'id' => $this->id,
-            'doll' => [
-                'postal_handle' => $this->user->postal_handle,
-                'display_name' => $this->user->displayName(),
-                'avatar_url' => $this->user->avatarUrl(),
-            ],
+            'doll' => new PartyResource($this->user),
             'headline' => $this->headline,
             'bio' => $this->bio,
             'specialties' => $this->specialties,
