@@ -532,7 +532,12 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** GET /api/v1/features — public map of feature-flag state */
+        /**
+         * GET /api/v1/features — public map of feature-flag state
+         * @description The response shape is declared explicitly because Scramble infers
+         *     `JsonResource::$resource` as `mixed` for a resource that wraps an array
+         *     instead of a model, and would otherwise publish `features: string`.
+         */
         get: operations["v1.features"];
         put?: never;
         post?: never;
@@ -2611,6 +2616,13 @@ export interface operations {
                             per_page: number;
                             next_cursor: string | null;
                             has_more: boolean;
+                            synced_at: string;
+                            is_delta: boolean;
+                            /**
+                             * @description Only meaningful during a delta: on a full sync, whatever the
+                             *     client doesn't receive is deleted by definition.
+                             */
+                            deleted_ids: string | string[];
                         };
                     };
                 };
@@ -3221,7 +3233,11 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        data: components["schemas"]["FeatureMapResource"];
+                        data: {
+                            features: {
+                                [key: string]: boolean;
+                            };
+                        };
                     };
                 };
             };
@@ -3299,6 +3315,15 @@ export interface operations {
                             per_page: number;
                             next_cursor: string | null;
                             has_more: boolean;
+                            synced_at: string;
+                            is_delta: boolean;
+                            /**
+                             * @description Only meaningful during a delta: on a full sync, whatever the
+                             *     client doesn't receive is deleted by definition.
+                             */
+                            deleted_ids: {
+                                [key: string]: unknown;
+                            };
                         };
                     };
                 };
@@ -3549,7 +3574,6 @@ export interface operations {
         parameters: {
             query?: {
                 status?: string;
-                updated_since?: string;
             };
             header?: never;
             path?: never;
@@ -3569,6 +3593,13 @@ export interface operations {
                             per_page: number;
                             next_cursor: string | null;
                             has_more: boolean;
+                            synced_at: string;
+                            is_delta: boolean;
+                            /**
+                             * @description Only meaningful during a delta: on a full sync, whatever the
+                             *     client doesn't receive is deleted by definition.
+                             */
+                            deleted_ids: string | string[];
                         };
                     };
                 };
@@ -4028,6 +4059,13 @@ export interface operations {
                             per_page: number;
                             next_cursor: string | null;
                             has_more: boolean;
+                            synced_at: string;
+                            is_delta: boolean;
+                            /**
+                             * @description Only meaningful during a delta: on a full sync, whatever the
+                             *     client doesn't receive is deleted by definition.
+                             */
+                            deleted_ids: string | string[];
                         };
                     };
                 };

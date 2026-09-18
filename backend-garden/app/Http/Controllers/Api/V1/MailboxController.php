@@ -22,6 +22,8 @@ use App\Models\LetterDelivery;
 use App\Services\Postal\RandomLetterQuota;
 use App\Services\Postal\RandomLetterSender;
 use App\Support\CursorPage;
+use App\Support\DeltaSync;
+use Dedoc\Scramble\Attributes\QueryParameter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -33,24 +35,32 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
  */
 class MailboxController extends Controller
 {
+    #[QueryParameter(
+        'updated_since',
+        'Sincronización delta: sólo lo cambiado después de esta marca de agua. Usa el `meta.synced_at` de la respuesta anterior, nunca el reloj del cliente (docs/api/_convenciones.md).',
+        required: false,
+        type: 'string',
+        format: 'date-time',
+        example: '2026-09-17T10:00:00Z',
+    )]
     public function index(Request $request): AnonymousResourceCollection
     {
+        $sync = DeltaSync::fromRequest($request);
+
         $query = LetterDelivery::query()
             ->inMailbox($request->user()->getKey())
-            ->with(['letter' => fn ($q) => $q->withCount('attachments'), 'sender'])
-            ->orderByDesc('delivered_at')
-            ->orderByDesc('id');
+            ->with(['letter' => fn ($q) => $q->withCount('attachments'), 'sender']);
 
         $this->applyMailboxFilter($query, $request->query('status'));
 
-        if (is_string($request->query('updated_since'))) {
-            $query->where('updated_at', '>=', $request->date('updated_since'));
-        }
+        // Nothing is deleted from a mailbox: archiving and reading are status
+        // changes, so `updated_at` already carries them. No tombstones needed.
+        $sync->apply($query, fn ($q) => $q->orderByDesc('delivered_at')->orderByDesc('id'));
 
         $page = $query->cursorPaginate(CursorPage::perPage((int) $request->query('per_page', '20')));
 
         return MailboxEnvelopeResource::collection($page->getCollection())
-            ->additional(['meta' => CursorPage::meta($page)]);
+            ->additional(['meta' => [...CursorPage::meta($page), ...$sync->meta()]]);
     }
 
     public function show(LetterDelivery $delivery): MailboxEnvelopeResource

@@ -10,6 +10,8 @@ use App\Http\Resources\DeliveryResource;
 use App\Http\Resources\TrackingEventResource;
 use App\Models\LetterDelivery;
 use App\Support\CursorPage;
+use App\Support\DeltaSync;
+use Dedoc\Scramble\Attributes\QueryParameter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -20,20 +22,33 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
  */
 class DeliveryController extends Controller
 {
+    #[QueryParameter(
+        'updated_since',
+        'Sincronización delta: sólo lo cambiado después de esta marca de agua. Usa el `meta.synced_at` de la respuesta anterior, nunca el reloj del cliente (docs/api/_convenciones.md).',
+        required: false,
+        type: 'string',
+        format: 'date-time',
+        example: '2026-09-17T10:00:00Z',
+    )]
     public function index(Request $request): AnonymousResourceCollection
     {
+        $sync = DeltaSync::fromRequest($request);
+
         $query = LetterDelivery::query()
             ->forSender($request->user()->getKey())
-            ->with('recipient')
-            ->orderByDesc('created_at')
-            ->orderByDesc('id');
+            ->with('recipient');
 
         $this->applyStatusFilter($query, $request->query('status'));
+
+        // A delivery moves through the postal clock on its own: every status
+        // change touches `updated_at`, which is exactly what a client syncing
+        // its outbox wants to hear about.
+        $sync->apply($query, fn ($q) => $q->orderByDesc('created_at')->orderByDesc('id'));
 
         $page = $query->cursorPaginate(CursorPage::perPage((int) $request->query('per_page', '20')));
 
         return DeliveryResource::collection($page->getCollection())
-            ->additional(['meta' => CursorPage::meta($page)]);
+            ->additional(['meta' => [...CursorPage::meta($page), ...$sync->meta()]]);
     }
 
     public function show(LetterDelivery $delivery): DeliveryResource

@@ -3,7 +3,7 @@
 **Actualizar al cerrar cada tarea.** Este archivo es lo que le dice al agente qué existe ya.
 Formato: `[ ]` pendiente · `[~]` en curso · `[x]` terminado.
 
-Última actualización: 2026-09-17 — **Fases 1, 2 y 3 completas.** Fase 4 en curso: **4A** Scramble → `docs/api/openapi.json` → tipos TS, con la desviación de ADR-0014 (los tipos del front siguen a mano porque los generados son más débiles; `src/types/contract.ts` impide que se desvíen). **Pendiente de Fase 4:** Capacitor + push nativo, sincronización delta (`updated_since`), exportación a PDF, búsqueda con Meilisearch, cartas póstumas y particionado de `letter_deliveries`. **Diferido a propósito:** pagos con Stripe (ADR-0012), `ModerateContentJob` asíncrono, Horizon y la contenerización.
+Última actualización: 2026-09-18 — **Fases 1, 2 y 3 completas.** Fase 4 en curso: **4A** Scramble → `docs/api/openapi.json` → tipos TS (con la desviación de ADR-0014: los tipos del front siguen a mano porque los generados son más débiles, y `src/types/contract.ts` impide que se desvíen) y **4B** sincronización delta (`?updated_since=` con marca de agua del servidor, ventana `>`, orden por `updated_at` y lápidas para borrados). **Pendiente de Fase 4:** Capacitor + push nativo, exportación a PDF, búsqueda con Meilisearch, cartas póstumas y particionado de `letter_deliveries` — los cuatro primeros requieren dependencias o infraestructura nuevas, así que se preguntan antes (CLAUDE.md). **Diferido a propósito:** pagos con Stripe (ADR-0012), `ModerateContentJob` asíncrono, Horizon y la contenerización.
 
 ---
 
@@ -267,7 +267,19 @@ Formato: `[ ]` pendiente · `[~]` en curso · `[x]` terminado.
       Dolls); `GET /features` publicaba `features: string` (arreglado con `#[Response]`).
       `ApiDocsTest` falla si una ruta `api/v1` no está en el documento versionado)_
 - [ ] Capacitor sobre la PWA + push nativo (FCM/APNs)
-- [ ] Sincronización delta (`updated_since`)
+- [x] Sincronización delta (`updated_since`)
+      _(4B: `App\Support\DeltaSync` reutilizable, aplicado a `GET /mailbox`, `/deliveries`, `/letters` y
+      `/notifications`. Lo que lo hace correcto y no un simple filtro: **la marca de agua la emite el
+      servidor** (`meta.synced_at`, tomada *antes* de la consulta — el reloj del cliente adelantado se
+      saltaría filas para siempre, y solapar es inofensivo mientras un hueco no lo es); ventana
+      **estrictamente `>`** (con `>=` la fila del borde vuelve en cada sincronización); durante un delta
+      el **orden pasa a `updated_at` asc** (paginar por `delivered_at` filtrando por `updated_at` da
+      páginas que no componen); y **`meta.deleted_ids`** como lápidas para `letters` (borrado lógico) —
+      sin ellas un borrador borrado se queda en el dispositivo para siempre. Fecha ilegible →
+      `422 INVALID_UPDATED_SINCE`, nunca un silencio. Documentado en `_convenciones.md` y declarado en
+      OpenAPI con `#[QueryParameter]`, porque al mover la lectura a `DeltaSync` Scramble dejó de
+      inferirlo. El consumidor previsto es el cliente móvil (Capacitor, pendiente); la PWA sigue con
+      TanStack Query + caché del service worker. `DeltaSyncTest`: 17 casos)_
 - [ ] Exportación de cartas a PDF
 - [ ] Búsqueda con Meilisearch
 - [ ] Cartas póstumas por inactividad (con aviso legal)

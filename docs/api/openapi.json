@@ -599,6 +599,16 @@
                         "schema": {
                             "type": "string"
                         }
+                    },
+                    {
+                        "name": "updated_since",
+                        "in": "query",
+                        "description": "Sincronizaci\u00f3n delta: s\u00f3lo lo cambiado despu\u00e9s de esta marca de agua. Usa el `meta.synced_at` de la respuesta anterior, nunca el reloj del cliente (docs/api/_convenciones.md).",
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time"
+                        },
+                        "example": "2026-09-17T10:00:00Z"
                     }
                 ],
                 "responses": {
@@ -629,12 +639,37 @@
                                                 },
                                                 "has_more": {
                                                     "type": "boolean"
+                                                },
+                                                "synced_at": {
+                                                    "type": "string"
+                                                },
+                                                "is_delta": {
+                                                    "type": "boolean"
+                                                },
+                                                "deleted_ids": {
+                                                    "description": "Only meaningful during a delta: on a full sync, whatever the\nclient doesn't receive is deleted by definition.",
+                                                    "anyOf": [
+                                                        {
+                                                            "type": "string"
+                                                        },
+                                                        {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "string"
+                                                            },
+                                                            "minItems": 0,
+                                                            "maxItems": 0
+                                                        }
+                                                    ]
                                                 }
                                             },
                                             "required": [
                                                 "per_page",
                                                 "next_cursor",
-                                                "has_more"
+                                                "has_more",
+                                                "synced_at",
+                                                "is_delta",
+                                                "deleted_ids"
                                             ]
                                         }
                                     },
@@ -1861,6 +1896,18 @@
                 "tags": [
                     "Letter"
                 ],
+                "parameters": [
+                    {
+                        "name": "updated_since",
+                        "in": "query",
+                        "description": "Sincronizaci\u00f3n delta: s\u00f3lo lo cambiado despu\u00e9s de esta marca de agua. Usa el `meta.synced_at` de la respuesta anterior, nunca el reloj del cliente (docs/api/_convenciones.md).",
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time"
+                        },
+                        "example": "2026-09-17T10:00:00Z"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Array of `LetterResource`",
@@ -1889,12 +1936,26 @@
                                                 },
                                                 "has_more": {
                                                     "type": "boolean"
+                                                },
+                                                "synced_at": {
+                                                    "type": "string"
+                                                },
+                                                "is_delta": {
+                                                    "type": "boolean"
+                                                },
+                                                "deleted_ids": {
+                                                    "type": "object",
+                                                    "description": "Only meaningful during a delta: on a full sync, whatever the\nclient doesn't receive is deleted by definition.",
+                                                    "additionalProperties": {}
                                                 }
                                             },
                                             "required": [
                                                 "per_page",
                                                 "next_cursor",
-                                                "has_more"
+                                                "has_more",
+                                                "synced_at",
+                                                "is_delta",
+                                                "deleted_ids"
                                             ]
                                         }
                                     },
@@ -2327,9 +2388,12 @@
                     {
                         "name": "updated_since",
                         "in": "query",
+                        "description": "Sincronizaci\u00f3n delta: s\u00f3lo lo cambiado despu\u00e9s de esta marca de agua. Usa el `meta.synced_at` de la respuesta anterior, nunca el reloj del cliente (docs/api/_convenciones.md).",
                         "schema": {
-                            "type": "string"
-                        }
+                            "type": "string",
+                            "format": "date-time"
+                        },
+                        "example": "2026-09-17T10:00:00Z"
                     }
                 ],
                 "responses": {
@@ -2360,12 +2424,37 @@
                                                 },
                                                 "has_more": {
                                                     "type": "boolean"
+                                                },
+                                                "synced_at": {
+                                                    "type": "string"
+                                                },
+                                                "is_delta": {
+                                                    "type": "boolean"
+                                                },
+                                                "deleted_ids": {
+                                                    "description": "Only meaningful during a delta: on a full sync, whatever the\nclient doesn't receive is deleted by definition.",
+                                                    "anyOf": [
+                                                        {
+                                                            "type": "string"
+                                                        },
+                                                        {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "string"
+                                                            },
+                                                            "minItems": 0,
+                                                            "maxItems": 0
+                                                        }
+                                                    ]
                                                 }
                                             },
                                             "required": [
                                                 "per_page",
                                                 "next_cursor",
-                                                "has_more"
+                                                "has_more",
+                                                "synced_at",
+                                                "is_delta",
+                                                "deleted_ids"
                                             ]
                                         }
                                     },
@@ -3071,6 +3160,18 @@
                 "tags": [
                     "Notification"
                 ],
+                "parameters": [
+                    {
+                        "name": "updated_since",
+                        "in": "query",
+                        "description": "Sincronizaci\u00f3n delta: s\u00f3lo lo cambiado despu\u00e9s de esta marca de agua. Usa el `meta.synced_at` de la respuesta anterior, nunca el reloj del cliente (docs/api/_convenciones.md).",
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time"
+                        },
+                        "example": "2026-09-17T10:00:00Z"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Array of `NotificationResource`",
@@ -3099,12 +3200,37 @@
                                                 },
                                                 "has_more": {
                                                     "type": "boolean"
+                                                },
+                                                "synced_at": {
+                                                    "type": "string"
+                                                },
+                                                "is_delta": {
+                                                    "type": "boolean"
+                                                },
+                                                "deleted_ids": {
+                                                    "description": "Only meaningful during a delta: on a full sync, whatever the\nclient doesn't receive is deleted by definition.",
+                                                    "anyOf": [
+                                                        {
+                                                            "type": "string"
+                                                        },
+                                                        {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "string"
+                                                            },
+                                                            "minItems": 0,
+                                                            "maxItems": 0
+                                                        }
+                                                    ]
                                                 }
                                             },
                                             "required": [
                                                 "per_page",
                                                 "next_cursor",
-                                                "has_more"
+                                                "has_more",
+                                                "synced_at",
+                                                "is_delta",
+                                                "deleted_ids"
                                             ]
                                         }
                                     },

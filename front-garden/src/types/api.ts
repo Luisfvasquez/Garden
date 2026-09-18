@@ -522,6 +522,28 @@ export interface CursorPage<T> {
   meta: { per_page: number; next_cursor: string | null; has_more: boolean }
 }
 
+/**
+ * Listados que soportan `?updated_since=` (buzón, envíos, cartas,
+ * notificaciones). Ver `docs/api/_convenciones.md` §Sincronización delta.
+ *
+ * `synced_at` lo emite el servidor y es lo que se devuelve en la siguiente
+ * llamada: nunca uses el reloj del cliente como marca de agua.
+ *
+ * El consumidor previsto es la app móvil (Capacitor, pendiente); la PWA tira
+ * hoy de TanStack Query + el caché del service worker.
+ */
+export interface DeltaMeta {
+  synced_at: string
+  is_delta: boolean
+  /** Ids borrados desde la marca de agua. Vacío en una sincronización completa. */
+  deleted_ids: string[]
+}
+
+export interface SyncablePage<T> {
+  data: T[]
+  meta: CursorPage<T>['meta'] & DeltaMeta
+}
+
 export interface ApiErrorBody {
   message: string
   error_code: string

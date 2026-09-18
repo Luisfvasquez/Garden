@@ -139,6 +139,48 @@ Se aplican en el API Resource, no en la vista:
 Todo cliente envía `X-App-Version: 1.4.2`. El backend puede responder `426` con
 `{ "error_code": "UPGRADE_REQUIRED", "meta": { "min_version": "1.5.0" } }`.
 
+## Sincronización delta (`?updated_since=`)
+
+Para que el cliente móvil no se descargue el buzón entero en cada arranque (spec §12.4). Lo soportan
+`GET /mailbox`, `/deliveries`, `/letters` y `/notifications`.
+
+```http
+GET /api/v1/mailbox?updated_since=2026-09-17T10:00:00Z
+```
+
+```json
+{
+  "data": [ ... ],
+  "meta": {
+    "per_page": 20, "next_cursor": null, "has_more": false,
+    "synced_at": "2026-09-18T08:15:03Z",
+    "is_delta": true,
+    "deleted_ids": ["01J8..."]
+  }
+}
+```
+
+Reglas, y el porqué de cada una:
+
+- **`synced_at` lo emite el servidor y es lo que mandas la próxima vez.** Nunca uses el reloj del
+  cliente: uno adelantado se saltaría filas para siempre. Se toma **antes** de la consulta, así que una
+  fila escrita a mitad se reenvía en la siguiente tanda; solapar es inofensivo, un hueco es pérdida de
+  datos.
+- **La ventana es estrictamente mayor que** (`>`), no `>=`. Con `>=`, la fila del borde vuelve en cada
+  sincronización y para una cuenta tranquila el delta no está vacío nunca.
+- **Durante un delta el orden cambia a `updated_at` ascendente.** Paginar por `delivered_at` mientras
+  filtras por `updated_at` da páginas que no componen: una fila tocada a mitad salta de página.
+- **`deleted_ids` son lápidas.** Un delta sólo trae filas que existen, así que sin esto un borrador
+  borrado se quedaría en el dispositivo para siempre. Sólo `letters` las necesita (borrado lógico); en
+  buzón y envíos no se borra nada, archivar y leer son cambios de estado que `updated_at` ya recoge.
+  En una sincronización completa va vacío: lo que no llega, está borrado por definición.
+- **Una fecha ilegible es `422 INVALID_UPDATED_SINCE`.** Devolver todo (o nada) en silencio es como un
+  cliente acaba desincronizado durante semanas sin que nadie se entere.
+- `synced_at` viene también en una sincronización completa, para que la primera no necesite una segunda
+  llamada sólo para conseguir la marca de agua.
+
+Implementado en `App\Support\DeltaSync`.
+
 ## El documento OpenAPI generado
 
 `docs/api/openapi.json` lo genera Scramble desde el código:

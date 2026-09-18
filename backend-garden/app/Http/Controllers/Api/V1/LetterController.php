@@ -12,7 +12,9 @@ use App\Http\Resources\LetterResource;
 use App\Models\Letter;
 use App\Services\Postal\LetterStyleCatalog;
 use App\Support\CursorPage;
+use App\Support\DeltaSync;
 use App\Support\TiptapContent;
+use Dedoc\Scramble\Attributes\QueryParameter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -23,13 +25,22 @@ class LetterController extends Controller
 {
     public function __construct(private readonly LetterStyleCatalog $styles) {}
 
+    #[QueryParameter(
+        'updated_since',
+        'Sincronización delta: sólo lo cambiado después de esta marca de agua. Usa el `meta.synced_at` de la respuesta anterior, nunca el reloj del cliente (docs/api/_convenciones.md).',
+        required: false,
+        type: 'string',
+        format: 'date-time',
+        example: '2026-09-17T10:00:00Z',
+    )]
     public function index(Request $request): AnonymousResourceCollection
     {
+        $sync = DeltaSync::fromRequest($request);
+        $authorId = $request->user()->getKey();
+
         $query = Letter::query()
-            ->where('author_id', $request->user()->getKey())
-            ->withCount('deliveries')
-            ->orderByDesc('updated_at')
-            ->orderByDesc('id');
+            ->where('author_id', $authorId)
+            ->withCount('deliveries');
 
         if ($request->query('status') === 'draft') {
             $query->where('is_locked', false);
@@ -37,10 +48,15 @@ class LetterController extends Controller
             $query->where('is_locked', true);
         }
 
+        $sync->apply($query, fn ($q) => $q->orderByDesc('updated_at')->orderByDesc('id'));
+
         $page = $query->cursorPaginate(CursorPage::perPage((int) $request->query('per_page', '20')));
 
         return LetterResource::collection($page->getCollection())
-            ->additional(['meta' => CursorPage::meta($page)]);
+            ->additional(['meta' => [
+                ...CursorPage::meta($page),
+                ...$sync->meta($this->deletedSince($sync, $authorId)),
+            ]]);
     }
 
     public function store(StoreLetterRequest $request): JsonResponse
@@ -79,6 +95,27 @@ class LetterController extends Controller
         return (new LetterResource($letter->loadCount('deliveries')))
             ->response()
             ->setStatusCode(201);
+    }
+
+    /**
+     * Tombstones. Letters are soft-deleted, so a client that already holds a
+     * draft has no other way to learn it is gone — a delta only ever carries
+     * rows that still exist. Without this, deleted drafts would linger on the
+     * device forever.
+     *
+     * @return list<string>
+     */
+    private function deletedSince(DeltaSync $sync, string $authorId): array
+    {
+        if (! $sync->isDelta()) {
+            return [];
+        }
+
+        return Letter::onlyTrashed()
+            ->where('author_id', $authorId)
+            ->where('deleted_at', '>', $sync->since)
+            ->pluck('id')
+            ->all();
     }
 
     public function show(Letter $letter): LetterResource
