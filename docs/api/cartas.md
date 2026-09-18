@@ -121,3 +121,27 @@ previa a página completa sin una segunda llamada:
 - Imagen: el servidor calcula `metadata.width` / `height`.
 - **Las cartas aleatorias no admiten adjuntos** (`422 ATTACHMENTS_NOT_ALLOWED`, vector de abuso).
 - Solo el autor y solo mientras la carta **no esté enviada** (`409 LETTER_LOCKED`).
+
+## Exportación a PDF
+
+```
+GET /api/v1/letters/{letter}/pdf     # la autora exporta su copia
+GET /api/v1/mailbox/{delivery}/pdf   # quien la recibió exporta la suya
+```
+
+Devuelve `application/pdf` con `Content-Disposition: attachment` y
+`Cache-Control: private, no-store` — una carta no se queda en una caché compartida.
+`throttle:export-pdf` (10/min): renderizar cuesta órdenes de magnitud más que leer una fila.
+
+Una carta tiene dos dueños, y cada puerta usa el permiso que ya existía:
+
+- `/letters/{id}/pdf` exige ser la autora (`LetterPolicy@view` → 404 sin filtrar existencia).
+- `/mailbox/{id}/pdf` exige la misma puerta que abrir el sobre (`viewInMailbox`): **nunca una entrega
+  `in_transit`**. La sorpresa es el producto; un PDF no puede ser la puerta trasera.
+- El anonimato lo resuelve `SenderView`, el mismo helper que usan los API Resources. Si el buzón aún
+  oculta a quien escribe, el PDF tampoco lleva línea de remite.
+
+**Fidelidad.** Se conservan el tono del papel, el color de la tinta y el marco. Las tipografías del
+catálogo (Cormorant, EB Garamond, Lora) **no** viajan en el repositorio como ficheros, así que el PDF
+cae a la serif que trae Dompdf. Poner los TTF en `storage/fonts` y registrarlos es el camino de mejora.
+Ver ADR-0015 para por qué Dompdf y no `spatie/laravel-pdf`.

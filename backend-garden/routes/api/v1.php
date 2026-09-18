@@ -22,6 +22,7 @@ use App\Http\Controllers\Api\V1\DollRequestController;
 use App\Http\Controllers\Api\V1\FeatureFlagController;
 use App\Http\Controllers\Api\V1\HealthController;
 use App\Http\Controllers\Api\V1\LetterController;
+use App\Http\Controllers\Api\V1\LetterPdfController;
 use App\Http\Controllers\Api\V1\LetterStyleController;
 use App\Http\Controllers\Api\V1\MailboxController;
 use App\Http\Controllers\Api\V1\MeController;
@@ -99,6 +100,9 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
     // --- Letters (composición) — contrato: docs/api/cartas.md ---
     Route::get('letters/styles', [LetterStyleController::class, 'index'])->name('letters.styles');
     Route::get('letters/{letter}/preview', [LetterController::class, 'preview'])->name('letters.preview');
+    // Exportación a PDF. Throttle propio: renderizar es caro comparado con leer.
+    Route::get('letters/{letter}/pdf', [LetterPdfController::class, 'mine'])
+        ->middleware('throttle:export-pdf')->name('letters.pdf');
     Route::post('letters/{letter}/send', SendLetterController::class)
         ->middleware(['verified', 'throttle:send-letter', 'idempotency'])
         ->name('letters.send');
@@ -205,6 +209,8 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
     Route::post('mailbox/{delivery}/archive', [MailboxController::class, 'archive'])->name('mailbox.archive');
     Route::post('mailbox/{delivery}/favorite', [MailboxController::class, 'favorite'])->name('mailbox.favorite');
     Route::post('mailbox/{delivery}/reply', [MailboxController::class, 'reply'])->name('mailbox.reply');
+    Route::get('mailbox/{delivery}/pdf', [LetterPdfController::class, 'received'])
+        ->middleware('throttle:export-pdf')->name('mailbox.pdf');
 
     // --- Bloqueos y reportes — contrato: docs/api/comunidad-notificaciones.md ---
     Route::get('blocks', [BlockController::class, 'index'])->name('blocks.index');

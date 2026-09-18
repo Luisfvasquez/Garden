@@ -48,11 +48,70 @@ final class TiptapContent
         return trim(preg_replace('/\n{3,}/', "\n\n", implode("\n", $lines)) ?? '');
     }
 
+    /**
+     * Renders to the small HTML subset the whitelist allows. Used for the PDF
+     * export (docs/api/cartas.md); the web clients render the JSON themselves.
+     *
+     * Everything is escaped on the way out. The document was sanitised on the
+     * way in, but a body stored before a whitelist change would otherwise be a
+     * stored-XSS hole into the PDF renderer.
+     *
+     * @param  array<string, mixed>  $doc
+     */
+    public static function toHtml(array $doc): string
+    {
+        return self::renderNode(self::sanitize($doc));
+    }
+
     public static function wordCount(string $plain): int
     {
         $trimmed = trim($plain);
 
         return $trimmed === '' ? 0 : count(preg_split('/\s+/', $trimmed) ?: []);
+    }
+
+    /**
+     * @param  array<string, mixed>  $node
+     */
+    private static function renderNode(array $node): string
+    {
+        $type = is_string($node['type'] ?? null) ? $node['type'] : '';
+
+        if ($type === 'text') {
+            $text = htmlspecialchars((string) ($node['text'] ?? ''), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+
+            foreach (is_array($node['marks'] ?? null) ? $node['marks'] : [] as $mark) {
+                $text = match (is_array($mark) ? ($mark['type'] ?? null) : null) {
+                    'bold' => "<strong>{$text}</strong>",
+                    'italic' => "<em>{$text}</em>",
+                    'underline' => "<u>{$text}</u>",
+                    default => $text,
+                };
+            }
+
+            return $text;
+        }
+
+        if ($type === 'hardBreak') {
+            return '<br>';
+        }
+
+        if ($type === 'horizontalRule') {
+            return '<hr>';
+        }
+
+        $inner = '';
+        foreach (is_array($node['content'] ?? null) ? $node['content'] : [] as $child) {
+            if (is_array($child)) {
+                $inner .= self::renderNode($child);
+            }
+        }
+
+        return match ($type) {
+            'paragraph' => '<p>'.($inner === '' ? '&nbsp;' : $inner).'</p>',
+            'blockquote' => "<blockquote>{$inner}</blockquote>",
+            default => $inner,
+        };
     }
 
     /**

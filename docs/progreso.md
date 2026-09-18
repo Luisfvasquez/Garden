@@ -280,7 +280,17 @@ Formato: `[ ]` pendiente · `[~]` en curso · `[x]` terminado.
       OpenAPI con `#[QueryParameter]`, porque al mover la lectura a `DeltaSync` Scramble dejó de
       inferirlo. El consumidor previsto es el cliente móvil (Capacitor, pendiente); la PWA sigue con
       TanStack Query + caché del service worker. `DeltaSyncTest`: 17 casos)_
-- [ ] Exportación de cartas a PDF
+- [x] Exportación de cartas a PDF
+      _(4C: `dompdf/dompdf` (PHP puro) envuelto en `LetterPdfRenderer`, **no** `spatie/laravel-pdf` como
+      sugería la spec: ese lanza un Chromium headless vía Node, y la contenerización sigue diferida, así
+      que ese coste recaería sobre cada máquina y CI. ADR-0015. `GET /letters/{id}/pdf` (la autora) y
+      `GET /mailbox/{id}/pdf` (quien la recibió); cada puerta reutiliza el permiso que ya existía, así
+      que **nunca** exporta una entrega `in_transit` ni revela un remitente que el buzón sigue ocultando
+      (`SenderView`). `Cache-Control: private, no-store` + `throttle:export-pdf` 10/min.
+      `TiptapContent::toHtml()` escapa al salir — el cuerpo se saneó al entrar, pero uno guardado antes
+      de un cambio de lista blanca sería un XSS almacenado hacia el renderizador. Limitación anotada:
+      las tipografías del catálogo no viajan como ficheros, así que el PDF cae a la serif de Dompdf;
+      papel, tinta y marco sí se conservan. `LetterPdfTest`: 13 casos)_
 - [ ] Búsqueda con Meilisearch
 - [ ] Cartas póstumas por inactividad (con aviso legal)
 - [ ] Particionado de `letter_deliveries` si el volumen lo pide

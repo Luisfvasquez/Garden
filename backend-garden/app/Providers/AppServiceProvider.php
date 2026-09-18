@@ -67,6 +67,10 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('create-doll-request', fn (Request $request) => Limit::perHour(5)
             ->by((string) $request->user()?->getAuthIdentifier()));
 
+        // Rendering a PDF costs orders of magnitude more than reading a row.
+        RateLimiter::for('export-pdf', fn (Request $request) => Limit::perMinute(10)
+            ->by((string) $request->user()?->getAuthIdentifier()));
+
         // Doll chat: generous, it is a real conversation — but bounded, so a
         // runaway client can't flood the transcript (ADR-0005).
         RateLimiter::for('doll-chat', fn (Request $request) => Limit::perMinute(30)
