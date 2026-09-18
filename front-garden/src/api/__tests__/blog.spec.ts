@@ -54,4 +54,14 @@ describe('blogApi', () => {
     expect(seen.url).toBe('/consent-requests/p9/respond')
     expect(seen.data).toBe(JSON.stringify({ granted: true }))
   })
+
+  it('passes the search terms through', async () => {
+    await blogApi.list({ q: 'cartas a mi padre' })
+    expect(seen.params).toMatchObject({ q: 'cartas a mi padre' })
+  })
+
+  it('omits q entirely when there is nothing to search', async () => {
+    await blogApi.list({ q: undefined, type: 'poem' })
+    expect(seen.params.q).toBeUndefined()
+  })
 })

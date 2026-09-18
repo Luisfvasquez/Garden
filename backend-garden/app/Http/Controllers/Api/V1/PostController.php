@@ -14,6 +14,7 @@ use App\Models\PublicPost;
 use App\Models\Tag;
 use App\Services\Blog\BlogPublisher;
 use App\Support\CursorPage;
+use Dedoc\Scramble\Attributes\QueryParameter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -26,9 +27,26 @@ class PostController extends Controller
     /**
      * GET /api/v1/posts — public feed. ?type=&tag=&sort=recent|featured
      */
+    #[QueryParameter(
+        'q',
+        'Búsqueda full-text sobre título y cuerpo (Postgres, configuración `spanish`). Acepta comillas para frase exacta y `-palabra` para excluir. Ordena por relevancia.',
+        required: false,
+        type: 'string',
+        example: 'cartas a mi padre',
+    )]
     public function index(Request $request): AnonymousResourceCollection
     {
-        $query = PublicPost::query()
+        $terms = $request->query('q');
+        $searching = is_string($terms) && trim($terms) !== '';
+
+        // Searching pages over a ranked derived table (see PublicPost::rankedSubquery);
+        // every other filter below applies to it unchanged, because the derived
+        // table keeps the name `public_posts`.
+        $query = $searching
+            ? PublicPost::query()->fromSub(PublicPost::rankedSubquery(trim((string) $terms)), 'public_posts')
+            : PublicPost::query();
+
+        $query
             ->publiclyVisible()
             ->with(['author', 'tags', 'reactions'])
             ->when($request->query('type'), fn ($q, $type) => $q->where('type', $type))
@@ -37,8 +55,13 @@ class PostController extends Controller
                 fn ($t) => $t->where('slug', $tag),
             ));
 
+        if ($searching) {
+            // Relevance first; recency and id break ties and keep the cursor unique.
+            $query->orderByDesc('search_rank');
+        }
+
         // The featured feed is curated by hand, never algorithmic
-        // (docs/api/blog.md) — for now it is just reverse-chronological too.
+        // (docs/api/blog.md) — for now it is just reverse-chronological.
         $query->orderByDesc('published_at')->orderByDesc('id');
 
         $page = $query->cursorPaginate(CursorPage::perPage((int) $request->query('per_page', '20')));

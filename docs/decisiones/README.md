@@ -23,3 +23,4 @@ de cambiar el código en silencio.
 | 0013 | Reverb para el canal en tiempo real, al precio de Guzzle 7 | Aceptado |
 | 0014 | Tipos del front a mano sobre el OpenAPI generado | Aceptado |
 | 0015 | Dompdf en vez de un navegador headless para exportar cartas | Aceptado |
+| 0016 | La búsqueda vive en Postgres; Meilisearch no se ha ganado su sitio | Aceptado |

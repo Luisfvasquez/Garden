@@ -3515,6 +3515,15 @@
                         "schema": {
                             "type": "string"
                         }
+                    },
+                    {
+                        "name": "q",
+                        "in": "query",
+                        "description": "B\u00fasqueda full-text sobre t\u00edtulo y cuerpo (Postgres, configuraci\u00f3n `spanish`). Acepta comillas para frase exacta y `-palabra` para excluir. Ordena por relevancia.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "cartas a mi padre"
                     }
                 ],
                 "responses": {
@@ -3528,17 +3537,7 @@
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "allOf": [
-                                                    {
-                                                        "$ref": "#/components/schemas/PostResource"
-                                                    },
-                                                    {
-                                                        "type": "object",
-                                                        "required": [
-                                                            "tags"
-                                                        ]
-                                                    }
-                                                ]
+                                                "$ref": "#/components/schemas/PostResource"
                                             }
                                         },
                                         "meta": {

@@ -388,6 +388,12 @@
       "deny": "Rechazar",
       "granted": "Permiso concedido.",
       "denied": "Solicitud rechazada."
+    },
+    "search": {
+      "label": "Buscar en el blog",
+      "placeholder": "Buscar por título o contenido…",
+      "clear": "Limpiar",
+      "hint": "Ordenado por relevancia. Usa comillas para una frase exacta y -palabra para excluir."
     }
   },
   "bottle": {

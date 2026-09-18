@@ -291,7 +291,18 @@ Formato: `[ ]` pendiente · `[~]` en curso · `[x]` terminado.
       de un cambio de lista blanca sería un XSS almacenado hacia el renderizador. Limitación anotada:
       las tipografías del catálogo no viajan como ficheros, así que el PDF cae a la serif de Dompdf;
       papel, tinta y marco sí se conservan. `LetterPdfTest`: 13 casos)_
-- [ ] Búsqueda con Meilisearch
+- [x] Búsqueda — **en Postgres, sin Meilisearch** (ADR-0016)
+      _(4D: `GET /posts?q=`. La columna `search_vector`, su índice GIN y su trigger existían desde 2D y
+      **nadie los usaba**; esto los enciende en vez de desplegar un servicio nuevo. Dos arreglos que se
+      notaban al primer intento: `simple` → `spanish` (sin lematizar, "cartas" no encontraba "carta") y
+      título con peso A sobre cuerpo B, que obligó a una función de trigger propia porque
+      `tsvector_update_trigger()` no asigna pesos (migración 000550, reindexa en sitio).
+      `websearch_to_tsquery`, no `to_tsquery`: acepta comillas, `-palabra` y hasta un `&` suelto sin
+      convertir una errata en un 500. **El ranking obligó a una subconsulta** — el cursor compara las
+      columnas del ORDER BY como columnas reales, así que un `search_rank` calculado reventaba en la
+      página 2; una tabla derivada lo convierte en columna de verdad (hay test). Front: buscador con
+      debounce de 350 ms en `BlogFeedView`. `PostSearchTest`: 20 casos. **No busca cartas privadas**:
+      `letters.body` va cifrado y eso sería otra función, con su propio consentimiento)_
 - [ ] Cartas póstumas por inactividad (con aviso legal)
 - [ ] Particionado de `letter_deliveries` si el volumen lo pide
 

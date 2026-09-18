@@ -4,10 +4,14 @@ import { blogApi } from '@/api/blog'
 import { qk } from '@/api/queryKeys'
 import type { CreatePostInput, ReactionType } from '@/types/api'
 
-export function useBlogFeed(type: MaybeRefOrGetter<string | undefined>, tag: MaybeRefOrGetter<string | undefined>) {
+export function useBlogFeed(
+  type: MaybeRefOrGetter<string | undefined>,
+  tag: MaybeRefOrGetter<string | undefined>,
+  q: MaybeRefOrGetter<string | undefined> = () => undefined,
+) {
   return useQuery({
-    queryKey: computed(() => qk.blog.feed(toValue(type), toValue(tag))),
-    queryFn: () => blogApi.list({ type: toValue(type), tag: toValue(tag) }),
+    queryKey: computed(() => qk.blog.feed(toValue(type), toValue(tag), toValue(q))),
+    queryFn: () => blogApi.list({ type: toValue(type), tag: toValue(tag), q: toValue(q) || undefined }),
   })
 }
 

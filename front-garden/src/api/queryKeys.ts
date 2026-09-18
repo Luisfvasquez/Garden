@@ -38,7 +38,8 @@ export const qk = {
   },
   blog: {
     all: ['blog'] as const,
-    feed: (type?: string, tag?: string) => ['blog', 'feed', type ?? 'all', tag ?? 'all'] as const,
+    feed: (type?: string, tag?: string, q?: string) =>
+      ['blog', 'feed', type ?? 'all', tag ?? 'all', q ?? ''] as const,
     post: (slug: string) => ['blog', 'post', slug] as const,
     comments: (postId: string) => ['blog', 'comments', postId] as const,
     tags: ['blog', 'tags'] as const,

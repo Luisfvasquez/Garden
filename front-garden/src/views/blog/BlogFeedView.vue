@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onUnmounted, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useBlogFeed, useBlogTags } from '@/composables/useBlog'
@@ -18,8 +18,28 @@ const types: (PostType | undefined)[] = [undefined, 'reflection', 'poem', 'unadd
 const activeType = ref<PostType | undefined>(undefined)
 const activeTag = ref<string | undefined>(undefined)
 
-const feed = useBlogFeed(activeType, activeTag)
+// `search` es lo que se escribe; `query` es lo que se consulta. Debounce de
+// 350 ms: cada pulsación es una consulta full-text, no un filtro en memoria.
+const search = ref('')
+const query = ref('')
+let debounce: ReturnType<typeof setTimeout> | undefined
+
+watch(search, (value) => {
+  clearTimeout(debounce)
+  debounce = setTimeout(() => {
+    query.value = value.trim()
+  }, 350)
+})
+
+onUnmounted(() => clearTimeout(debounce))
+
+const feed = useBlogFeed(activeType, activeTag, query)
 const tags = useBlogTags()
+
+function clearSearch() {
+  search.value = ''
+  query.value = ''
+}
 </script>
 
 <template>
@@ -36,6 +56,30 @@ const tags = useBlogTags()
           </RouterLink>
         </div>
       </div>
+
+      <form class="flex gap-2" role="search" @submit.prevent="query = search.trim()">
+        <label class="flex-1">
+          <span class="sr-only">{{ t('blog.search.label') }}</span>
+          <input
+            v-model="search"
+            type="search"
+            :placeholder="t('blog.search.placeholder')"
+            class="w-full rounded border border-[var(--border-soft)] bg-[var(--surface)] px-3 py-2 text-sm"
+          />
+        </label>
+        <button
+          v-if="query"
+          type="button"
+          class="rounded border border-[var(--border-soft)] px-3 py-1.5 text-sm"
+          @click="clearSearch"
+        >
+          {{ t('blog.search.clear') }}
+        </button>
+      </form>
+
+      <p v-if="query" class="text-sm text-[var(--text-muted)]">
+        {{ t('blog.search.hint') }}
+      </p>
 
       <div class="flex flex-wrap gap-2">
         <button

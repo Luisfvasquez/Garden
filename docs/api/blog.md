@@ -108,3 +108,27 @@ y se escala a revisión humana.
 
 - Búsqueda full-text: `tsvector` de Postgres en fase 2, Meilisearch en fase 4.
 - Feed RSS/Atom público en `/feed.xml` — barato y coherente con la estética.
+
+## Búsqueda
+
+```
+GET /api/v1/posts?q=cartas%20a%20mi%20padre
+```
+
+Full-text sobre título y cuerpo, en Postgres (`tsvector` + GIN, configuración `spanish`). Ordena por
+relevancia y se combina con `type` y `tag`. Ver **ADR-0016** para por qué no Meilisearch.
+
+- El **título pesa más que el cuerpo**: un post titulado "Padre" sale por delante de otro que lo
+  menciona de pasada.
+- **Lematiza en español**: "cartas" encuentra "carta", "escribir" encuentra "escribiendo".
+- Acepta `"frase exacta"` entre comillas y `-palabra` para excluir.
+- **Cualquier cosa que alguien escriba es válida.** Se usa `websearch_to_tsquery`, así que un `&` suelto
+  o un paréntesis sin cerrar devuelven resultados vacíos, no un 500.
+- Sólo busca lo que ya es público: un borrador o un post retenido por moderación nunca aparece.
+- Un `q` vacío o en blanco equivale a no buscar.
+
+Limitación conocida: hay **una sola configuración de idioma por columna**, y es `spanish`. Los posts en
+inglés se siguen encontrando por coincidencia exacta, pero sin lematización.
+
+**No se buscan cartas privadas.** `letters.body` va cifrado; buscar correspondencia propia sería una
+función aparte, con su propio consentimiento (spec §13.1).

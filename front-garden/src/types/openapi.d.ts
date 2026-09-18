@@ -612,6 +612,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/letters/{letter}/pdf": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET /api/v1/letters/{letter}/pdf — the author exports their own copy */
+        get: operations["v1.letters.pdf"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/mailbox/{delivery}/pdf": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET /api/v1/mailbox/{delivery}/pdf — the recipient exports what arrived */
+        get: operations["v1.mailbox.pdf"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/letters/styles": {
         parameters: {
             query?: never;
@@ -2597,6 +2631,11 @@ export interface operations {
         parameters: {
             query?: {
                 status?: string;
+                /**
+                 * @description Sincronización delta: sólo lo cambiado después de esta marca de agua. Usa el `meta.synced_at` de la respuesta anterior, nunca el reloj del cliente (docs/api/_convenciones.md).
+                 * @example 2026-09-17T10:00:00Z
+                 */
+                updated_since?: string;
             };
             header?: never;
             path?: never;
@@ -3296,7 +3335,13 @@ export interface operations {
     };
     "v1.letters.index": {
         parameters: {
-            query?: never;
+            query?: {
+                /**
+                 * @description Sincronización delta: sólo lo cambiado después de esta marca de agua. Usa el `meta.synced_at` de la respuesta anterior, nunca el reloj del cliente (docs/api/_convenciones.md).
+                 * @example 2026-09-17T10:00:00Z
+                 */
+                updated_since?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -3445,6 +3490,60 @@ export interface operations {
             404: components["responses"]["ModelNotFoundException"];
         };
     };
+    "v1.letters.pdf": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The letter ID */
+                letter: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    "Content-Disposition"?: string;
+                    "Cache-Control"?: "private, no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/pdf": string;
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
+        };
+    };
+    "v1.mailbox.pdf": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The delivery ID */
+                delivery: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    "Content-Disposition"?: string;
+                    "Cache-Control"?: "private, no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/pdf": string;
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
+        };
+    };
     "v1.letters.styles": {
         parameters: {
             query?: never;
@@ -3574,6 +3673,11 @@ export interface operations {
         parameters: {
             query?: {
                 status?: string;
+                /**
+                 * @description Sincronización delta: sólo lo cambiado después de esta marca de agua. Usa el `meta.synced_at` de la respuesta anterior, nunca el reloj del cliente (docs/api/_convenciones.md).
+                 * @example 2026-09-17T10:00:00Z
+                 */
+                updated_since?: string;
             };
             header?: never;
             path?: never;
@@ -4040,7 +4144,13 @@ export interface operations {
     };
     "v1.notifications.index": {
         parameters: {
-            query?: never;
+            query?: {
+                /**
+                 * @description Sincronización delta: sólo lo cambiado después de esta marca de agua. Usa el `meta.synced_at` de la respuesta anterior, nunca el reloj del cliente (docs/api/_convenciones.md).
+                 * @example 2026-09-17T10:00:00Z
+                 */
+                updated_since?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -4187,6 +4297,11 @@ export interface operations {
             query?: {
                 type?: string;
                 tag?: string;
+                /**
+                 * @description Búsqueda full-text sobre título y cuerpo (Postgres, configuración `spanish`). Acepta comillas para frase exacta y `-palabra` para excluir. Ordena por relevancia.
+                 * @example cartas a mi padre
+                 */
+                q?: string;
             };
             header?: never;
             path?: never;
@@ -4201,7 +4316,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        data: (components["schemas"]["PostResource"] & Record<string, never>)[];
+                        data: components["schemas"]["PostResource"][];
                         meta: {
                             per_page: number;
                             next_cursor: string | null;

@@ -388,6 +388,12 @@
       "deny": "Decline",
       "granted": "Permission granted.",
       "denied": "Request declined."
+    },
+    "search": {
+      "label": "Search the blog",
+      "placeholder": "Search by title or content…",
+      "clear": "Clear",
+      "hint": "Sorted by relevance. Use quotes for an exact phrase and -word to exclude."
     }
   },
   "bottle": {

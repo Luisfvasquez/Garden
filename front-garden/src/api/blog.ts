@@ -10,7 +10,7 @@ import type {
 
 /** Community blog — contract: docs/api/blog.md. */
 export const blogApi = {
-  list: (params: { type?: string; tag?: string; sort?: string; cursor?: string } = {}) =>
+  list: (params: { type?: string; tag?: string; sort?: string; q?: string; cursor?: string } = {}) =>
     api.get<CursorPage<Post>>('/posts', { params }).then((r) => r.data),
 
   get: (slug: string) => fetchResource<Post>(`/posts/${slug}`),

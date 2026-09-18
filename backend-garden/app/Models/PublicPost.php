@@ -17,7 +17,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 /**
@@ -162,5 +164,37 @@ class PublicPost extends Model
         $query->whereNotNull('published_at')
             ->where('moderation_status', ModerationStatus::Approved)
             ->where('visibility', PostVisibility::Public);
+    }
+
+    /**
+     * The ranked result set for a full-text search, as a subquery.
+     *
+     * It has to be a subquery, and that is the non-obvious part. The rank is a
+     * computed expression, but cursor pagination builds its cursor by
+     * comparing the ORDERED COLUMNS of the last row — and it emits those as
+     * real column references. A computed `search_rank` in the outer ORDER BY
+     * makes Postgres fail with a type mismatch on page 2 (it did; there is a
+     * test). Wrapping the ranking in a derived table called `public_posts`
+     * turns `search_rank` into an actual column of the thing being paged, so
+     * the cursor composes.
+     *
+     * `websearch_to_tsquery`, not `to_tsquery`: it takes whatever a person
+     * types — quotes, OR, a leading minus — and **never throws on malformed
+     * input**. `to_tsquery` raises a syntax error on something as ordinary as
+     * `cartas &`, turning a typo into a 500.
+     *
+     * Title is weighted A and body B by the trigger (migration 000550), so a
+     * post named "Padre" outranks one that merely mentions it in passing.
+     */
+    public static function rankedSubquery(string $terms): QueryBuilder
+    {
+        $config = 'pg_catalog.spanish';
+
+        return DB::table('public_posts')
+            ->selectRaw(
+                'public_posts.*, ts_rank(search_vector, websearch_to_tsquery(?, ?)) AS search_rank',
+                [$config, $terms],
+            )
+            ->whereRaw('search_vector @@ websearch_to_tsquery(?, ?)', [$config, $terms]);
     }
 }
