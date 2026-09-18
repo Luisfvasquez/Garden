@@ -24,3 +24,4 @@ de cambiar el código en silencio.
 | 0014 | Tipos del front a mano sobre el OpenAPI generado | Aceptado |
 | 0015 | Dompdf en vez de un navegador headless para exportar cartas | Aceptado |
 | 0016 | La búsqueda vive en Postgres; Meilisearch no se ha ganado su sitio | Aceptado |
+| 0017 | Lo que queda fuera de la Fase 4, y qué haría falta para entrarlo | Aceptado |

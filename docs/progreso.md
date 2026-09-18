@@ -3,7 +3,7 @@
 **Actualizar al cerrar cada tarea.** Este archivo es lo que le dice al agente qué existe ya.
 Formato: `[ ]` pendiente · `[~]` en curso · `[x]` terminado.
 
-Última actualización: 2026-09-18 — **Fases 1, 2 y 3 completas.** Fase 4 en curso: **4A** Scramble → `docs/api/openapi.json` → tipos TS (con la desviación de ADR-0014: los tipos del front siguen a mano porque los generados son más débiles, y `src/types/contract.ts` impide que se desvíen) y **4B** sincronización delta (`?updated_since=` con marca de agua del servidor, ventana `>`, orden por `updated_at` y lápidas para borrados). **Pendiente de Fase 4:** Capacitor + push nativo, exportación a PDF, búsqueda con Meilisearch, cartas póstumas y particionado de `letter_deliveries` — los cuatro primeros requieren dependencias o infraestructura nuevas, así que se preguntan antes (CLAUDE.md). **Diferido a propósito:** pagos con Stripe (ADR-0012), `ModerateContentJob` asíncrono, Horizon y la contenerización.
+Última actualización: 2026-09-18 — **Fases 1, 2 y 3 completas. Fase 4 entregada en lo que se puede entregar y verificar aquí:** **4A** Scramble → `docs/api/openapi.json` → tipos TS (ADR-0014: los del front siguen a mano porque los generados son más débiles; `contract.ts` impide que se desvíen), **4B** sincronización delta (`?updated_since=` con marca de agua del servidor, ventana `>`, orden por `updated_at` y lápidas), **4C** exportación a PDF (Dompdf, no Chromium headless — ADR-0015) y **4D** búsqueda del blog en Postgres (`tsvector` `spanish` con pesos, **sin Meilisearch** — ADR-0016). **Fuera a propósito, con motivo escrito en ADR-0017:** Capacitor (no verificable sin SDK nativos), cartas póstumas (decisión de producto + aviso legal) y particionado (el volumen no lo pide). **Diferido de antes:** pagos con Stripe (ADR-0012), `ModerateContentJob` asíncrono, Horizon y la contenerización. **Siguiente paso natural:** el checklist previo al lanzamiento.
 
 ---
 
@@ -267,6 +267,11 @@ Formato: `[ ]` pendiente · `[~]` en curso · `[x]` terminado.
       Dolls); `GET /features` publicaba `features: string` (arreglado con `#[Response]`).
       `ApiDocsTest` falla si una ruta `api/v1` no está en el documento versionado)_
 - [ ] Capacitor sobre la PWA + push nativo (FCM/APNs)
+      _(**diferido: no se puede verificar aquí** — ADR-0017. Escribir la config es trivial; compilar y
+      probar necesita Android Studio, Xcode y credenciales reales de FCM/APNs. Entregar andamiaje que
+      nadie ha ejecutado es peor que una casilla vacía. Lo que la spec §12.4 pedía decidir "ahora" ya
+      está hecho y no habrá que rehacerlo: tokens desde el día 1, `error_code` estable, cursor,
+      `?updated_since=`, `push_subscriptions.platform` y `426 UPGRADE_REQUIRED`)_
 - [x] Sincronización delta (`updated_since`)
       _(4B: `App\Support\DeltaSync` reutilizable, aplicado a `GET /mailbox`, `/deliveries`, `/letters` y
       `/notifications`. Lo que lo hace correcto y no un simple filtro: **la marca de agua la emite el
@@ -304,22 +309,50 @@ Formato: `[ ]` pendiente · `[~]` en curso · `[x]` terminado.
       debounce de 350 ms en `BlogFeedView`. `PostSearchTest`: 20 casos. **No busca cartas privadas**:
       `letters.body` va cifrado y eso sería otra función, con su propio consentimiento)_
 - [ ] Cartas póstumas por inactividad (con aviso legal)
+      _(**diferido: decisión de producto y legal, no técnica** — ADR-0017. Es la única función que actúa
+      en nombre de quien no ha pedido nada en ese momento: si el umbral falla, se envía la
+      correspondencia íntima de alguien que está vivo, y una carta entregada no se recoge. Faltan por
+      escrito el umbral, los avisos previos, quién puede cancelar y **el aviso legal que el propio
+      checklist exige**)_
 - [ ] Particionado de `letter_deliveries` si el volumen lo pide
+      _(**no procede: el volumen no lo pide** — ADR-0017. La condición está en el propio enunciado. Hay
+      índices parciales desde Fase 1 (ADR-0006). Particionar antes de necesitarlo añade complejidad
+      permanente en migraciones, claves foráneas y consultas a cambio de nada)_
 
 ---
 
 ## Checklist previo al lanzamiento
 
-- [ ] Verificación de email obligatoria activa
+> Sólo se marca lo **verificado**, no lo que "debería estar". Es la puerta de lanzamiento: una casilla
+> marcada por optimismo aquí es peor que una vacía.
+
+- [x] Cartas aleatorias en opt-in explícito
+      _(`users.accepts_random_letters` nace `false` en la migración; además `restrict_random` puede
+      retirarlo por moderación — ADR-0004)_
+- [x] Filtro de moderación activo en aleatorias y blog
+      _(2A `ContentModerator` + 2C filtro síncrono en botella + 2D filtro obligatorio previo a publicar)_
+- [x] Recursos de ayuda configurados para los países principales
+      _(`SupportResourceSeeder`: ES, MX, AR, US + fallback internacional)_
+- [x] Rate limits en todos los endpoints de escritura
+      _(auditado ruta por ruta sobre `route:list --json`: las 45 restantes van con el bucket general de
+      60/min y las costosas tienen el suyo. El audit encontró un hueco real y se corrigió: **las subidas
+      de ficheros** (`me/avatar`, `letters/{id}/attachments`) sólo tenían el bucket general, que limita
+      peticiones pero no megabytes de procesado de imagen → `throttle:upload` 30/h)_
+- [~] Verificación de email obligatoria activa
+      _(el middleware `verified` cubre enviar carta, publicar, comentar, chat de Dolls y crear
+      solicitudes. **Queda decidir** si leer también debe exigirlo)_
+- [~] `APP_DEBUG=false`, `/docs` protegido, Telescope desactivado
+      _(`/docs` protegido y con tests en 4A: abierto sólo en `local`, fuera de ahí gate `viewApiDocs` =
+      staff activo. Telescope no está instalado. `APP_DEBUG` es cosa del despliegue)_
 - [ ] Edad mínima verificada en el registro
-- [ ] Cartas aleatorias en opt-in explícito
-- [ ] Filtro de moderación activo en aleatorias y blog
+      _(`UNDER_MINIMUM_AGE` existe desde Fase 0, pero es **autodeclarada**; falta decidir si eso basta)_
 - [ ] Bloqueo y reporte accesibles desde cada carta, post y perfil
-- [ ] Recursos de ayuda configurados para los países principales
+      _(sin auditar pantalla por pantalla — no se marca a ojo)_
 - [ ] Términos y política de privacidad publicados
+      _(texto legal, no código. Bloquea también las cartas póstumas — ADR-0017)_
 - [ ] Backups automáticos con restauración probada
 - [ ] Alertas de Horizon y del "reloj postal"
+      _(Horizon sigue diferido con la contenerización)_
 - [ ] Tests de policy al 100 %
-- [ ] Rate limits en todos los endpoints de escritura
-- [ ] `APP_DEBUG=false`, `/docs` protegido, Telescope desactivado
 - [ ] Lighthouse: PWA instalable y funcional sin conexión
+      _(no se ha ejecutado Lighthouse; la PWA sí instala y cachea el buzón)_

@@ -67,6 +67,12 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('create-doll-request', fn (Request $request) => Limit::perHour(5)
             ->by((string) $request->user()?->getAuthIdentifier()));
 
+        // File uploads: the general 60/min bucket covers "how many requests",
+        // not "how many megabytes of image processing". Found auditing write
+        // endpoints before launch.
+        RateLimiter::for('upload', fn (Request $request) => Limit::perHour(30)
+            ->by((string) $request->user()?->getAuthIdentifier()));
+
         // Rendering a PDF costs orders of magnitude more than reading a row.
         RateLimiter::for('export-pdf', fn (Request $request) => Limit::perMinute(10)
             ->by((string) $request->user()?->getAuthIdentifier()));

@@ -88,7 +88,8 @@ Route::prefix('auth')->name('auth.')->middleware('throttle:auth')->group(functio
 Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
     Route::get('me', [MeController::class, 'show'])->name('me.show');
     Route::patch('me', [MeController::class, 'update'])->name('me.update');
-    Route::post('me/avatar', [AvatarController::class, 'store'])->name('me.avatar');
+    Route::post('me/avatar', [AvatarController::class, 'store'])
+        ->middleware('throttle:upload')->name('me.avatar');
     Route::get('me/settings', [MeSettingsController::class, 'show'])->name('me.settings.show');
     Route::patch('me/settings', [MeSettingsController::class, 'update'])->name('me.settings.update');
     Route::post('me/postal-handle/rotate', [PostalHandleController::class, 'rotate'])->name('me.postal-handle.rotate');
@@ -106,7 +107,8 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
     Route::post('letters/{letter}/send', SendLetterController::class)
         ->middleware(['verified', 'throttle:send-letter', 'idempotency'])
         ->name('letters.send');
-    Route::post('letters/{letter}/attachments', [AttachmentController::class, 'store'])->name('letters.attachments.store');
+    Route::post('letters/{letter}/attachments', [AttachmentController::class, 'store'])
+        ->middleware('throttle:upload')->name('letters.attachments.store');
     Route::delete('letters/{letter}/attachments/{attachment}', [AttachmentController::class, 'destroy'])
         ->scopeBindings()
         ->name('letters.attachments.destroy');
