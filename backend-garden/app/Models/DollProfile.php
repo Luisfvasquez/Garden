@@ -159,4 +159,15 @@ class DollProfile extends Model
     {
         return $this->activeRequestsCount() < $this->max_concurrent_requests;
     }
+
+    /**
+     * One 5-star review is an anecdote, not a rating. Below the threshold the
+     * API sends `rating_avg: null` so the front shows "sin valoraciones
+     * suficientes" instead of a number that misleads the next client
+     * (config/dolls.php).
+     */
+    public function hasDisplayableRating(): bool
+    {
+        return $this->rating_count >= (int) config('dolls.min_ratings_to_display', 3);
+    }
 }

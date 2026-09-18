@@ -10,6 +10,7 @@ use App\Exceptions\ApiException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreReportRequest;
 use App\Http\Resources\ReportResource;
+use App\Models\DollChatMessage;
 use App\Models\Report;
 use App\Services\Moderation\CriticalAlertDispatcher;
 use Illuminate\Http\JsonResponse;
@@ -26,9 +27,6 @@ class ReportController extends Controller
         $me = $request->user();
 
         $modelClass = $type->modelClass();
-        if ($modelClass === null) {
-            throw new ApiException('Aún no se puede reportar este tipo de contenido.', 'INVALID_TARGET', 422);
-        }
 
         if (! $modelClass::query()->whereKey($data['reportable_id'])->exists()) {
             throw new ApiException('El contenido reportado no existe.', 'NOT_FOUND', 404);
@@ -36,6 +34,23 @@ class ReportController extends Controller
 
         if ($type === ReportableType::User && $data['reportable_id'] === $me->getKey()) {
             throw new ApiException('No puedes reportarte a ti mismo.', 'INVALID_TARGET', 422);
+        }
+
+        // A Doll chat is visible to exactly two people. Reporting is the one
+        // place that takes an id from outside, so it gets the same isolation
+        // as the chat itself: a non-participant learns nothing, not even that
+        // the message exists (docs/api/dolls.md § Salvaguardas).
+        if ($type === ReportableType::DollChatMessage) {
+            $isParticipant = DollChatMessage::query()
+                ->whereKey($data['reportable_id'])
+                ->whereHas('dollRequest', fn ($q) => $q
+                    ->where('client_id', $me->getKey())
+                    ->orWhere('doll_id', $me->getKey()))
+                ->exists();
+
+            if (! $isParticipant) {
+                throw new ApiException('El contenido reportado no existe.', 'NOT_FOUND', 404);
+            }
         }
 
         $report = Report::query()->updateOrCreate(

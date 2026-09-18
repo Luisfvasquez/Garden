@@ -7,11 +7,14 @@ namespace App\Console\Commands;
 use App\Enums\DeliveryEventType;
 use App\Enums\DeliveryMode;
 use App\Enums\DeliveryStatus;
+use App\Enums\DollChatMessageType;
 use App\Enums\LeapDayPolicy;
 use App\Enums\LetterKind;
 use App\Enums\ModerationStatus;
 use App\Enums\RecurrenceType;
 use App\Enums\TransitTier;
+use App\Enums\UserRole;
+use App\Models\DollChatMessage;
 use App\Models\DollProfile;
 use App\Models\DollRequest;
 use App\Models\FeatureFlag;
@@ -108,6 +111,8 @@ class SeedDemoCommand extends Command
             ['name' => 'Iris Cannary', 'handle' => 'iris-cannary', 'accepts_random' => false, 'country' => 'GB'],
             ['name' => 'Erica Brown', 'handle' => 'erica-brown', 'accepts_random' => true, 'country' => 'US'],
             ['name' => 'Benedict Blue', 'handle' => 'benedict-blue', 'accepts_random' => false, 'country' => 'US'],
+            // Runs the CH Postal Company in canon — the natural admin for a moderation panel.
+            ['name' => 'Claudia Hodgins', 'handle' => 'hodgins', 'accepts_random' => false, 'country' => 'ES', 'role' => UserRole::Admin],
         ];
 
         $users = [];
@@ -122,6 +127,7 @@ class SeedDemoCommand extends Command
                 'country_code' => $person['country'],
                 'last_active_at' => now(),
                 'accepts_random_letters' => $person['accepts_random'],
+                'role' => $person['role'] ?? UserRole::Client,
             ]);
             $user->settings()->update(['notify_push' => true]);
 
@@ -357,7 +363,7 @@ class SeedDemoCommand extends Command
             'desired_tone' => ['íntimo', 'sobrio'],
         ]);
 
-        DollRequest::factory()->inProgress()->create([
+        $underway = DollRequest::factory()->inProgress()->create([
             'client_id' => $u['gilbert']->getKey(),
             'doll_id' => $u['cattleya']->getKey(),
             'occasion' => 'Carta de agradecimiento',
@@ -366,7 +372,60 @@ class SeedDemoCommand extends Command
             'desired_tone' => ['cálido', 'formal'],
         ]);
 
-        $this->components->info('3 perfiles Doll (2 verificadas, 1 pendiente de revisión) + 2 solicitudes (pendiente, en curso).');
+        $this->seedDollChat($underway, client: $u['gilbert'], doll: $u['cattleya']);
+
+        $this->components->info('3 perfiles Doll (2 verificadas, 1 pendiente de revisión) + 2 solicitudes (pendiente, en curso con chat y borrador v1 sin aprobar).');
+    }
+
+    /**
+     * A short transcript ending in an unapproved draft: the demo lands on the
+     * one screen where the client has something to decide (Fase 3C).
+     */
+    private function seedDollChat(DollRequest $request, User $client, User $doll): void
+    {
+        $lines = [
+            [$doll, 'Gracias por confiarme esto. ¿Qué te enseñó tu mentor que no supiste agradecerle en su momento?'],
+            [$client, 'Que se puede ser exigente sin ser cruel. Tardé años en entenderlo.'],
+            [$doll, '¿Hay algún momento concreto? Una carta se sostiene mejor sobre una escena que sobre una idea.'],
+            [$client, 'La tarde que rompió un informe mío delante de todos y luego se quedó hasta las diez ayudándome a rehacerlo.'],
+        ];
+
+        foreach ($lines as $i => [$sender, $body]) {
+            $message = new DollChatMessage([
+                'type' => DollChatMessageType::Text,
+                'body' => $body,
+            ]);
+            $message->doll_request_id = $request->getKey();
+            $message->sender_id = $sender->getKey();
+            $message->save();
+            // Spread them out so the transcript reads as a conversation, not a burst.
+            $message->forceFill(['created_at' => now()->subMinutes(40 - ($i * 8))])->save();
+        }
+
+        $draft = new DollChatMessage([
+            'type' => DollChatMessageType::Draft,
+            'body' => 'Primera versión. Dime si el tono es el que buscabas.',
+            'draft_version' => 1,
+            'draft_payload' => [
+                'title' => 'Para quien me enseñó a exigir sin herir',
+                'body' => [
+                    'type' => 'doc',
+                    'content' => [[
+                        'type' => 'paragraph',
+                        'content' => [[
+                            'type' => 'text',
+                            'text' => 'Nunca le di las gracias por aquella tarde. Rompió mi informe delante '
+                                .'de todos y después se quedó hasta las diez ayudándome a rehacerlo. Tardé '
+                                .'años en entender que esas dos cosas eran la misma.',
+                        ]],
+                    ]],
+                ],
+                'style' => [],
+            ],
+        ]);
+        $draft->doll_request_id = $request->getKey();
+        $draft->sender_id = $doll->getKey();
+        $draft->save();
     }
 
     private function enableFlags(): void

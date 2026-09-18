@@ -3,7 +3,7 @@
 **Actualizar al cerrar cada tarea.** Este archivo es lo que le dice al agente qué existe ya.
 Formato: `[ ]` pendiente · `[~]` en curso · `[x]` terminado.
 
-Última actualización: 2026-09-16 — **Fase 1 completa**. Fase 2 en curso: **2A moderación** (ADR-0008), **2B tiempo** (`letter_schedules` + `OccurrenceGenerator`, ADR-0002/0009), **2C botella al mar** (pool Redis, cuotas, filtro síncrono, respuesta anónima, `restrict_random`; ADR-0004/0010), **2D blog** (`public_posts`/`comments`/`reactions`/`tags`, consentimiento de `shared_letter`, filtro obligatorio previo), **2E Web Push** (`push_subscriptions`, `WebPushChannel` → `scheduled_pushes`, `quiet_hours` + agrupación, `usePush` en Ajustes), **2F panel Filament** (`/admin` server-side, usuarios + cola de reportes + moderación blog + catálogos + métricas; ADR-0011), `evergarden:seed-demo` (escenario de demo idempotente, seis usuarios, cartas en todos los estados, programación con ocurrencias, blog con consentimiento pendiente), y `CriticalAlertDispatcher` (escalado real por correo de `minor_safety`/`self_harm` críticos, cableado en reportes, botella al mar y blog). **Fase 2 backend y front completos** salvo `ModerateContentJob` asíncrono, diferido a propósito (ver nota en el checklist de moderación).
+Última actualización: 2026-09-17 — **Fases 1, 2 y 3 completas.** Fase 3 (Auto Memory Dolls) cerrada: **3A** perfiles y directorio, **3B** `doll_requests` con máquina de estados, **3C** chat en tiempo real (Reverb + doble validación de canal, mensajes cifrados, borradores versionados, aprobación que crea la carta del cliente y cierra la solicitud, filtro anti-intercambio de contactos que avisa sin bloquear; ADR-0013) y **3D** valoraciones (`RecalculateDollRatingsJob`, agregado derivado nunca incrementado), `PurgeOldDollChatsJob` (90 días), panel de la Doll e indicador de escritura por whispers. **Diferido a propósito:** pagos con Stripe (ADR-0012) y `ModerateContentJob` asíncrono. **Siguiente: Fase 4 — móvil y refinamiento**, que arranca por Scramble → `openapi.json` → tipos TS (retira el stand-in a mano de `src/types/api.ts`).
 
 ---
 
@@ -177,11 +177,39 @@ Formato: `[ ]` pendiente · `[~]` en curso · `[x]` terminado.
       disponible + cupo (`DollProfile::hasCapacity()`, cuenta solo `accepted`/`in_progress`/
       `awaiting_client`) y filtra PII en `target_recipient_hint` (`PiiScanner`); `GET /doll-requests
       ?role=&status=`; `ExpireStaleDollRequestsJob` cada hora)_
-- [ ] Reverb + `routes/channels.php` + doble validación en controlador
-- [ ] `doll_chat_messages` + borradores versionados + aprobación
-- [ ] Filtro anti-intercambio de contactos
-- [ ] Valoraciones + `RecalculateDollRatingsJob`
-- [ ] `PurgeOldDollChatsJob` (90 días)
+- [x] Reverb + `routes/channels.php` + doble validación en controlador
+      _(3C: `laravel/reverb ^1.11` — obliga a bajar Guzzle 8→7, ADR-0013. `routes/channels.php` con
+      `doll-request.{id}` (participante + `status->isOpenChannel()`) y `user.{id}`; `/broadcasting/auth`
+      registrado vía `withBroadcasting(..., ['api','auth:sanctum'])` para que sirva a la PWA (cookie) y
+      al móvil (Bearer), no sólo al guard `web`. Doble validación real: `DollChatController` y
+      `DollDraftController` repiten la comprobación en cada llamada → `403 CHANNEL_CLOSED`. El evento
+      `DollChatMessageSent` viaja con id/type/sender/fecha y **nada más**: el cuerpo se relee por API)_
+- [x] `doll_chat_messages` + borradores versionados + aprobación
+      _(3C: migración `doll_chat_messages` (`body` `encrypted`, `draft_payload` jsonb, `draft_version`
+      con único `(doll_request_id, draft_version)`, `pii_flags`, índice `(doll_request_id, created_at)`);
+      `GET/POST .../messages` (cursor **ascendente**, legible tras cerrar — sólo escribir exige canal
+      abierto), `POST .../drafts` (sólo la Doll, versión asignada por el servidor),
+      `POST .../drafts/{draft}/approve` (sólo el cliente, `scopeBindings()`). `DraftApprover` hace las
+      tres cosas en una transacción: crea la `letter` con `author_id = client_id` + `doll_request_id`,
+      sella el borrador y llama a `DollRequest::complete()`. `in_progress ⇄ awaiting_client` se alterna
+      solo, según quién escriba. FK `letters.doll_request_id` por fin constreñida)_
+- [x] Filtro anti-intercambio de contactos
+      _(3C: `ContactExchangeGuard` sobre `PiiScanner` — **avisa, no bloquea** (al revés que en aleatorias):
+      el mensaje sale, vuelve con `pii_flags`, se inserta un mensaje `system` que ambas partes ven y se
+      registra `moderation_actions` `warn`/`filter` `contact_exchange_in_doll_chat`. Además
+      `reportable_type: doll_chat_message` cableado, exigiendo ser parte de la solicitud → 404 si no)_
+- [x] Valoraciones + `RecalculateDollRatingsJob`
+      _(3D: `POST /doll-requests/{id}/rate` (sólo el cliente, una vez, sólo sobre `completed`;
+      `409 ALREADY_RATED`); el endpoint **no** toca el agregado. `RecalculateDollRatingsJob` (horario,
+      cola `maintenance`) recalcula `rating_avg`/`rating_count`/`completed_requests_count` **desde
+      cero** con un solo UPDATE correlacionado — una media por incrementos se desvía en cuanto algo se
+      borra. `config/dolls.php`: `min_ratings_to_display` (3) hace que `rating_avg` salga `null` hasta
+      que la media significa algo)_
+- [x] `PurgeOldDollChatsJob` (90 días)
+      _(3D: diario 04:00, cola `maintenance`. Borra **sólo la transcripción** de solicitudes en estado
+      terminal, fechadas por `COALESCE(completed_at, cancelled_at, rejected_at, updated_at)`; la
+      solicitud (auditoría + valoración) y la carta del cliente sobreviven. Una conversación abierta no
+      se toca nunca. Ventana en `config/dolls.php`)_
 - [x] (Opcional) Stripe Connect + pagos retenidos — **diferido a propósito, ver ADR-0012**
 
 ### Front
@@ -193,10 +221,29 @@ Formato: `[ ]` pendiente · `[~]` en curso · `[x]` terminado.
       solicitudes", filtro cliente/Doll) + `DollRequestDetailView` (detalle + aceptar/rechazar/empezar/
       cancelar según el rol del usuario respecto a la solicitud); `api/dollRequests.ts` + `useDollRequests`;
       i18n es/en; `api/__tests__/dollRequests.spec.ts`)_
-- [ ] Chat en tiempo real (Echo) + indicador de escritura
-- [ ] Visor de borradores versionados + aprobación
-- [ ] Panel de la Doll (bandeja de solicitudes)
-- [ ] Valoración post-servicio
+- [x] Chat en tiempo real (Echo)
+      _(3C: `src/lib/echo.ts` (Reverb, conexión **perezosa** — sólo al abrir un chat; `disconnectEcho()`
+      al cerrar sesión), `DollRequestChatView` (`/dolls/solicitudes/:id/chat`) con transcripción viva o
+      de sólo lectura según el estado, `ChatMessage` (texto / aviso del sistema / tarjeta de borrador),
+      `api/dollChat.ts` + `useDollChat`; si `VITE_REVERB_KEY` está vacío cae a refetch cada 15 s en vez
+      de romperse; i18n es/en; `api/__tests__/dollChat.spec.ts`. Indicador de escritura (3D) por
+      **whisper** de Echo: cliente a cliente, nunca se guarda ni pasa por el servidor, throttle de 1/s y
+      caduca solo a los 3 s — es azúcar de presencia, no contenido de la conversación)_
+- [x] Visor de borradores versionados + aprobación
+      _(3C: la tarjeta de borrador vive en la propia transcripción y renderiza el doc tiptap con
+      `PostBody` (sin arrastrar prosemirror); `DraftComposer` para que la Doll comparta versiones con
+      `LetterEditor`; aprobar redirige al editor de la carta recién creada, que ya es del cliente)_
+- [x] Panel de la Doll (bandeja de solicitudes)
+      _(3D: `DollPanelView` (`/dolls/panel`, sólo rol `doll` verificado, enlace de nav condicionado):
+      disponibilidad con toggle, ocupación `activos/max` (cuenta lo mismo que el backend: `pending` no
+      ocupa cupo), bandeja de pendientes con aceptar/rechazar en línea y caducidad visible, encargos en
+      curso con acceso directo al chat, y terminados con su valoración o «sin valorar»)_
+- [x] Valoración post-servicio
+      _(3D: `RatingForm` en `DollRequestDetailView`, sólo para el cliente y sólo sobre `completed`;
+      estrellas accesibles (`aria-pressed`, `aria-label`) + comentario opcional; una vez valorada se
+      muestra en modo lectura, sin forma de cambiarla. No es modal ni insiste: «sin valorar» es un final
+      perfectamente válido. El directorio y el perfil muestran «sin valoraciones suficientes» mientras
+      `rating_avg` sea `null`)_
 
 ---
 

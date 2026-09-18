@@ -2,7 +2,15 @@
 import { computed } from 'vue'
 import { useRoute, RouterLink } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { useDollRequest, useAcceptDollRequest, useRejectDollRequest, useStartDollRequest, useCancelDollRequest } from '@/composables/useDollRequests'
+import {
+  useDollRequest,
+  useAcceptDollRequest,
+  useRejectDollRequest,
+  useStartDollRequest,
+  useCancelDollRequest,
+  useRateDollRequest,
+} from '@/composables/useDollRequests'
+import { isChannelOpen } from '@/composables/useDollChat'
 import { useApiError } from '@/composables/useApiError'
 import { useAuthStore } from '@/stores/auth'
 import { useUiStore } from '@/stores/ui'
@@ -11,6 +19,7 @@ import AppLayout from '@/layouts/AppLayout.vue'
 import AlertBox from '@/components/ui/AlertBox.vue'
 import SpinnerDots from '@/components/ui/SpinnerDots.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
+import RatingForm from '@/components/dolls/RatingForm.vue'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -25,8 +34,26 @@ const accept = useAcceptDollRequest()
 const reject = useRejectDollRequest()
 const start = useStartDollRequest()
 const cancel = useCancelDollRequest()
+const rate = useRateDollRequest()
+
+/** Only the client rates, and only once the request actually completed. */
+const canRate = computed(
+  () => isClient.value && request.data.value?.status === 'completed',
+)
+
+function submitRating(payload: { rating: number; comment: string | null }) {
+  rate
+    .mutateAsync({ id: id.value, ...payload })
+    .then(() => ui.pushToast('success', t('dolls.rating.thanks')))
+    .catch((error) => ui.pushToast('error', messageFor(error)))
+}
 
 const isDoll = computed(() => request.data.value?.doll?.postal_handle === auth.user?.postal_handle)
+const isClient = computed(() => request.data.value?.client?.postal_handle === auth.user?.postal_handle)
+// There is something to read as soon as the request has been started once.
+const hasTranscript = computed(() =>
+  ['in_progress', 'awaiting_client', 'completed', 'cancelled'].includes(request.data.value?.status ?? ''),
+)
 const isNonTerminal = computed(
   () => !!request.data.value && !['completed', 'rejected', 'expired', 'cancelled'].includes(request.data.value.status),
 )
@@ -82,6 +109,16 @@ function run(mutation: { mutateAsync: (id: string) => Promise<unknown> }) {
         </dl>
 
         <div class="flex flex-wrap gap-2">
+          <!-- El chat sólo existe mientras se trabaja la solicitud (ADR-0005);
+               una vez cerrada, el enlace lleva a la transcripción de sólo lectura. -->
+          <RouterLink
+            v-if="hasTranscript"
+            :to="{ name: 'doll-request-chat', params: { id } }"
+            class="rounded bg-[var(--accent)] px-3 py-1.5 text-sm text-[var(--surface)]"
+          >
+            {{ isChannelOpen(request.data.value.status) ? t('dolls.chat.open') : t('dolls.chat.viewTranscript') }}
+          </RouterLink>
+
           <template v-if="isDoll && request.data.value.status === 'pending'">
             <BaseButton :loading="accept.isPending.value" @click="run(accept)">
               {{ t('dolls.requests.accept') }}
@@ -108,6 +145,13 @@ function run(mutation: { mutateAsync: (id: string) => Promise<unknown> }) {
             {{ t('dolls.requests.cancel') }}
           </button>
         </div>
+
+        <RatingForm
+          v-if="canRate"
+          :request="request.data.value"
+          :busy="rate.isPending.value"
+          @rate="submitRating"
+        />
       </template>
     </section>
   </AppLayout>

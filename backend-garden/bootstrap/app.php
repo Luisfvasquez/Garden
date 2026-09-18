@@ -20,6 +20,14 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
+    // Reverb. `auth:sanctum` so the channel handshake works for both the PWA
+    // (session cookie) and mobile (Bearer token) — the default `web` guard
+    // would only serve the first. ADR-0005: the only real-time channel is the
+    // Doll chat.
+    ->withBroadcasting(
+        __DIR__.'/../routes/channels.php',
+        ['middleware' => ['api', 'auth:sanctum']],
+    )
     ->withMiddleware(function (Middleware $middleware): void {
         // SPA cookie auth for the PWA; mobile clients still use Bearer tokens.
         $middleware->statefulApi();

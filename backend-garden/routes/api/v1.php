@@ -15,7 +15,9 @@ use App\Http\Controllers\Api\V1\BlockController;
 use App\Http\Controllers\Api\V1\CommentController;
 use App\Http\Controllers\Api\V1\ConsentController;
 use App\Http\Controllers\Api\V1\DeliveryController;
+use App\Http\Controllers\Api\V1\DollChatController;
 use App\Http\Controllers\Api\V1\DollDirectoryController;
+use App\Http\Controllers\Api\V1\DollDraftController;
 use App\Http\Controllers\Api\V1\DollRequestController;
 use App\Http\Controllers\Api\V1\FeatureFlagController;
 use App\Http\Controllers\Api\V1\HealthController;
@@ -173,6 +175,20 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
         Route::post('doll-requests/{dollRequest}/reject', [DollRequestController::class, 'reject'])->name('doll-requests.reject');
         Route::post('doll-requests/{dollRequest}/start', [DollRequestController::class, 'start'])->name('doll-requests.start');
         Route::post('doll-requests/{dollRequest}/cancel', [DollRequestController::class, 'cancel'])->name('doll-requests.cancel');
+        Route::post('doll-requests/{dollRequest}/rate', [DollRequestController::class, 'rate'])->name('doll-requests.rate');
+
+        // Chat y borradores (3C). El canal se valida DOS veces: aqui en el
+        // controlador y en routes/channels.php al suscribirse — ADR-0005.
+        Route::get('doll-requests/{dollRequest}/messages', [DollChatController::class, 'index'])
+            ->name('doll-requests.messages.index');
+        Route::post('doll-requests/{dollRequest}/messages', [DollChatController::class, 'store'])
+            ->middleware(['verified', 'throttle:doll-chat'])->name('doll-requests.messages.store');
+
+        Route::post('doll-requests/{dollRequest}/drafts', [DollDraftController::class, 'store'])
+            ->middleware(['verified', 'throttle:doll-chat'])->name('doll-requests.drafts.store');
+        Route::post('doll-requests/{dollRequest}/drafts/{draft}/approve', [DollDraftController::class, 'approve'])
+            ->scopeBindings()
+            ->name('doll-requests.drafts.approve');
     });
 
     // --- Envíos: bandeja de salida, seguimiento y cancelación ---

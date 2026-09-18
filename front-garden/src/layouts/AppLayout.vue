@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useQueryClient } from '@tanstack/vue-query'
@@ -8,6 +8,7 @@ import { useUiStore } from '@/stores/ui'
 import { useApiError } from '@/composables/useApiError'
 import { useUnreadCount } from '@/composables/useMailbox'
 import { useFeature } from '@/composables/useFeatures'
+import { disconnectEcho } from '@/lib/echo'
 import LocaleSwitch from '@/components/ui/LocaleSwitch.vue'
 import ThemeToggle from '@/components/ui/ThemeToggle.vue'
 
@@ -22,6 +23,7 @@ const schedulesEnabled = useFeature('schedules')
 const bottleEnabled = useFeature('bottle_at_sea')
 const blogEnabled = useFeature('blog')
 const dollsEnabled = useFeature('dolls')
+const isDoll = computed(() => auth.user?.role === 'doll')
 
 const signingOut = ref(false)
 
@@ -30,6 +32,8 @@ async function signOut() {
   try {
     await auth.logout()
     queryClient.clear()
+    // Drop the WebSocket too: the next user must not inherit this one's channels.
+    disconnectEcho()
     await router.push({ name: 'login' })
   } catch (error) {
     ui.pushToast('error', messageFor(error))
@@ -100,6 +104,16 @@ async function signOut() {
           active-class="text-[var(--text)]"
         >
           {{ t('nav.dolls') }}
+        </RouterLink>
+
+        <!-- Sólo para quien ya es Doll verificada: el rol se activa al verificar. -->
+        <RouterLink
+          v-if="dollsEnabled && isDoll"
+          :to="{ name: 'doll-panel' }"
+          class="text-sm text-[var(--text-muted)] hover:text-[var(--text)]"
+          active-class="text-[var(--text)]"
+        >
+          {{ t('nav.dollPanel') }}
         </RouterLink>
         <RouterLink
           :to="{ name: 'settings' }"

@@ -70,14 +70,17 @@ it('rejects reporting content that does not exist', function (): void {
     ])->assertNotFound();
 });
 
-it('rejects reporting a type whose module is not built', function (): void {
+// `doll_chat_message` used to be the "module not built" case here; Fase 3C
+// wired it, so the miss is now an ordinary 404. Reporting inside a chat has
+// its own isolation tests in tests/Feature/Dolls/DollChatTest.php.
+it('404s reporting a chat message that does not exist', function (): void {
     Sanctum::actingAs(User::factory()->create());
 
     $this->postJson('/api/v1/reports', [
         'reportable_type' => 'doll_chat_message',
         'reportable_id' => Str::uuid()->toString(),
         'category' => 'spam',
-    ])->assertStatus(422)->assertJsonPath('error_code', 'INVALID_TARGET');
+    ])->assertNotFound();
 });
 
 it('rejects reporting yourself', function (): void {

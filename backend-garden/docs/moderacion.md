@@ -70,6 +70,12 @@ Patrones de email, teléfono, @handles y URLs en:
 - cartas aleatorias (bloquea),
 - chat de Dolls (avisa a ambas partes y registra).
 
+En el chat lo implementa `ContactExchangeGuard` (`App\Services\Dolls`): el mensaje sale igual, vuelve
+con `pii_flags`, se añade un mensaje `system` que ambas partes ven, y se registra una
+`moderation_actions` `warn`/`filter` con razón `contact_exchange_in_doll_chat`. Avisar en vez de
+bloquear es deliberado: un brief legítimo contiene cosas que parecen PII, y bloquear en silencio sólo
+enseña a ofuscar.
+
 ## Escalado crítico
 
 `minor_safety` y `self_harm` con severidad `critical` → alerta inmediata al equipo, fuera de la cola

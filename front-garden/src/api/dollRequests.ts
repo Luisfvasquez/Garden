@@ -18,4 +18,10 @@ export const dollRequestsApi = {
   start: (id: string) => api.post<{ data: DollRequest }>(`/doll-requests/${id}/start`).then((r) => r.data.data),
 
   cancel: (id: string) => api.post<{ data: DollRequest }>(`/doll-requests/${id}/cancel`).then((r) => r.data.data),
+
+  /** Client-only, once, and only on a completed request. */
+  rate: (id: string, rating: number, comment?: string | null) =>
+    api
+      .post<{ data: DollRequest }>(`/doll-requests/${id}/rate`, { rating, comment: comment || null })
+      .then((r) => r.data.data),
 }

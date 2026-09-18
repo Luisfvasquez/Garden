@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
 /**
@@ -94,6 +95,29 @@ class DollRequest extends Model
     public function doll(): BelongsTo
     {
         return $this->belongsTo(User::class, 'doll_id');
+    }
+
+    /**
+     * The chat transcript, oldest first.
+     *
+     * @return HasMany<DollChatMessage, $this>
+     */
+    public function messages(): HasMany
+    {
+        return $this->hasMany(DollChatMessage::class);
+    }
+
+    /**
+     * Scoped route binding for `/drafts/{draft}` hangs off this. Deliberately
+     * NOT filtered to `type = draft`: scoping by request is what enforces the
+     * isolation, and letting a non-draft resolve lets the controller answer
+     * `NOT_A_DRAFT` instead of a misleading 404.
+     *
+     * @return HasMany<DollChatMessage, $this>
+     */
+    public function drafts(): HasMany
+    {
+        return $this->hasMany(DollChatMessage::class);
     }
 
     /**

@@ -314,7 +314,8 @@ export interface DollProfile {
   rate_amount: number | null
   currency: string | null
   is_available: boolean
-  rating_avg: number
+  /** null hasta que hay valoraciones suficientes (config/dolls.php). */
+  rating_avg: number | null
   rating_count: number
   completed_requests_count: number
   response_time_avg_minutes: number | null
@@ -379,6 +380,39 @@ export interface CreateDollRequestInput {
   target_recipient_hint?: string | null
   desired_tone?: string[]
   deadline_at?: string | null
+}
+
+// --- Dolls: chat y borradores (Fase 3C) ---------------------------------------
+
+export type DollChatMessageType = 'text' | 'draft' | 'system' | 'attachment'
+
+/** `email` | `phone` | `social_handle` | `url` — filtro anti-intercambio de contactos. */
+export type PiiFlag = 'email' | 'phone' | 'social_handle' | 'url'
+
+export interface DollDraftPayload {
+  title: string | null
+  body: TiptapDoc
+  style?: Record<string, unknown>
+}
+
+export interface DollChatMessage {
+  id: string
+  doll_request_id: string
+  type: DollChatMessageType
+  body: string | null
+  sender: DollRequestParty | null
+  is_mine: boolean
+  draft_payload: DollDraftPayload | null
+  draft_version: number | null
+  draft_approved_at: string | null
+  pii_flags: PiiFlag[]
+  read_at: string | null
+  created_at: string
+}
+
+export interface CreateDollDraftInput {
+  draft_payload: { title?: string | null; body: TiptapDoc; style?: Record<string, unknown> }
+  note?: string | null
 }
 
 // --- Notifications / blocks ---------------------------------------------------

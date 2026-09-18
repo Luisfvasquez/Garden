@@ -33,7 +33,8 @@
     "blog": "Blog",
     "dolls": "Dolls",
     "signOut": "Cerrar sesión",
-    "account": "Cuenta"
+    "account": "Cuenta",
+    "dollPanel": "Panel de la Doll"
   },
   "desk": {
     "writeLetter": "Escribir una carta",
@@ -95,9 +96,18 @@
     "recipientNotFound": "No existe nadie con ese identificador.",
     "tier": "Velocidad de tránsito",
     "tiers": {
-      "express": { "name": "Exprés", "hint": "De 30 min a 2 h. Máx. 3 al mes." },
-      "standard": { "name": "Normal", "hint": "De 2 a 12 horas." },
-      "slow": { "name": "Lenta", "hint": "De 1 a 3 días." }
+      "express": {
+        "name": "Exprés",
+        "hint": "De 30 min a 2 h. Máx. 3 al mes."
+      },
+      "standard": {
+        "name": "Normal",
+        "hint": "De 2 a 12 horas."
+      },
+      "slow": {
+        "name": "Lenta",
+        "hint": "De 1 a 3 días."
+      }
     },
     "scheduleArrival": "Programar la fecha de llegada",
     "arriveAt": "Debe llegar el…",
@@ -487,6 +497,59 @@
       "rejected": "Rechazada",
       "expired": "Expirada",
       "cancelled": "Cancelada"
+    },
+    "chat": {
+      "open": "Abrir el chat",
+      "viewTranscript": "Ver la conversación",
+      "backToRequest": "Volver a la solicitud",
+      "closed": "Esta conversación está cerrada. Puedes leerla, pero ya no se pueden enviar mensajes.",
+      "dollNotice": "Sólo ves el encargo y esta conversación: ni el buzón, ni las cartas, ni los contactos de quien te escribe.",
+      "empty": "Todavía no hay mensajes. Pregunta lo que necesites saber.",
+      "messageLabel": "Mensaje",
+      "placeholder": "Escribe tu mensaje…",
+      "send": "Enviar",
+      "privacyHint": "Toda la conversación ocurre aquí. Compartir correos, teléfonos o usuarios de otras redes os deja a ambos sin el respaldo de Evergarden.",
+      "flaggedTitle": "Este mensaje parece incluir datos de contacto",
+      "shareDraft": "Compartir un borrador",
+      "shareDraftSubmit": "Compartir esta versión",
+      "draftTitle": "Título de la carta",
+      "draftBody": "Texto de la carta",
+      "draftNote": "Nota para quien la recibe (opcional)",
+      "draftUntitled": "Borrador sin título",
+      "draftVersion": "Versión {n}",
+      "draftApproved": "Aprobado",
+      "approveDraft": "Aprobar esta versión",
+      "approveHint": "Al aprobar, la carta pasa a ser tuya y la solicitud se cierra. La envías tú, cuando quieras.",
+      "approvedToast": "La carta ya es tuya. Puedes editarla y enviarla cuando quieras.",
+      "typing": "{name} está escribiendo…"
+    },
+    "rating": {
+      "title": "¿Cómo fue la experiencia?",
+      "hint": "Tu valoración ayuda a quien busque ayuda después. Puedes dejarla en blanco.",
+      "comment": "Comentario (opcional)",
+      "submit": "Enviar valoración",
+      "stars": "{n} de 5 estrellas",
+      "yourRating": "Tu valoración",
+      "thanks": "Gracias por valorar.",
+      "notEnough": "Sin valoraciones suficientes todavía"
+    },
+    "panel": {
+      "title": "Panel de la Doll",
+      "noProfile": "Todavía no tienes un perfil de Doll.",
+      "becomeDoll": "Solicitar el rol",
+      "pendingReview": "Tu perfil está pendiente de revisión. Te avisaremos cuando esté verificado.",
+      "available": "Disponible",
+      "unavailable": "No disponible",
+      "pause": "Pausar",
+      "resume": "Volver a estar disponible",
+      "capacity": "{active} de {max} encargos activos",
+      "atCapacity": "Has llegado a tu límite de encargos activos. No recibirás solicitudes nuevas hasta cerrar alguno.",
+      "inbox": "Esperan tu respuesta",
+      "inboxEmpty": "Nada pendiente de responder.",
+      "active": "En curso",
+      "activeEmpty": "No tienes encargos en curso.",
+      "done": "Terminados",
+      "unrated": "sin valorar"
     }
   },
   "schedules": {

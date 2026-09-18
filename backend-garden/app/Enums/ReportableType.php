@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Enums;
 
 use App\Models\Comment;
+use App\Models\DollChatMessage;
 use App\Models\LetterDelivery;
 use App\Models\PublicPost;
 use App\Models\User;
@@ -23,16 +24,20 @@ enum ReportableType: string
     case DollChatMessage = 'doll_chat_message';
 
     /**
-     * @return class-string<Model>|null
+     * Every kind on the enum is wired since Fase 3C. A type with no model
+     * would have to be added here deliberately, and validation rejects
+     * anything that isn't a case at all.
+     *
+     * @return class-string<Model>
      */
-    public function modelClass(): ?string
+    public function modelClass(): string
     {
         return match ($this) {
             self::LetterDelivery => LetterDelivery::class,
             self::User => User::class,
             self::PublicPost => PublicPost::class,
             self::Comment => Comment::class,
-            default => null, // module not built yet
+            self::DollChatMessage => DollChatMessage::class,
         };
     }
 }

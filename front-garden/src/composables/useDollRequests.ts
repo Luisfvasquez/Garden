@@ -59,3 +59,19 @@ export function useStartDollRequest() {
 export function useCancelDollRequest() {
   return useDollRequestTransition(dollRequestsApi.cancel)
 }
+
+export function useRateDollRequest() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, rating, comment }: { id: string; rating: number; comment?: string | null }) =>
+      dollRequestsApi.rate(id, rating, comment),
+    onSuccess: (request) => {
+      qc.setQueryData(qk.dollRequests.one(request.id), request)
+      void qc.invalidateQueries({ queryKey: qk.dollRequests.all })
+      // The Doll's public average is recomputed hourly by the backend job, so
+      // the directory won't move yet — but the profile page should stop
+      // offering to rate this request again.
+      void qc.invalidateQueries({ queryKey: qk.dolls.all })
+    },
+  })
+}

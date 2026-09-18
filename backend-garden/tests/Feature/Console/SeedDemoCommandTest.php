@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\DeliveryStatus;
+use App\Models\DollChatMessage;
 use App\Models\DollProfile;
 use App\Models\DollRequest;
 use App\Models\FeatureFlag;
@@ -14,7 +15,8 @@ use App\Models\User;
 it('seeds a coherent demo scenario', function (): void {
     $this->artisan('evergarden:seed-demo')->assertSuccessful();
 
-    expect(User::where('email', 'like', '%@demo.evergarden.test')->count())->toBe(6)
+    expect(User::where('email', 'like', '%@demo.evergarden.test')->count())->toBe(7)
+        ->and(User::where('role', 'admin')->count())->toBe(1)
         ->and(LetterDelivery::where('status', DeliveryStatus::Held)->count())->toBe(1)
         ->and(LetterSchedule::count())->toBe(1)
         ->and(PublicPost::count())->toBe(3)
@@ -30,9 +32,11 @@ it('is idempotent — a second run replaces the demo users instead of piling up'
     $this->artisan('evergarden:seed-demo')->assertSuccessful();
     $this->artisan('evergarden:seed-demo')->assertSuccessful();
 
-    expect(User::where('email', 'like', '%@demo.evergarden.test')->count())->toBe(6)
+    expect(User::where('email', 'like', '%@demo.evergarden.test')->count())->toBe(7)
         ->and(DollProfile::count())->toBe(3)
-        ->and(DollRequest::count())->toBe(2);
+        ->and(DollRequest::count())->toBe(2)
+        // 4 lines + 1 unapproved draft, so the 3C screens have something to show.
+        ->and(DollChatMessage::count())->toBe(5);
 });
 
 it('refuses to run in production', function (): void {

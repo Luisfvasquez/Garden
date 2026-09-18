@@ -20,3 +20,4 @@ de cambiar el código en silencio.
 | 0010 | Cliente Redis `predis` y pool aleatorio | Aceptado |
 | 0011 | Panel de moderación server-side (Filament) | Aceptado |
 | 0012 | Dolls voluntarias, sin pagos (Stripe diferido) | Aceptado |
+| 0013 | Reverb para el canal en tiempo real, al precio de Guzzle 7 | Aceptado |

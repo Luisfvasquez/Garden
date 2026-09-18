@@ -33,7 +33,8 @@
     "blog": "Blog",
     "dolls": "Dolls",
     "signOut": "Sign out",
-    "account": "Account"
+    "account": "Account",
+    "dollPanel": "Doll panel"
   },
   "desk": {
     "writeLetter": "Write a letter",
@@ -95,9 +96,18 @@
     "recipientNotFound": "No one has that handle.",
     "tier": "Transit speed",
     "tiers": {
-      "express": { "name": "Express", "hint": "30 min to 2 h. Max 3 per month." },
-      "standard": { "name": "Standard", "hint": "2 to 12 hours." },
-      "slow": { "name": "Slow", "hint": "1 to 3 days." }
+      "express": {
+        "name": "Express",
+        "hint": "30 min to 2 h. Max 3 per month."
+      },
+      "standard": {
+        "name": "Standard",
+        "hint": "2 to 12 hours."
+      },
+      "slow": {
+        "name": "Slow",
+        "hint": "1 to 3 days."
+      }
     },
     "scheduleArrival": "Schedule the arrival date",
     "arriveAt": "Should arrive on…",
@@ -487,6 +497,59 @@
       "rejected": "Rejected",
       "expired": "Expired",
       "cancelled": "Cancelled"
+    },
+    "chat": {
+      "open": "Open the chat",
+      "viewTranscript": "Read the conversation",
+      "backToRequest": "Back to the request",
+      "closed": "This conversation is closed. You can read it, but no new messages can be sent.",
+      "dollNotice": "You only see the brief and this conversation — never their mailbox, letters or contacts.",
+      "empty": "No messages yet. Ask whatever you need to know.",
+      "messageLabel": "Message",
+      "placeholder": "Write your message…",
+      "send": "Send",
+      "privacyHint": "The whole conversation happens here. Sharing emails, phone numbers or handles from other networks leaves you both without Evergarden's protection.",
+      "flaggedTitle": "This message looks like it contains contact details",
+      "shareDraft": "Share a draft",
+      "shareDraftSubmit": "Share this version",
+      "draftTitle": "Letter title",
+      "draftBody": "Letter text",
+      "draftNote": "A note for them (optional)",
+      "draftUntitled": "Untitled draft",
+      "draftVersion": "Version {n}",
+      "draftApproved": "Approved",
+      "approveDraft": "Approve this version",
+      "approveHint": "Approving makes the letter yours and closes the request. You send it yourself, whenever you want.",
+      "approvedToast": "The letter is yours now. Edit it and send it whenever you like.",
+      "typing": "{name} is typing…"
+    },
+    "rating": {
+      "title": "How was the experience?",
+      "hint": "Your rating helps whoever looks for help next. You can leave it blank.",
+      "comment": "Comment (optional)",
+      "submit": "Send rating",
+      "stars": "{n} out of 5 stars",
+      "yourRating": "Your rating",
+      "thanks": "Thank you for rating.",
+      "notEnough": "Not enough ratings yet"
+    },
+    "panel": {
+      "title": "Doll panel",
+      "noProfile": "You don't have a Doll profile yet.",
+      "becomeDoll": "Request the role",
+      "pendingReview": "Your profile is pending review. We'll let you know once it's verified.",
+      "available": "Available",
+      "unavailable": "Unavailable",
+      "pause": "Pause",
+      "resume": "Become available again",
+      "capacity": "{active} of {max} active requests",
+      "atCapacity": "You've reached your limit of active requests. You won't receive new ones until you close some.",
+      "inbox": "Waiting on you",
+      "inboxEmpty": "Nothing waiting for an answer.",
+      "active": "In progress",
+      "activeEmpty": "No requests in progress.",
+      "done": "Finished",
+      "unrated": "unrated"
     }
   },
   "schedules": {

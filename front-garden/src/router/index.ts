@@ -145,6 +145,13 @@ const routes: RouteRecordRaw[] = [
     meta: { auth: true, verified: true },
   },
   {
+    // Espacio de trabajo de la Doll: qué espera respuesta y qué tiene en mano.
+    path: '/dolls/panel',
+    name: 'doll-panel',
+    component: () => import('@/views/dolls/DollPanelView.vue'),
+    meta: { auth: true, verified: true },
+  },
+  {
     path: '/dolls/solicitudes',
     name: 'doll-requests',
     component: () => import('@/views/dolls/DollRequestsListView.vue'),
@@ -161,6 +168,13 @@ const routes: RouteRecordRaw[] = [
     name: 'doll-request-detail',
     component: () => import('@/views/dolls/DollRequestDetailView.vue'),
     meta: { auth: true },
+  },
+  {
+    // El chat vive bajo la solicitud: no existe fuera de ella (ADR-0005).
+    path: '/dolls/solicitudes/:id/chat',
+    name: 'doll-request-chat',
+    component: () => import('@/views/dolls/DollRequestChatView.vue'),
+    meta: { auth: true, verified: true },
   },
   {
     path: '/dolls/:id',

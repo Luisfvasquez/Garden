@@ -51,7 +51,7 @@ const doll = useDollProfile(handle)
 
         <div class="flex flex-wrap gap-4 text-sm">
           <span>{{ t(`dolls.rateType.${doll.data.value.rate_type}`) }}</span>
-          <span>
+          <span v-if="doll.data.value.rating_avg !== null">
             {{
               t('dolls.directory.rating', {
                 avg: doll.data.value.rating_avg.toFixed(1),
@@ -59,6 +59,7 @@ const doll = useDollProfile(handle)
               })
             }}
           </span>
+          <span v-else class="text-[var(--text-muted)]">{{ t('dolls.rating.notEnough') }}</span>
           <span>{{ t('dolls.profile.completed', { count: doll.data.value.completed_requests_count }) }}</span>
         </div>
 

@@ -40,4 +40,16 @@ describe('dollRequestsApi', () => {
     expect(seen.method).toBe('post')
     expect(seen.url).toBe(`/doll-requests/r1/${action}`)
   })
+
+  it('rates a request', async () => {
+    await dollRequestsApi.rate('r1', 5, 'Gracias')
+    expect(seen.method).toBe('post')
+    expect(seen.url).toBe('/doll-requests/r1/rate')
+    expect(JSON.parse(seen.data)).toEqual({ rating: 5, comment: 'Gracias' })
+  })
+
+  it('sends a null comment rather than an empty string', async () => {
+    await dollRequestsApi.rate('r1', 4, '')
+    expect(JSON.parse(seen.data)).toEqual({ rating: 4, comment: null })
+  })
 })

@@ -18,18 +18,31 @@ Horizon con workers separados por cola, `balance: auto`, `maxProcesses` diferenc
 ## Scheduler
 
 ```php
-// routes/console.php
+// routes/console.php — estado real tras la Fase 3
 Schedule::job(new DispatchDueLettersJob)->everyMinute()->withoutOverlapping();
 Schedule::job(new DeliverArrivedLettersJob)->everyMinute()->withoutOverlapping();
+Schedule::job(new GenerateUpcomingDeliveriesJob)->dailyAt('03:00')->withoutOverlapping();
 Schedule::job(new RefreshRandomRecipientPoolJob)->everyFifteenMinutes();
-Schedule::job(new GenerateUpcomingDeliveriesJob)->dailyAt('03:00');
-Schedule::job(new ExpireStaleDollRequestsJob)->hourly();
-Schedule::job(new SendQueuedQuietHourPushJob)->everyTenMinutes();
-Schedule::job(new PurgeOldDollChatsJob)->dailyAt('04:00');
-Schedule::job(new ProcessAccountDeletionsJob)->dailyAt('04:30');
-Schedule::job(new RecalculateDollRatingsJob)->hourly();
-Schedule::command('horizon:snapshot')->everyFiveMinutes();
+Schedule::job(new DispatchDuePushesJob)->everyMinute()->withoutOverlapping();
+Schedule::job(new ExpireStaleDollRequestsJob)->hourly()->withoutOverlapping();
+Schedule::job(new RecalculateDollRatingsJob)->hourly()->withoutOverlapping();
+Schedule::job(new PurgeOldDollChatsJob)->dailyAt('04:00')->withoutOverlapping();
 ```
+
+**Todavía no existen** (van con su módulo): `ProcessAccountDeletionsJob` (borrado diferido de cuentas,
+la gracia de 30 días la aplica hoy la propia consulta) y `horizon:snapshot` (Horizon sigue diferido con
+la contenerización). `SendQueuedQuietHourPushJob` del plan original se implementó como
+`DispatchDuePushesJob`, cada minuto: la cola de `quiet_hours` se vacía sola al vencer `deliver_after`.
+
+### Los dos jobs de Dolls que no son "otro tick más"
+
+`RecalculateDollRatingsJob` recalcula el agregado de `doll_profiles` **entero, desde cero**, en un solo
+UPDATE correlacionado. No incrementa: una media mantenida a incrementos se desvía en cuanto una fila se
+borra o se corrige, y el agregado es un valor derivado — `doll_requests` es la verdad.
+
+`PurgeOldDollChatsJob` borra **sólo `doll_chat_messages`** de solicitudes en estado terminal cerradas
+hace más de `dolls.chat_retention_days` (90). La solicitud sobrevive (auditoría y valoración) y la carta
+también — es del cliente. Una conversación abierta no se toca nunca, por vieja que sea.
 
 ## El patrón de reserva por lote
 

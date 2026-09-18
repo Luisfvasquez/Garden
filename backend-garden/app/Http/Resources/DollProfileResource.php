@@ -40,7 +40,8 @@ class DollProfileResource extends JsonResource
             'rate_amount' => $this->rate_amount,
             'currency' => $this->currency,
             'is_available' => $this->is_available,
-            'rating_avg' => (float) $this->rating_avg,
+            // null until there are enough ratings to mean anything (config/dolls.php).
+            'rating_avg' => $this->hasDisplayableRating() ? (float) $this->rating_avg : null,
             'rating_count' => $this->rating_count,
             'completed_requests_count' => $this->completed_requests_count,
             'response_time_avg_minutes' => $this->response_time_avg_minutes,

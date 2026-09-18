@@ -47,4 +47,33 @@ class DollRequestPolicy
     {
         return $this->view($user, $request);
     }
+
+    /**
+     * Read or write the chat. Participation only — whether the channel is still
+     * OPEN is a separate check (`CHANNEL_CLOSED`, 403) made in the controller,
+     * because "you may not look at this" and "this conversation is over" are
+     * different answers and the client shows different things for each.
+     */
+    public function chat(User $user, DollRequest $request): Response
+    {
+        return $this->view($user, $request);
+    }
+
+    /** Only the Doll shares drafts. */
+    public function sendDraft(User $user, DollRequest $request): Response
+    {
+        return $this->viewAsDoll($user, $request);
+    }
+
+    /** Only the client approves one — approving is what closes the request. */
+    public function approveDraft(User $user, DollRequest $request): Response
+    {
+        return $this->viewAsClient($user, $request);
+    }
+
+    /** Only the client rates, and only their own request. */
+    public function rate(User $user, DollRequest $request): Response
+    {
+        return $this->viewAsClient($user, $request);
+    }
 }

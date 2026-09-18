@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use App\Jobs\Dolls\ExpireStaleDollRequestsJob;
+use App\Jobs\Dolls\PurgeOldDollChatsJob;
+use App\Jobs\Dolls\RecalculateDollRatingsJob;
 use App\Jobs\Maintenance\DispatchDuePushesJob;
 use App\Jobs\Maintenance\GenerateUpcomingDeliveriesJob;
 use App\Jobs\Postal\DeliverArrivedLettersJob;
@@ -35,3 +37,9 @@ Schedule::job(new DispatchDuePushesJob)->everyMinute()->withoutOverlapping();
 
 // Auto Memory Dolls: a Doll who never responds loses the request (docs/api/dolls.md).
 Schedule::job(new ExpireStaleDollRequestsJob)->hourly()->withoutOverlapping();
+
+// Ratings are derived from doll_requests, never incremented in place.
+Schedule::job(new RecalculateDollRatingsJob)->hourly()->withoutOverlapping();
+
+// Chats are purged 90 days after the request closes — declared in the terms.
+Schedule::job(new PurgeOldDollChatsJob)->dailyAt('04:00')->withoutOverlapping();

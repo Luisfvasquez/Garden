@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Exceptions\ApiException;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\DollRequests\RateDollRequestRequest;
 use App\Http\Requests\DollRequests\StoreDollRequestRequest;
 use App\Http\Resources\DollRequestResource;
 use App\Models\DollProfile;
@@ -129,6 +130,22 @@ class DollRequestController extends Controller
     {
         $this->authorize('cancel', $dollRequest);
         $dollRequest->cancel();
+
+        return new DollRequestResource($dollRequest->load(['client', 'doll']));
+    }
+
+    /**
+     * POST /api/v1/doll-requests/{id}/rate — the client rates a completed
+     * request, once. The profile aggregate is NOT touched here: it is derived,
+     * and RecalculateDollRatingsJob owns it (hourly). Writing both from here
+     * would make the average drift the first time anything is corrected.
+     */
+    public function rate(RateDollRequestRequest $request, DollRequest $dollRequest): DollRequestResource
+    {
+        $this->authorize('rate', $dollRequest);
+
+        $data = $request->validated();
+        $dollRequest->rate((int) $data['rating'], $data['comment'] ?? null);
 
         return new DollRequestResource($dollRequest->load(['client', 'doll']));
     }

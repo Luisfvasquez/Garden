@@ -77,7 +77,10 @@ const dolls = useDollDirectory(specialty, language, () => (onlyAvailable.value ?
               <span v-for="s in d.specialties" :key="s">#{{ s }} </span>
             </p>
             <p class="mt-auto text-xs text-[var(--text-muted)]">
-              {{ t('dolls.directory.rating', { avg: d.rating_avg.toFixed(1), count: d.rating_count }) }}
+              <template v-if="d.rating_avg !== null">
+                {{ t('dolls.directory.rating', { avg: d.rating_avg.toFixed(1), count: d.rating_count }) }}
+              </template>
+              <template v-else>{{ t('dolls.rating.notEnough') }}</template>
               · {{ t(`dolls.rateType.${d.rate_type}`) }}
             </p>
           </RouterLink>
