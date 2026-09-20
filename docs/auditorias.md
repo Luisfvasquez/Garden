@@ -76,6 +76,9 @@ Para cada regla: dónde se aplica, dónde podría no aplicarse, qué test la fij
 
 ### Promesas incumplidas de la API
 
+> **Ejecutada el 2026-09-20.** Resultado en `auditoria-contrato-vs-codigo.md`: tres de tres
+> incumplidas. Si la repites, cambia el área — esta ya está cubierta.
+
 ```
 Busca cosas que la API declara y no cumple. No modifiques nada.
 
@@ -104,6 +107,23 @@ Salida: ADR | estado | evidencia.
 Explícame cómo funciona [X] hoy, qué ADR lo cubre y qué se rompería si
 cambiase [Y]. No modifiques nada.
 ```
+
+---
+
+## Auditorías hechas
+
+Una línea por sesión. El documento de cada una guarda la evidencia con archivo y línea, para no
+volver a rastrear lo mismo.
+
+| Fecha | Área | Documento | Resultado |
+| --- | --- | --- | --- |
+| 2026-09-18 | Validación previa al MVP | (en el commit y en la cabecera de `progreso.md`) | 3 fallos reales, los tres arreglados |
+| 2026-09-20 | Promesas incumplidas de la API | `auditoria-contrato-vs-codigo.md` | 3 huecos: borrado de cuenta a medias, `GET /me/export` inexistente, adjuntos sin visor. **Ninguno arreglado** — son casillas de 5D |
+
+Las tres comparten forma, y conviene tenerla presente al escribir el próximo prompt: **la capa que
+promete estaba terminada y la que cumple no existía**. Ninguna se detecta ejercitando la API, porque
+todas responden exactamente lo que el contrato dice. Sólo aparecen siguiendo la promesa hasta su
+consecuencia.
 
 ---
 

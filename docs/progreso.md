@@ -3,7 +3,7 @@
 **Actualizar al cerrar cada tarea.** Este archivo es lo que le dice al agente qué existe ya.
 Formato: `[ ]` pendiente · `[~]` en curso · `[x]` terminado.
 
-Última actualización: 2026-09-20 — **Fases 1, 2 y 3 completas; Fase 4 entregada en lo verificable (4A OpenAPI/tipos, 4B delta sync, 4C PDF, 4D búsqueda).** Validación previa al MVP hecha: el checklist de lanzamiento pasa de 4 a **7 verificados**, y encontró tres cosas que faltaban de verdad — **no había forma de reportar nada desde el front** (backend listo desde Fase 1, UI inexistente), `POST /reports` **no podía apuntar a una persona** (el cliente nunca tiene su uuid), y cualquier petición sin `Accept: application/json` a una ruta protegida devolvía **500 en vez de 401** (afectaba al enlace de descarga del PDF). Las tres corregidas con tests. Guía de arranque en **`docs/como-probar.md`**. **Fuera a propósito (ADR-0017):** Capacitor, cartas póstumas y particionado. **Diferido de antes:** pagos con Stripe (ADR-0012), `ModerateContentJob` asíncrono, Horizon y contenerización. **Fase 5 (Operación y lanzamiento) iniciada:** 5A observabilidad, 5B respaldo y recuperación, 5C infraestructura, 5D huecos funcionales, 5E legal, 5F beta privada. Orden recomendado **5B → 5A → 5D → 5C → 5E → 5F**. Durante la fase no se añaden funcionalidades. Apoyo operativo nuevo: **`docs/runbook.md`**, **`docs/auditorias.md`** y **`docs/decisiones/_plantilla.md`**. **Entregado de 5A:** a medias — `postal:stats` y `postal:health` (alarma del reloj postal, exit 1, programada cada 5 min, avisa a `OPS_ALERT_EMAIL`); faltan `failed_jobs`, Sentry, `/health` ampliado y el monitor externo.
+Última actualización: 2026-09-20 — **Fases 1, 2 y 3 completas; Fase 4 entregada en lo verificable (4A OpenAPI/tipos, 4B delta sync, 4C PDF, 4D búsqueda).** Validación previa al MVP hecha: el checklist de lanzamiento pasa de 4 a **7 verificados**, y encontró tres cosas que faltaban de verdad — **no había forma de reportar nada desde el front** (backend listo desde Fase 1, UI inexistente), `POST /reports` **no podía apuntar a una persona** (el cliente nunca tiene su uuid), y cualquier petición sin `Accept: application/json` a una ruta protegida devolvía **500 en vez de 401** (afectaba al enlace de descarga del PDF). Las tres corregidas con tests. Guía de arranque en **`docs/como-probar.md`**. **Fuera a propósito (ADR-0017):** Capacitor, cartas póstumas y particionado. **Diferido de antes:** pagos con Stripe (ADR-0012), `ModerateContentJob` asíncrono, Horizon y contenerización. **Fase 5 (Operación y lanzamiento) iniciada:** 5A observabilidad, 5B respaldo y recuperación, 5C infraestructura, 5D huecos funcionales, 5E legal, 5F beta privada. Orden recomendado **5B → 5A → 5D → 5C → 5E → 5F**. Durante la fase no se añaden funcionalidades. Apoyo operativo nuevo: **`docs/runbook.md`**, **`docs/auditorias.md`** y **`docs/decisiones/_plantilla.md`**. **Entregado de 5A:** a medias — `postal:stats` y `postal:health` (alarma del reloj postal, exit 1, programada cada 5 min, avisa a `OPS_ALERT_EMAIL`); faltan `failed_jobs`, Sentry, `/health` ampliado y el monitor externo. **Auditoría de promesas incumplidas** (`docs/auditoria-contrato-vs-codigo.md`): tres de tres incumplidas — el borrado de cuenta de `DELETE /me` **no se ejecuta nunca** (no hay job y `deletes_at` no se lee), `GET /me/export` **no existe en ninguna capa**, y los adjuntos no tienen visor ni subida en el front aunque el sobre ya los anuncie. Las tres son casillas de 5D; ninguna arreglada.
 
 ---
 
@@ -394,13 +394,30 @@ Formato: `[ ]` pendiente · `[~]` en curso · `[x]` terminado.
 
 - [ ] **Visor de adjuntos en el buzón.** Se pueden subir desde Fase 1 y no hay forma de verlos. Es el
       agujero funcional más visible que queda.
+      _(**auditado 2026-09-20** — `docs/auditoria-contrato-vs-codigo.md` §3. Confirmado, y peor de lo
+      anotado: **tampoco hay subida desde el front** (la casilla de Fase 1 era del backend), y
+      `EnvelopeClosed.vue:52` ya pinta un clip 📎 cuando `has_attachments` es true — el sobre promete
+      un adjunto que al abrirlo no está. El PDF tampoco los incluye. El backend los sirve completos en
+      `MailboxLetterResource:38`; falta solo el front)_
 - [ ] **Paginación por cursor en el buzón** (anotada como pendiente en Fase 1). Con cien cartas se nota.
 - [ ] **Verificar que `ProcessAccountDeletionsJob` existe y corre.** `DELETE /me` promete borrado a los
       30 días; si el job no está, la API declara algo que no cumple, y es una obligación legal.
       Comprobar también la anonimización descrita en la spec §13.4 (las cartas ya entregadas
       permanecen, el remitente pasa a «Usuario eliminado»).
+      _(**auditado 2026-09-20** — `docs/auditoria-contrato-vs-codigo.md` §1. **El job no existe**, y
+      `deletes_at` no se lee en ninguna consulta: se escribe, se limpia al reentrar y nada más.
+      `UserStatus::Deleted` sólo se lee, nunca se escribe. Dos cosas que hay que saber antes de
+      implementarlo: `jobs-y-colas.md:33` afirma en falso que «la gracia la aplica hoy la propia
+      consulta», y el esquema empuja al error — `letters.author_id` es `cascadeOnDelete` y
+      `letter_deliveries.letter_id` también, así que un `delete()` del usuario destruye las cartas
+      **del destinatario**, justo lo que §13.4 prohíbe. Hay que anonimizar en sitio)_
 - [ ] **Exportación RGPD `GET /me/export`.** Está en el contrato (`docs/api/auth.md`) y no aparece en
       ninguna casilla de progreso: comprobar si existe.
+      _(**auditado 2026-09-20** — `docs/auditoria-contrato-vs-codigo.md` §2. **No existe en ninguna
+      capa**: ni ruta, ni controlador, ni job, y 0 coincidencias en `openapi.json` y en los tipos del
+      front. Como nunca llegó al OpenAPI, la deriva no contaminó el front: el que miente es el `.md` a
+      mano. `auth.md:3` declara el módulo `[x] backend` y dos líneas después admite que el export
+      queda pendiente «— Fase 2». Arreglar la cabecera es gratis; implementarlo es esta casilla)_
 - [ ] **Policies al 100 %.** Es el test de mayor valor que queda: un fallo aquí expone el buzón de
       alguien. Auditar endpoint por endpoint antes de escribir nada.
 - [ ] **Lighthouse ejecutado**, con los números anotados. Media hora.
