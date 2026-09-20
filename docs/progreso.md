@@ -3,7 +3,7 @@
 **Actualizar al cerrar cada tarea.** Este archivo es lo que le dice al agente qué existe ya.
 Formato: `[ ]` pendiente · `[~]` en curso · `[x]` terminado.
 
-Última actualización: 2026-09-18 — **Fases 1, 2 y 3 completas; Fase 4 entregada en lo verificable (4A OpenAPI/tipos, 4B delta sync, 4C PDF, 4D búsqueda).** Validación previa al MVP hecha: el checklist de lanzamiento pasa de 4 a **7 verificados**, y encontró tres cosas que faltaban de verdad — **no había forma de reportar nada desde el front** (backend listo desde Fase 1, UI inexistente), `POST /reports` **no podía apuntar a una persona** (el cliente nunca tiene su uuid), y cualquier petición sin `Accept: application/json` a una ruta protegida devolvía **500 en vez de 401** (afectaba al enlace de descarga del PDF). Las tres corregidas con tests. Guía de arranque en **`docs/como-probar.md`**. **Fuera a propósito (ADR-0017):** Capacitor, cartas póstumas y particionado. **Diferido de antes:** pagos con Stripe (ADR-0012), `ModerateContentJob` asíncrono, Horizon y contenerización.
+Última actualización: 2026-09-20 — **Fases 1, 2 y 3 completas; Fase 4 entregada en lo verificable (4A OpenAPI/tipos, 4B delta sync, 4C PDF, 4D búsqueda).** Validación previa al MVP hecha: el checklist de lanzamiento pasa de 4 a **7 verificados**, y encontró tres cosas que faltaban de verdad — **no había forma de reportar nada desde el front** (backend listo desde Fase 1, UI inexistente), `POST /reports` **no podía apuntar a una persona** (el cliente nunca tiene su uuid), y cualquier petición sin `Accept: application/json` a una ruta protegida devolvía **500 en vez de 401** (afectaba al enlace de descarga del PDF). Las tres corregidas con tests. Guía de arranque en **`docs/como-probar.md`**. **Fuera a propósito (ADR-0017):** Capacitor, cartas póstumas y particionado. **Diferido de antes:** pagos con Stripe (ADR-0012), `ModerateContentJob` asíncrono, Horizon y contenerización. **Fase 5 (Operación y lanzamiento) planificada, no iniciada:** 5A observabilidad, 5B respaldo y recuperación, 5C infraestructura, 5D huecos funcionales, 5E legal, 5F beta privada. Orden recomendado **5B → 5A → 5D → 5C → 5E → 5F**. Durante la fase no se añaden funcionalidades. Apoyo operativo nuevo: **`docs/runbook.md`**, **`docs/auditorias.md`** y **`docs/decisiones/_plantilla.md`**.
 
 ---
 
@@ -318,6 +318,126 @@ Formato: `[ ]` pendiente · `[~]` en curso · `[x]` terminado.
       _(**no procede: el volumen no lo pide** — ADR-0017. La condición está en el propio enunciado. Hay
       índices parciales desde Fase 1 (ADR-0006). Particionar antes de necesitarlo añade complejidad
       permanente en migraciones, claves foráneas y consultas a cambio de nada)_
+
+---
+
+## Fase 5 — Operación y lanzamiento
+
+> **Regla de la fase: no se añaden funcionalidades hasta cerrarla.** El producto ya hace lo que
+> prometía; lo que falta es poder operarlo sin nadie delante. Cada módulo nuevo que se añada ahora es
+> más superficie que vigilar con la misma vigilancia (ninguna).
+>
+> Orden recomendado: **5B → 5A → 5D → 5C → 5E → 5F**. 5B primero porque protege contra la pérdida
+> irreversible; 5A segundo porque sin él los fallos son invisibles.
+
+### 5A — Observabilidad: que un fallo se note
+
+- [ ] **Alerta del reloj postal.** Comando `postal:health` que falle si hay entregas con
+      `scheduled_for <= now()` en `queued` y ninguna despachada en los últimos 15 min, o entregas
+      `in_transit` con `delivered_at` vencido sin entregar. Programado cada 5 min, notifica por correo
+      a `OPS_ALERT_EMAIL`.
+      _Es la métrica más importante del sistema: si el scheduler o el worker se caen, las cartas dejan
+      de llegar **en silencio** y nadie se entera durante horas._
+- [ ] **Comando `postal:stats`** (lo sugería la spec §17.5 y nunca se creó): entregas por estado,
+      edad de la más vieja en `queued`, tránsito medio, `failed_jobs` pendientes. Es lo primero que se
+      mira ante cualquier duda.
+- [ ] **Vigilancia de `failed_jobs`.** Alerta si crece por encima de un umbral. Hoy nadie los mira.
+- [ ] **Sentry (o equivalente) en API y PWA**, con `release` por commit.
+- [ ] **`GET /health` ampliado**: hoy existe; que informe también de la antigüedad del último despacho
+      y del último `schedule:run`, para poder engancharlo a un uptime externo.
+- [ ] **Uptime externo** apuntando a `/api/v1/health` (UptimeRobot, Better Stack, cron propio).
+- [ ] **`MODERATION_ALERT_EMAIL` apuntando a un buzón que alguien lee.** `CriticalAlertDispatcher` ya
+      envía; si el destino no se lee, `minor_safety` se queda esperando.
+
+### 5B — Respaldo y recuperación
+
+- [ ] **La `APP_KEY` respaldada fuera de la base de datos** (gestor de contraseñas + copia offline).
+      _`letters.body` y `doll_chat_messages.body` van cifrados: sin la clave, un backup de Postgres es
+      un archivo de ruido. Es el único fallo del proyecto que no tiene vuelta atrás._
+- [ ] **`APP_PREVIOUS_KEYS` documentado y probado** en `.env.example` y en el runbook, antes de
+      necesitar rotar.
+- [ ] **Backups automáticos diarios** de Postgres, cifrados, con retención definida (p. ej. 7 diarios
+      + 4 semanales + 3 mensuales) y fuera del mismo servidor.
+- [ ] **Backup del almacenamiento de adjuntos** (avatares, imágenes, audio).
+- [ ] **Restauración probada de verdad**, no asumida: levantar una copia limpia desde el último backup,
+      correr migraciones, abrir una carta cifrada y comprobar que se lee. Anotar fecha y duración.
+- [ ] **Repetición trimestral de la prueba** anotada en el runbook.
+
+### 5C — Infraestructura (lo diferido desde Fase 0)
+
+- [ ] **`docker-compose`** con php-fpm, nginx, pgsql, redis, worker, scheduler, reverb, mailpit, minio.
+      Cierra la casilla de Fase 0 y elimina la dependencia de Laragon.
+- [ ] **Worker y scheduler bajo supervisor** (supervisord o `restart: unless-stopped`). Hoy dependen de
+      que alguien los arranque a mano.
+- [ ] **`QUEUE_CONNECTION` y `CACHE_STORE` a Redis** + **Horizon**. ADR-0010 ya dejó el pool aislado
+      tras su interfaz, así que este cambio no lo toca.
+- [ ] **Colas separadas realmente en marcha** (`critical`, `postal`, `notifications`, `moderation`,
+      `default`, `maintenance`) con `maxProcesses` diferenciados.
+- [ ] **Reverb detrás de nginx con upgrade WS** y TLS.
+- [ ] **`APP_DEBUG=false` y `.env` de producción revisado** ítem por ítem.
+- [ ] **Despliegue reproducible**: script o workflow con `migrate --force`, cachés, `horizon:terminate`,
+      y un rollback escrito.
+- [ ] **Tipografías del catálogo en `storage/fonts`** y registradas en `LetterPdfRenderer` (mejora
+      directa anotada en ADR-0015; con contenedor deja de ser un problema por máquina).
+
+### 5D — Huecos funcionales conocidos
+
+- [ ] **Visor de adjuntos en el buzón.** Se pueden subir desde Fase 1 y no hay forma de verlos. Es el
+      agujero funcional más visible que queda.
+- [ ] **Paginación por cursor en el buzón** (anotada como pendiente en Fase 1). Con cien cartas se nota.
+- [ ] **Verificar que `ProcessAccountDeletionsJob` existe y corre.** `DELETE /me` promete borrado a los
+      30 días; si el job no está, la API declara algo que no cumple, y es una obligación legal.
+      Comprobar también la anonimización descrita en la spec §13.4 (las cartas ya entregadas
+      permanecen, el remitente pasa a «Usuario eliminado»).
+- [ ] **Exportación RGPD `GET /me/export`.** Está en el contrato (`docs/api/auth.md`) y no aparece en
+      ninguna casilla de progreso: comprobar si existe.
+- [ ] **Policies al 100 %.** Es el test de mayor valor que queda: un fallo aquí expone el buzón de
+      alguien. Auditar endpoint por endpoint antes de escribir nada.
+- [ ] **Lighthouse ejecutado**, con los números anotados. Media hora.
+- [ ] **Pulido de la animación de apertura** (pendiente desde Fase 1) — cosmético, va al final.
+
+### 5E — Legal y políticas
+
+- [ ] **Términos de servicio publicados**, con: retención de chats de Dolls a 90 días, borrado de cuenta
+      a 30 días, regla de consentimiento para publicar cartas recibidas, y que las tarifas de las Dolls
+      son informativas (ADR-0012).
+- [ ] **Política de privacidad publicada**: qué se guarda, cuánto, cifrado en reposo, derechos de
+      acceso y borrado, subencargados (correo, almacenamiento, push).
+- [ ] **Aviso de edad mínima** coherente con lo que valida el registro (autodeclarada, 16).
+- [ ] **Política de moderación pública**: qué se modera, qué consecuencias hay, cómo se apela.
+- [ ] **Compromiso interno de revisión de la cola**: con qué frecuencia se vacía y quién lo hace.
+      Sin esto, la cola de Filament es decorativa.
+- [ ] **Enlaces a ambos textos** desde el registro y desde Ajustes.
+
+### 5F — Beta privada y apertura por fases
+
+> El arranque en frío es un problema real: `accepts_random_letters` nace en `false`, hay cap diario y
+> cooldown de 90 días, y el directorio de Dolls empieza vacío. Con pocos usuarios, esos módulos no
+> hacen nada y parecen rotos.
+
+- [ ] **Decidir el orden de apertura con feature flags.** Sugerido: cartas dirigidas → blog →
+      Dolls → botella al mar. La botella la última: es la de mayor riesgo y la que más masa necesita.
+- [ ] **Beta privada de 10–20 personas** por invitación, con los flags ajustados a ese orden.
+- [ ] **Texto de estado vacío honesto** en botella al mar y directorio de Dolls («todavía no hay
+      suficiente gente») en vez de una pantalla que parece fallar.
+- [ ] **Semilla de Dolls**: 2–3 personas verificadas antes de abrir el módulo.
+- [ ] **Canal de feedback** (un correo basta) enlazado desde la app.
+- [ ] **Revisión tras la beta**: qué se rompió, qué nadie usó, qué hubo que moderar.
+
+---
+
+### Actualización del checklist de lanzamiento
+
+Al cerrar 5A–5E, estas casillas del checklist pasan a verificables:
+
+| Casilla | La cierra |
+| --- | --- |
+| Backups automáticos con restauración probada | 5B |
+| Alertas de Horizon y del «reloj postal» | 5A + 5C |
+| `APP_DEBUG=false`, `/docs` protegido, Telescope | 5C |
+| Términos y política de privacidad publicados | 5E |
+| Tests de policy al 100 % | 5D |
+| Lighthouse | 5D |
 
 ---
 

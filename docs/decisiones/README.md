@@ -25,3 +25,18 @@ de cambiar el código en silencio.
 | 0015 | Dompdf en vez de un navegador headless para exportar cartas | Aceptado |
 | 0016 | La búsqueda vive en Postgres; Meilisearch no se ha ganado su sitio | Aceptado |
 | 0017 | Lo que queda fuera de la Fase 4, y qué haría falta para entrarlo | Aceptado |
+
+---
+
+## Candidatos de la Fase 5
+
+La tabla sigue en 0017. Estos son los ADR que la Fase 5 probablemente pida:
+
+| ADR | Título probable |
+| --- | --- |
+| 0018 | Estrategia de respaldo y custodia de la `APP_KEY` |
+| 0019 | Infraestructura de producción: contenedores, Horizon y colas en Redis |
+| 0020 | Orden de apertura de módulos y arranque en frío |
+
+**No los escribas por adelantado.** Un ADR se escribe cuando la decisión se toma, no cuando se prevé.
+Al escribir uno, parte de `_plantilla.md` y añade su fila a la tabla de arriba.

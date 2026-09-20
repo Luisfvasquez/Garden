@@ -27,6 +27,9 @@ garden/
 | Trabajar en Dolls | `docs/api/dolls.md` + ADR-0005 |
 | Cambiar algo del despacho o las colas | `backend-garden/docs/jobs-y-colas.md` |
 | Construir una vista | `front-garden/docs/sistema-diseno.md` + `docs/api/` del módulo |
+| Operar, desplegar o diagnosticar un fallo | `docs/runbook.md` |
+| Auditar, revisar o buscar huecos | `docs/auditorias.md` |
+| Escribir un ADR nuevo | `docs/decisiones/_plantilla.md` |
 
 **No cargues `00-especificacion-tecnica.md` entero salvo que lo pida explícitamente.** Es un documento
 de referencia de ~2000 líneas; lee la sección concreta que necesites.
@@ -45,6 +48,9 @@ de referencia de ~2000 líneas; lee la sección concreta que necesites.
 5. **Feature flags:** todo módulo nuevo nace detrás de un flag.
 6. Al terminar una tarea, marca la casilla correspondiente en `docs/progreso.md`.
 7. Si tomas una decisión técnica no obvia, escribe un ADR en `docs/decisiones/`.
+8. **Durante la Fase 5 no se añaden funcionalidades.** El producto ya hace lo que prometía; lo que
+   falta es poder operarlo. Si una petición añade superficie nueva antes de cerrar 5A–5E, dilo en vez
+   de implementarla.
 
 ## Prohibido sin preguntar
 
