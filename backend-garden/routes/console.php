@@ -26,6 +26,15 @@ Artisan::command('inspire', function () {
 Schedule::job(new DispatchDueLettersJob)->everyMinute()->withoutOverlapping();
 Schedule::job(new DeliverArrivedLettersJob)->everyMinute()->withoutOverlapping();
 
+/*
+ * ...and the alarm that notices when it stops. Non-zero exit + an email to
+ * OPS_ALERT_EMAIL. Without this the failure mode is silence (5A, runbook §1).
+ */
+Schedule::command('postal:health')
+    ->everyFiveMinutes()
+    ->withoutOverlapping()
+    ->runInBackground();
+
 // Recurring letters: materialise the next 90 days of occurrences (ADR-0002).
 Schedule::job(new GenerateUpcomingDeliveriesJob)->dailyAt('03:00')->withoutOverlapping();
 

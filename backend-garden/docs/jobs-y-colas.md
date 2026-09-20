@@ -18,9 +18,10 @@ Horizon con workers separados por cola, `balance: auto`, `maxProcesses` diferenc
 ## Scheduler
 
 ```php
-// routes/console.php — estado real tras la Fase 3
+// routes/console.php — estado real tras la Fase 3 (+ la alarma de 5A)
 Schedule::job(new DispatchDueLettersJob)->everyMinute()->withoutOverlapping();
 Schedule::job(new DeliverArrivedLettersJob)->everyMinute()->withoutOverlapping();
+Schedule::command('postal:health')->everyFiveMinutes()->withoutOverlapping()->runInBackground();
 Schedule::job(new GenerateUpcomingDeliveriesJob)->dailyAt('03:00')->withoutOverlapping();
 Schedule::job(new RefreshRandomRecipientPoolJob)->everyFifteenMinutes();
 Schedule::job(new DispatchDuePushesJob)->everyMinute()->withoutOverlapping();
@@ -98,6 +99,27 @@ intermedio: transacción + estado explícito `failed` con `failure_reason`.
 
 Si `DispatchDueLettersJob` no procesa nada durante 15 minutos **habiendo entregas vencidas**, el reloj
 está roto y las cartas no llegan. Es la métrica más importante del sistema. Alerta inmediata.
+
+Lo vigila **`postal:health`**, cada 5 minutos. Falla (exit 1) ante cualquiera de estas tres cosas:
+
+| Condición | Umbral | Qué significa |
+| --- | --- | --- |
+| `queued` vencidas y ningún despacho reciente | 15 min de gracia + 15 min de silencio | El scheduler o el worker están muertos |
+| `in_transit` con `delivered_at` pasado | 15 min de gracia | `DeliverArrivedLettersJob` no las mueve |
+| `queued` con `dispatch_batch_id` asignado | 30 min | Reserva huérfana: el despachador las ignora para siempre (runbook §1) |
+
+La gracia existe porque los dos ticks corren cada minuto: sin ella, una entrega vencida hace 30
+segundos dispararía la alarma y el aviso dejaría de significar nada. Por el mismo motivo sólo sale
+**un correo por incidente** (`postal.health.alert_cooldown_minutes`, 60 por defecto) en lugar de uno
+cada 5 minutos mientras dure.
+
+El correo va a `OPS_ALERT_EMAIL` y viaja por la cola `critical` — con la trampa evidente de que si lo
+que ha muerto es el worker, el correo espera con él. **El exit code es la señal que no depende de
+ninguna cola**, y es la que debe enganchar el monitor externo (5A). Vacío el destino, la alerta se
+queda sólo en el log.
+
+`postal:stats` enseña los mismos números sin juzgarlos, y siempre sale 0. Ninguno de los dos escribe:
+liberar un lote huérfano sigue siendo la decisión humana que describe el runbook.
 
 ## Nota sobre `delivered_at`
 

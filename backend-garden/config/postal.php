@@ -45,6 +45,32 @@ return [
         'audio_max_seconds' => 60,
     ],
 
+    // The postal clock alarm (postal:health / postal:stats, docs/runbook.md §1).
+    'health' => [
+        // Nothing dispatched in this long, while overdue work waits, means the
+        // clock stopped. The 15 minutes come from docs/jobs-y-colas.md.
+        'dispatch_silence_minutes' => (int) env('POSTAL_HEALTH_DISPATCH_SILENCE_MINUTES', 15),
+
+        // Both ticks run every minute, so a delivery a few seconds past its
+        // date is normal, not a stall. Only count it as late beyond this.
+        'overdue_grace_minutes' => (int) env('POSTAL_HEALTH_OVERDUE_GRACE_MINUTES', 15),
+
+        // Rows reserved with a `dispatch_batch_id` and still `queued`: the
+        // dispatcher filters on `dispatch_batch_id IS NULL`, so it will never
+        // look at them again (runbook §1, causa 2).
+        'orphaned_batch_minutes' => (int) env('POSTAL_HEALTH_ORPHANED_BATCH_MINUTES', 30),
+
+        // Window for the measured average transit reported by postal:stats.
+        'transit_sample_days' => 7,
+
+        // The check runs every 5 min and a stopped clock stays stopped: without
+        // a cooldown one incident is hundreds of identical emails. 0 = every run.
+        'alert_cooldown_minutes' => (int) env('POSTAL_HEALTH_ALERT_COOLDOWN_MINUTES', 60),
+
+        // Where the alarm rings. Empty = log only, no email.
+        'alert_email' => env('OPS_ALERT_EMAIL', ''),
+    ],
+
     // Recurring letters (docs/api/programaciones.md).
     'schedules' => [
         // Upper bound on `occurrences_total` / the length of `custom_dates`.

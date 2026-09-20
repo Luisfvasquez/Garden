@@ -3,7 +3,7 @@
 **Actualizar al cerrar cada tarea.** Este archivo es lo que le dice al agente qué existe ya.
 Formato: `[ ]` pendiente · `[~]` en curso · `[x]` terminado.
 
-Última actualización: 2026-09-20 — **Fases 1, 2 y 3 completas; Fase 4 entregada en lo verificable (4A OpenAPI/tipos, 4B delta sync, 4C PDF, 4D búsqueda).** Validación previa al MVP hecha: el checklist de lanzamiento pasa de 4 a **7 verificados**, y encontró tres cosas que faltaban de verdad — **no había forma de reportar nada desde el front** (backend listo desde Fase 1, UI inexistente), `POST /reports` **no podía apuntar a una persona** (el cliente nunca tiene su uuid), y cualquier petición sin `Accept: application/json` a una ruta protegida devolvía **500 en vez de 401** (afectaba al enlace de descarga del PDF). Las tres corregidas con tests. Guía de arranque en **`docs/como-probar.md`**. **Fuera a propósito (ADR-0017):** Capacitor, cartas póstumas y particionado. **Diferido de antes:** pagos con Stripe (ADR-0012), `ModerateContentJob` asíncrono, Horizon y contenerización. **Fase 5 (Operación y lanzamiento) planificada, no iniciada:** 5A observabilidad, 5B respaldo y recuperación, 5C infraestructura, 5D huecos funcionales, 5E legal, 5F beta privada. Orden recomendado **5B → 5A → 5D → 5C → 5E → 5F**. Durante la fase no se añaden funcionalidades. Apoyo operativo nuevo: **`docs/runbook.md`**, **`docs/auditorias.md`** y **`docs/decisiones/_plantilla.md`**.
+Última actualización: 2026-09-20 — **Fases 1, 2 y 3 completas; Fase 4 entregada en lo verificable (4A OpenAPI/tipos, 4B delta sync, 4C PDF, 4D búsqueda).** Validación previa al MVP hecha: el checklist de lanzamiento pasa de 4 a **7 verificados**, y encontró tres cosas que faltaban de verdad — **no había forma de reportar nada desde el front** (backend listo desde Fase 1, UI inexistente), `POST /reports` **no podía apuntar a una persona** (el cliente nunca tiene su uuid), y cualquier petición sin `Accept: application/json` a una ruta protegida devolvía **500 en vez de 401** (afectaba al enlace de descarga del PDF). Las tres corregidas con tests. Guía de arranque en **`docs/como-probar.md`**. **Fuera a propósito (ADR-0017):** Capacitor, cartas póstumas y particionado. **Diferido de antes:** pagos con Stripe (ADR-0012), `ModerateContentJob` asíncrono, Horizon y contenerización. **Fase 5 (Operación y lanzamiento) iniciada:** 5A observabilidad, 5B respaldo y recuperación, 5C infraestructura, 5D huecos funcionales, 5E legal, 5F beta privada. Orden recomendado **5B → 5A → 5D → 5C → 5E → 5F**. Durante la fase no se añaden funcionalidades. Apoyo operativo nuevo: **`docs/runbook.md`**, **`docs/auditorias.md`** y **`docs/decisiones/_plantilla.md`**. **Entregado de 5A:** a medias — `postal:stats` y `postal:health` (alarma del reloj postal, exit 1, programada cada 5 min, avisa a `OPS_ALERT_EMAIL`); faltan `failed_jobs`, Sentry, `/health` ampliado y el monitor externo.
 
 ---
 
@@ -332,15 +332,25 @@ Formato: `[ ]` pendiente · `[~]` en curso · `[x]` terminado.
 
 ### 5A — Observabilidad: que un fallo se note
 
-- [ ] **Alerta del reloj postal.** Comando `postal:health` que falle si hay entregas con
+- [x] **Alerta del reloj postal.** Comando `postal:health` que falle si hay entregas con
       `scheduled_for <= now()` en `queued` y ninguna despachada en los últimos 15 min, o entregas
       `in_transit` con `delivered_at` vencido sin entregar. Programado cada 5 min, notifica por correo
       a `OPS_ALERT_EMAIL`.
       _Es la métrica más importante del sistema: si el scheduler o el worker se caen, las cartas dejan
       de llegar **en silencio** y nadie se entera durante horas._
-- [ ] **Comando `postal:stats`** (lo sugería la spec §17.5 y nunca se creó): entregas por estado,
+      _(tres condiciones, no dos: se añadió la del runbook §1 causa 2 — filas con `dispatch_batch_id`
+      asignado y más de 30 min en `queued`, que el despachador ignora para siempre porque filtra
+      `dispatch_batch_id IS NULL`. Sale 1 si algo falla, así que sirve igual como alerta programada,
+      como comprobación a mano y como objetivo de un monitor externo. Ventana de gracia de 15 min
+      sobre lo vencido para que los ticks de cada minuto no hagan saltar la alarma; un correo por
+      incidente, no uno cada 5 min. `--no-alert` para diagnosticar de madrugada sin despertar a nadie)_
+- [x] **Comando `postal:stats`** (lo sugería la spec §17.5 y nunca se creó): entregas por estado,
       edad de la más vieja en `queued`, tránsito medio, `failed_jobs` pendientes. Es lo primero que se
       mira ante cualquier duda.
+      _(el tránsito medio es el real medido `dispatched_at → delivered_at` de los últimos 7 días, no el
+      planificado de `transit_duration_minutes`. Añade el último despacho, los vencidos en tránsito y
+      los lotes huérfanos. Estrictamente de lectura: informa y nunca repara — liberar un lote huérfano
+      sigue siendo un paso humano del runbook)_
 - [ ] **Vigilancia de `failed_jobs`.** Alerta si crece por encima de un umbral. Hoy nadie los mira.
 - [ ] **Sentry (o equivalente) en API y PWA**, con `release` por commit.
 - [ ] **`GET /health` ampliado**: hoy existe; que informe también de la antigüedad del último despacho
